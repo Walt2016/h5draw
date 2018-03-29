@@ -1,0 +1,952 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+    <title>几何图形</title>
+    <link rel="shortcut icon" type="image/x-icon" href="data:image/gif;base64,YQ==">
+    <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/console.css">
+    <link rel="stylesheet" href="css/pickout.css">
+    <style>
+    html,
+    body {
+        margin: 0;
+        padding: 0
+    }
+
+    .tab-head {
+        background: rgba(255, 255, 255, 1);
+        padding-left: 14px;
+        padding-right: 14px;
+    }
+
+    .tab-head-item {
+        color: #666;
+        min-width: 50px;
+        text-align: center;
+        font-size: 16px;
+        cursor: pointer;
+        user-select: none;
+        height: 40px;
+        line-height: 40px;
+        border-bottom: 1px solid #dcdcdc;
+    }
+
+    .tab-head-item.active {
+        color: #000;
+        background: #cecece
+    }
+
+    .tab-body-item.hide {
+        display: none;
+    }
+
+    .tab-body {
+        padding-left: 14px;
+        padding-right: 14px;
+    }
+
+    .scroll {
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .tab-body-item {
+        font-size: 12px;
+        word-wrap: break-word;
+        margin-bottom: 62px;
+    }
+
+    .tab-body-item .header {
+        height: 22px;
+        background-color: #cecece;
+        line-height: 22px;
+        padding: 6px;
+    }
+
+    .tab-body-item .body {
+        border-bottom: 1px solid rgb(220, 220, 220);
+        margin-bottom: 20px;
+        min-height: 30px;
+        padding: 6px;
+    }
+
+
+
+
+    .mt10 {
+        margin-top: 10px
+    }
+
+    .mt4 {
+        margin-top: 4px
+    }
+
+    .ml4 {
+        margin-left: 4px;
+    }
+
+    .grid {
+        line-height: 40px;
+        font-size: 15px;
+        border: 1px solid #dcdcdc;
+    }
+
+    .grid .body.off {
+        display: none;
+    }
+
+    .grid .row {
+        border-bottom: 1px solid #dcdcdc;
+    }
+
+    .grid .row:last-child {
+        border-bottom: none
+    }
+
+    .grid .row .hd {
+        width: 100px;
+        height: 40px;
+        padding-left: 4px;
+        border-right: 1px solid #dcdcdc;
+        position: relative;
+        background-color: rgba(248, 248, 248, 0.5);
+        overflow: hidden;
+    }
+
+    .grid .row .hd:last-child {
+        border-right: none
+    }
+
+    .grid .row .td {
+        padding-left: 4px;
+        height: 40px;
+        position: relative;
+    }
+
+    .hide {
+        display: none
+    }
+
+    .fixedbottom {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        z-index: 999;
+        max-width: 680px;
+        margin: 0 auto;
+    }
+
+    .btn-group {
+        border-top: 1px solid #ccc;
+    }
+
+    .btn {
+        font-size: 15px;
+        height: 40px;
+        line-height: 40px;
+        -webkit-user-select: none;
+        -webkit-box-flex: 1;
+        -webkit-flex: 1;
+        -ms-flex: 1;
+        flex: 1;
+        text-align: center;
+        /*background: rgba(0, 0, 0, 0.2)*/
+        margin: 1px;
+        border-right: 1px dashed #dedede;
+    }
+
+    .btn:last-child {
+        border-right: none;
+    }
+
+    .btn.w100 {
+        width: 100px;
+        max-width: 100px;
+    }
+
+    .scroll {
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .switchBtn {
+        width: 40px;
+        height: 20px;
+        border: 1px solid #666;
+        background-image: -webkit-linear-gradient(right, #dedede, #dedede 50%, #cccccc 50%, #cccccc);
+        position: absolute;
+        top: 10px;
+        right: 10px;
+    }
+
+    .switchBtn.on {
+        background-image: -webkit-linear-gradient(left, #dedede, #dedede 50%, #ff6414 50%, #ff6414);
+    }
+
+    .rightArrow {
+        width: 0px;
+        height: 0px;
+        border: 10px solid transparent;
+        border-left-color: #cecece;
+    }
+
+    .leftArrow {
+        width: 0px;
+        height: 0px;
+        border: 10px solid transparent;
+        border-right-color: #cecece;
+    }
+
+    .upArrow {
+        width: 0px;
+        height: 0px;
+        border: 8px solid transparent;
+        border-bottom-color: #cecece;
+        margin-bottom: 8px;
+    }
+
+    .downArrow {
+        width: 0px;
+        height: 0px;
+        border: 8px solid transparent;
+        border-top-color: #cecece;
+        margin-top: 8px;
+    }
+
+    .colorblock {
+        width: 20px;
+        height: 10px;
+        position: absolute;
+        right: 10px;
+        top: 15px;
+    }
+
+    .switchBody.off {
+        display: none;
+    }
+
+    .switchBtn.none {
+        display: none;
+    }
+
+    #startBtn {
+        background-color: #ccc
+    }
+
+    #configPanel.hide {
+        display: none;
+    }
+
+    #configPanel {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+    }
+
+    #configPanel.center {
+        position: fixed;
+        z-index: 2000;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        width: 95%
+    }
+    </style>
+</head>
+
+<body>
+    <div id="container">
+        <div class="screen"></div>
+        <div id="configPanel" class="hide">
+            <div class="tab" layout="col">
+                <div class="tab-head" layout="row" layout-align="between center" template="_tab-head-item_tpl" data="tabs">
+                </div>
+                <div class="tab-body scroll" template="_tab-body-item_tpl" data="tabs">
+                </div>
+            </div>
+        </div>
+        <div class="btn-group row fixedbottom" template="_btn_tpl">
+        </div>
+    </div>
+    <div class="pk-overlay"></div>
+    <div class="pk-modal">
+        <div class="head">title</div>
+        <div class="pk-search">
+            <input type="text">
+        </div><span class="close">×</span>
+        <ul class="main"></ul>
+    </div>
+    <script type="text/template" id="_btn_tpl">
+        <div class="btn row center w100" on="configHandler" id="configBtn">设置
+            <div class="icon upArrow ml4"></div>
+        </div>
+        <div class="btn hide w100" on="stopHandler" id="stopBtn">停止</div>
+        <div class="btn" on="startHandler" id="startBtn">画图</div>
+    </script>
+    <script type="text/template" id="_tab-head-item_tpl">
+        <div class="tab-head-item {=active|tabActive}" target="{=key}" flex on="tabHandler">{=text}</div>
+    </script>
+    <script type="text/template" id="_tab-body-item_tpl">
+        <div class="tab-body-item {=active|tabBodyActive}" name="{=key}">
+            <div class="grid mt4">
+                <div class="row head">
+                    <div class="hd flex">{=key}
+                        <div class="switchBtn {=switch}" on="{=switchMethod}"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="switchBody {=switch}">
+                <div class="grid mt4">
+                    <div class="row">
+                        <div class="hd">字段</div>
+                        <div style="width: 50px">自动</div>
+                        <div class="td flex">值</div>
+                    </div>
+                    {=items|tabItem}
+                </div>
+            </div>
+        </div>
+    </script>
+    <script type="text/template" id="_tab-body-item-row_tpl">
+        <div class="row">
+            <div class="hd">{=text}</div>
+            <div style="width: 50px">
+                <input type="checkbox" name="{=key}" on="autoNext" {=auto|checkbox}/>
+            </div>
+            <div class="td flex" on="pickerHandler">
+                <span class="value">{=value}</span>
+                <span class="pk-arrow -clean"></span> {=$this|picker}
+            </div>
+        </div>
+    </script>
+    <script src="js/tpler.js"></script>
+    <script>
+    // _.debug();
+    // return ;
+    var optJson = {
+        "shape": {
+            "text": "图形",
+            "active": true,
+            "shape": {
+                "type": "picker",
+                "values": [{
+                        "key": "line",
+                        "text": "线条"
+                    },
+                    {
+                        "key": "triangle",
+                        "text": "三角形"
+                    },
+                    {
+                        "key": "square",
+                        "text": "正方形"
+                    },
+                    {
+                        "key": "rectangle",
+                        "text": "矩形"
+                    },
+                    {
+                        "key": "polygon",
+                        "text": "多边形"
+                    },
+                    {
+                        "key": "star",
+                        "text": "星形"
+                    },
+                    {
+                        "key": "circle",
+                        "text": "圆形"
+                    },
+                    {
+                        "key": "inpolygon",
+                        "text": "内切多边形"
+                    },
+                    {
+                        "key": "flower",
+                        "text": "花"
+                    },
+                    {
+                        "key": "sunflower",
+                        "text": "太阳花"
+                    },
+
+                    {
+                        "key": "sierpinski",
+                        "text": "谢尔宾斯基"
+                    },
+                    {
+                        "key": "ray",
+                        "text": "射线"
+                    },
+                    {
+                        "key": "ellipse",
+                        "text": "椭圆"
+                    },
+                    {
+                        "key": "diamond",
+                        "text": "菱形"
+                    },
+                    {
+                        "key": "cross",
+                        "text": "交叉线"
+                    },
+                    {
+                        "key": "ring",
+                        "text": "环形"
+                    },
+                    {
+                        "key": "mirror",
+                        "text": "镜像"
+                    },
+                    {
+                        "key": "spiral",
+                        "text": "螺线"
+                    },
+                    {
+                        "key": "fibonacci",
+                        "text": "斐波那契螺线"
+                    },
+                    {
+                        "key": "zebra",
+                        "text": "斑马"
+                    },
+                    {
+                        "key": "diagonal",
+                        "text": "对角线"
+                    },{
+                        "key":"axialMirror",
+                        "text":"轴对称"
+                    },{
+                        "key":"comb",
+                        "text":"蜂巢"
+                    }
+                ],
+
+                "index": 19,
+                "text": "图形"
+
+            },
+            "a": {
+                "type": "slider",
+                "min": 0,
+                "max": 180,
+                "step": 1,
+                "value": 0,
+                "text": "角度",
+                "auto": true
+            },
+            "num": {
+                "type": "slider",
+                "min": 1,
+                "max": 100,
+                "step": 1,
+                "value": 3,
+                "text": "边数",
+                "auto": true
+            },
+            "r": {
+                "type": "slider",
+                "min": 1,
+                "max": 100,
+                "step": 1,
+                "value": 30,
+                "text": "半径"
+            },
+            "rRatio": {
+                "type": "slider",
+                "min": 0.1,
+                "max": 10,
+                "step": 0.1,
+                "value": 1,
+                // "type": "piker",
+                // "values": [0.5, 0.6, 0.7, 0.8, 0.9, 0.99, 1, 1.01, 1.1, 1.2, 1.3, [0.5, 2],
+                //     [0.1, 5, 2]
+                // ],
+                // "type": "cycle",
+                // "index": 6,
+                "text": "半径变化率"
+            },
+            "rRatioType": {
+                "type": "picker",
+                "values": [{
+                        "key": "cv",
+                        "text": "匀速"
+                    },
+                    {
+                        "key": "ac",
+                        "text": "加速"
+                    }
+                ],
+                "index": 0,
+                "text": "变化率类型"
+            },
+            "turns": {
+                "type": "slider",
+                "min": 1,
+                "max": 50,
+                "step": 1,
+                "value": 1,
+                "text": "匝数"
+            },
+            "begin": {
+                "value": true,
+                "text": "新开画布"
+            },
+            "closed": {
+                "value": true,
+                "text": "图形闭合"
+            },
+            "showExcircle": {
+                "value": false,
+                "text": "显示外切圆"
+            },
+
+            "showVertices": {
+                "value": false,
+                "text": "显示顶点"
+            },
+            "identifierVertices": {
+                "value": false,
+                "text": "顶点编号"
+            },
+            "showRadius": {
+                "value": false,
+                "text": "显示半径"
+            },
+            "showCenter": {
+                "value": false,
+                "text": "显示圆心"
+            },
+
+            "lineWidth": {
+                "type": "slider",
+                "min": 0.5,
+                "max": 20,
+                "step": 0.5,
+                "value": 1,
+                "text": "线条宽度"
+            },
+            "lineColor": {
+                "type": "color_rgb",
+                "length": 15,
+                "text": "线条颜色"
+            },
+
+            "fill": {
+                "value": false,
+                "text": "填色"
+            },
+            "color": {
+                "type": "color_rgba",
+                "length": 15,
+                "text": "颜色"
+            }
+        },
+        "group": {
+            "text": "组合",
+            "switch": "off",
+            "group": {
+                "type": "picker",
+                "values": [{
+                        "key": "surround",
+                        "text": "环绕"
+                    },
+                    {
+                        "key": "concentric",
+                        "text": "同心"
+                    },
+                    // {
+                    //     "key": "inpolygon",
+                    //     "text": "内切多边形"
+                    // },
+                    {
+                        "key": "excircle",
+                        "text": "外切圆"
+                    },
+                    {
+                        "key": "repeat",
+                        "text": "平铺"
+                    },
+                    {
+                        "key": "ring",
+                        "text": "环形"
+                    },
+
+                ],
+                "index": 0,
+                "text": "组合"
+            },
+            "sr": {
+                "type": "slider",
+                "min": 0,
+                "max": 300,
+                "step": 1,
+                "value": 60,
+                "text": "环绕半径"
+            },
+            "clockwise": {
+                "type": "picker",
+                "values": [{
+                        "key": true,
+                        "text": "顺时针"
+                    },
+                    {
+                        "key": false,
+                        "text": "逆时针"
+                    }
+                ],
+                "index": 0,
+                "text": "顺时针"
+            },
+            "rotation": {
+                "value": true,
+                "text": "自转"
+            },
+            "interval": {
+                "type": "slider",
+                "min": 0,
+                "max": 180,
+                "step": 1,
+                "value": 60,
+                "text": "图形间距"
+            },
+            "animate": {
+                "value": true,
+                "text": "动画"
+            },
+            "animationInterval": {
+                "type": "slider",
+                "min": 5,
+                "max": 1000,
+                "step": 1,
+                "value": 10,
+                "text": "动画间隔"
+            },
+            // "colorful": {
+            //     "value": true,
+            //     "text": "多彩"
+            // },
+            "colorful": {
+                "type": "picker",
+                "values": [{
+                        "key": "random",
+                        "text": "随机"
+                    }, {
+                        "key": "gradient",
+                        "text": "渐变"
+                    },
+                    {
+                        "key": "singleGradient",
+                        "text": "单色渐变"
+                    },
+                    {
+                        "key": "solid",
+                        "text": "单色"
+                    }
+                ],
+                "index": 0,
+                "text": "颜色"
+            },
+            "showRadius": {
+                "value": false,
+                "text": "显示半径"
+            },
+            "showCenter": {
+                "value": false,
+                "text": "显示圆心"
+            },
+
+        },
+        "motion": {
+            "text": "运动",
+            "switch": "off",
+            "mode": {
+                "type": "picker",
+                "values": [{
+                        "key": "move",
+                        "text": "自由移动"
+                    },
+                    {
+                        "key": "rotation",
+                        "text": "旋转"
+                    }
+                ],
+                "index": 0,
+                "text": "运动形式"
+            },
+            "speed": {
+                "type": "slider",
+                "min": 0.1,
+                "max": 20,
+                "step": 0.1,
+                "value": 1,
+                "text": "速度"
+            },
+            "num": //movenum
+            {
+                "type": "slider",
+                "min": 1,
+                "max": 20,
+                "step": 1,
+                "value": 1,
+                "text": "物体数量"
+            },
+            "link": {
+                "value": false,
+                "text": "连线"
+            },
+            "bounce": {
+                "value": true,
+                "text": "反弹"
+            },
+            "colorful": {
+                "value": true,
+                "text": "多彩"
+            }
+        }
+    };
+
+    console.log(optJson)
+    var c = _.createOptCycle(optJson);
+    console.log(c)
+    console.log(c.init())
+    console.log(c.viewData())
+
+    // _.ajax("data/opt.json?v=5", function(result) {
+    // var optJson = _.json(result)
+    // })
+
+    var draw = _.draw({
+        ratio: "1:1",
+        // background: "#dedede",
+        callback: function(result) {}
+    })
+
+    var motion;
+
+    tpler({
+        el: "#container",
+        data: c.viewData(),
+        filters: _.extend({
+                tabItem: function(val) {
+                    return _.parseTpl({
+                        template: "_tab-body-item-row_tpl",
+                        data: val,
+                    })
+                },
+                checkbox: function(val) {
+                    return val ? 'checked' : ""
+                },
+                tabActive: function(val) {
+                    return val ? 'active' : "";
+                },
+                tabBodyActive: function(val) {
+                    return val ? "" : "hide"
+                },
+                picker: function(val) {
+                    var sel = document.createElement("select");
+                    var option;
+                    sel.attr("placeholder", val.text);
+                    sel.id = val.id;
+                    sel.className = val.type; //"pickout" 
+                    sel.style.display = "none"
+                    val.values && val.values.forEach && val.values.forEach(function(t, i) {
+                        var selected = i == val.index ? true : false;
+                        if (t.text) {
+                            option = new Option(t.text, t.key, selected);
+                        } else {
+                            option = new Option(t, t, selected);
+                        }
+                        sel.options.add(option)
+                    });
+                    return sel.outerHTML;
+                }
+
+            },
+            c.filters
+        ),
+        methods: _.extend({
+            pickerHandler: function(item, ev) {
+                // console.log(item);
+                var overlay = _.$(".pk-overlay");
+                var modal = _.$(".pk-modal");
+                var main = modal.$('.main');
+                var select = item.$("select");
+                var head = modal.querySelector('.head')
+                var title = select.hasAttribute('placeholder') ? select.getAttribute('placeholder') : 'Select to option';
+                head.innerHTML = title;
+                var type = select.className;
+
+                var close = document.createElement('span');
+                close.setAttribute('class', 'close');
+                close.innerHTML = '&times;';
+                modal.appendChild(close);
+
+                var closeModal = function() {
+                    overlay.removeClass("-show");
+                    modal.removeClass("-show");
+                    setTimeout(function() {
+                        main.innerHTML = '';
+                    }, 500);
+                }
+
+                var options = Array.prototype.slice.call(select);
+
+                options.map(function(option, key) {
+                    var li = document.createElement('li');
+                    li.addClass("pk-option");
+                    var selected = option.hasAttribute('selected') ? '-selected' : '';
+                    selected && li.addClass(selected);
+                    var txt = document.createElement('span');
+                    txt.setAttribute('class', 'txt');
+                    txt.innerHTML = option.innerHTML;
+                    main.appendChild(li);
+                    li.appendChild(txt);
+                    if (["color_rgba", "color_rgb", "color"].indexOf(type) >= 0) {
+                        li.style.backgroundColor = option.innerHTML
+
+                        // '<div class="colorblock" style="background-color:'+option.innerHTML+'"></div>'
+                    }
+                    toucher({
+                        el: li,
+                        callback: function() {
+                            if (["color_rgba", "color_rgb", "color"].indexOf(type) >= 0) {
+                                item.$(".value").innerHTML=txt.innerHTML + '<div class="colorblock" style="background-color:' + option.innerHTML + '"></div>';
+                            } else {
+                                item.$(".value").text(txt.innerHTML);
+                            }
+
+                            // option.selected=true;
+                            console.log(option)
+                            console.log(select.id);
+                            var id = select.id;
+                            var ids = id.split("_");
+                            var cdata = c.data[ids[0]][ids[1]];
+
+                            options.forEach(function(t, i) {
+                                t.removeAttr('selected')
+                                if (t == option) {
+                                    if (cdata.type == "picker") {
+                                        cdata.index = i
+                                    } else if (cdata.type == "slider") {
+                                        cdata.value = Number(txt.innerHTML);
+                                        cdata.index = i;
+                                    } else if (cdata.type == "toggle") {
+                                        cdata.index = i;
+                                        cdata.value = txt.innerHTML == "是" ? true : false;
+                                    }else{
+                                        cdata.index = i;
+
+                                    }
+                                }
+                            })
+                            option.setAttribute('selected', 'selected');
+                            closeModal();
+                        }
+                    })
+                });
+
+
+                overlay.addClass("-show");
+                modal.addClass("-show");
+                ev.preventDefault();
+                ev.stopPropagation();
+
+                toucher({
+                    el: [overlay, close],
+                    callback: function(item, ev) {
+                        ev.preventDefault();
+                        ev.stopPropagation();
+                        closeModal();
+                    }
+                })
+            },
+            tabHandler: function(item, ev) {
+                var target = item.attr("target");
+                item.addClass("active").siblings().removeClass("active");
+                // _.$('#' + this.attr("target")).show().siblings().hide();
+
+                _.$(".tab-body-item").forEach(function(t) {
+                    if (t.attr("name") == target) {
+                        t.show();
+                    } else {
+                        t.hide()
+                    }
+                })
+
+                for (var key in c.data) {
+                    if (key == target) {
+                        c.data[key].active = true;
+                    } else {
+                        c.data[key].active = false;
+                    }
+                }
+
+            },
+            configHandler: function(item, ev) {
+
+
+                var configPanel = _.$("#configPanel");
+                configPanel.$(".scroll").css({ height: (_.screen.y - 100) + "px" })
+                var icon = item.$(".icon");
+                if (configPanel.hasClass("hide")) {
+                    configPanel.removeClass("hide");
+                    icon.removeClass("upArrow").addClass("downArrow");
+                    var cfg = _.extend({}, this, { data: c.viewData(), el: "#configPanel" });
+                    // console.log(cfg);
+                    tpler(cfg);
+                } else {
+                    configPanel.addClass("hide");
+                    icon.removeClass("downArrow").addClass("upArrow")
+                }
+
+            },
+            stopHandler: function(item, ev) {
+                // motion && motion.stop();
+                draw.stop();
+            },
+            startHandler: function(item, ev) {
+                _.hide("#configPanel");
+                var icon = _.$("#configBtn .icon");
+                icon.removeClass("downArrow").addClass("upArrow")
+                // console.log(c.init())
+
+                draw.clear(); //"#dedede"
+                var opt = c.init()
+
+                if (item.id != "startBtn") {
+                    var pos = _.pos(ev)
+                    opt.shape = _.extend(opt.shape, { x: pos.x, y: pos.y });
+                    opt.group = _.extend(opt.group, { x: pos.x, y: pos.y });
+                }
+
+                draw.setup(opt);
+            }
+        }, c.methods),
+
+        callback: function() {
+            // _.$(".tab-head-item").tab("active", function(ev) {})
+            // _.active(_.$(".tab-head-item").first());
+            // _.show(_.$(".tab-body-item").first());
+            _.$(".tab").css({ height: (_.screen.y - 30) + "px" })
+
+            _.$(".screen").appendChild(draw.canvas)
+            var self = this;
+            toucher({
+                el: draw.canvas,
+                type: "touchstart",
+                callback: function(item, ev) {
+                    self.methods.startHandler(item, ev);
+                }
+            })
+        }
+    })
+    </script>
+</body>
+
+</html>
