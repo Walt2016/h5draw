@@ -418,12 +418,16 @@
                     {
                         "key": "diagonal",
                         "text": "对角线"
-                    },{
-                        "key":"axialMirror",
-                        "text":"轴对称"
-                    },{
-                        "key":"comb",
-                        "text":"蜂巢"
+                    }, {
+                        "key": "axialMirror",
+                        "text": "轴对称"
+                    }, {
+                        "key": "comb",
+                        "text": "蜂巢"
+                    },
+                    {
+                        "key":"pentagram",
+                        "text":"五角星"
                     }
                 ],
 
@@ -525,7 +529,7 @@
 
             "lineWidth": {
                 "type": "slider",
-                "min": 0.5,
+                "min": 0,
                 "max": 20,
                 "step": 0.5,
                 "value": 1,
@@ -672,9 +676,53 @@
                         "text": "自由移动"
                     },
                     {
-                        "key": "rotation",
+                        "key": "rotate",
                         "text": "旋转"
-                    }
+                    },
+                    {
+                        "key": "zoom",
+                        "text": "缩放"
+                    },
+                    {
+                        "key": "rotate_zoom",
+                        "text": "旋转+缩放"
+                    },
+                    {
+                        "key": "move_zoom",
+                        "text": "移动+缩放"
+                    },
+                    {
+                        "key": "move_rotate",
+                        "text": "移动+旋转"
+                    },
+                    {
+                        "key": "move_rotate_zoom",
+                        "text": "移动+旋转+缩放"
+                    },
+                    {
+                        "key": "gravitate",
+                        "text": "跳一跳"
+                    },
+                    {
+                        "key": "rotate_gravitate",
+                        "text": "旋转+跳一跳"
+                    },
+                    {
+                        "key": "curve",
+                        "text": "曲线运动"
+                    },
+                    {
+                        "key": "transform",
+                        "text": "变形"
+                    },
+                    {
+                        "key": "jiggle",
+                        "text": "颤抖"
+                    },
+                    {
+                        "key": "float",
+                        "text": "漂浮"
+                    },
                 ],
                 "index": 0,
                 "text": "运动形式"
@@ -691,7 +739,7 @@
             {
                 "type": "slider",
                 "min": 1,
-                "max": 20,
+                "max": 100,
                 "step": 1,
                 "value": 1,
                 "text": "物体数量"
@@ -707,7 +755,23 @@
             "colorful": {
                 "value": true,
                 "text": "多彩"
-            }
+            },
+            "shadow": {
+                "value": false,
+                "text": "光影效果"
+            },
+            "simulate": {
+                "value": false,
+                "text": "虚拟点击"
+            },
+            "simulateInterval": {
+                "type": "slider",
+                "min": 100,
+                "max": 2000,
+                "step": 100,
+                "value": 1,
+                "text": "点击频率"
+            },
         }
     };
 
@@ -816,14 +880,14 @@
                         el: li,
                         callback: function() {
                             if (["color_rgba", "color_rgb", "color"].indexOf(type) >= 0) {
-                                item.$(".value").innerHTML=txt.innerHTML + '<div class="colorblock" style="background-color:' + option.innerHTML + '"></div>';
+                                item.$(".value").innerHTML = txt.innerHTML + '<div class="colorblock" style="background-color:' + option.innerHTML + '"></div>';
                             } else {
                                 item.$(".value").text(txt.innerHTML);
                             }
 
                             // option.selected=true;
-                            console.log(option)
-                            console.log(select.id);
+                            // console.log(option)
+                            // console.log(select.id);
                             var id = select.id;
                             var ids = id.split("_");
                             var cdata = c.data[ids[0]][ids[1]];
@@ -839,7 +903,7 @@
                                     } else if (cdata.type == "toggle") {
                                         cdata.index = i;
                                         cdata.value = txt.innerHTML == "是" ? true : false;
-                                    }else{
+                                    } else {
                                         cdata.index = i;
 
                                     }
@@ -907,43 +971,36 @@
 
             },
             stopHandler: function(item, ev) {
-                // motion && motion.stop();
                 draw.stop();
             },
             startHandler: function(item, ev) {
                 _.hide("#configPanel");
                 var icon = _.$("#configBtn .icon");
                 icon.removeClass("downArrow").addClass("upArrow")
-                // console.log(c.init())
-
-                draw.clear(); //"#dedede"
+                draw.clear(); 
                 var opt = c.init()
-
-                if (item.id != "startBtn") {
-                    var pos = _.pos(ev)
-                    opt.shape = _.extend(opt.shape, { x: pos.x, y: pos.y });
-                    opt.group = _.extend(opt.group, { x: pos.x, y: pos.y });
-                }
-
+                console.log(opt)
                 draw.setup(opt);
             }
         }, c.methods),
 
         callback: function() {
-            // _.$(".tab-head-item").tab("active", function(ev) {})
-            // _.active(_.$(".tab-head-item").first());
-            // _.show(_.$(".tab-body-item").first());
             _.$(".tab").css({ height: (_.screen.y - 30) + "px" })
-
             _.$(".screen").appendChild(draw.canvas)
-            var self = this;
-            toucher({
-                el: draw.canvas,
-                type: "touchstart",
-                callback: function(item, ev) {
-                    self.methods.startHandler(item, ev);
-                }
-            })
+            // var self = this;
+            // toucher([{
+            //     el: draw.canvas,
+            //     type: "touchstart",
+            //     callback: function(item, ev) {
+            //         self.methods.startHandler(item, ev);
+            //     }
+            // },{
+            //     el: draw.canvas,
+            //     type: "touchmove",
+            //     callback: function(item, ev) {
+            //         self.methods.startHandler(item, ev);
+            //     }
+            // }])
         }
     })
     </script>
