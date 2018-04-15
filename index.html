@@ -15,15 +15,44 @@
         margin: 0;
         padding: 0
     }
+    .container {
+    display: flex;
+    flex-direction: column;
+    max-width: 680px;
+    margin: 0 auto;
+    height: 100vh;
+    min-width: 300px;
+    position: relative;
+}
+    .screen {
+    /*background-color: rgb(55, 58, 63);*/
+    font-size: 12px;
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 100vw;
+    max-width: 680px;
+    min-width: 300px;
+}
 
+.rlt {
+    position: relative;
+}
+
+.abs {
+    position: absolute;
+}
     .tab-head {
-        background: rgba(255, 255, 255, 1);
+        background: rgba(100, 100, 100, 1);
         padding-left: 14px;
         padding-right: 14px;
+        color:#fff;
     }
 
     .tab-head-item {
-        color: #666;
+        /*color: #666;*/
         min-width: 50px;
         text-align: center;
         font-size: 16px;
@@ -46,6 +75,7 @@
     .tab-body {
         padding-left: 14px;
         padding-right: 14px;
+        background: rgba(0,0,0,0.1)
     }
 
     .scroll {
@@ -157,6 +187,7 @@
         /*background: rgba(0, 0, 0, 0.2)*/
         margin: 1px;
         border-right: 1px dashed #dedede;
+        cursor: pointer;
     }
 
     .btn:last-child {
@@ -221,7 +252,7 @@
         width: 20px;
         height: 10px;
         position: absolute;
-        right: 10px;
+        right: 25px;
         top: 15px;
     }
 
@@ -246,6 +277,8 @@
         top: 0;
         left: 0;
         right: 0;
+        background: rgba(255,255,255,0.9);
+
     }
 
     #configPanel.center {
@@ -260,8 +293,10 @@
 </head>
 
 <body>
-    <div id="container">
-        <div class="screen"></div>
+    <div class="container" id="container">
+        <div class="screen" id="screen">
+            <canvas id="myCanvas"></canvas>
+        </div>
         <div id="configPanel" class="hide">
             <div class="tab" layout="col">
                 <div class="tab-head" layout="row" layout-align="between center" template="_tab-head-item_tpl" data="tabs">
@@ -426,8 +461,8 @@
                         "text": "蜂巢"
                     },
                     {
-                        "key":"pentagram",
-                        "text":"五角星"
+                        "key": "pentagram",
+                        "text": "五角星"
                     }
                 ],
 
@@ -549,7 +584,19 @@
                 "type": "color_rgba",
                 "length": 15,
                 "text": "颜色"
-            }
+            },
+            "animate": {
+                "value": false,
+                "text": "动画"
+            },
+            "animationInterval": {
+                "type": "slider",
+                "min": 0,
+                "max": 2000,
+                "step": 100,
+                "value": 10,
+                "text": "动画间隔"
+            },
         },
         "group": {
             "text": "组合",
@@ -585,7 +632,7 @@
                 "index": 0,
                 "text": "组合"
             },
-            "sr": {
+            "r": {
                 "type": "slider",
                 "min": 0,
                 "max": 300,
@@ -664,7 +711,6 @@
                 "value": false,
                 "text": "显示圆心"
             },
-
         },
         "motion": {
             "text": "运动",
@@ -723,6 +769,22 @@
                         "key": "float",
                         "text": "漂浮"
                     },
+                    {
+                        "key": "circle",
+                        "text": "绕圆"
+                    },
+                    {
+                        "key": "ellipse",
+                        "text": "椭圆"
+                    },
+                    {
+                        "key": "spiral",
+                        "text": "螺旋"
+                    },
+                    {
+                        "key": "rotate_spiral",
+                        "text": "旋转+螺旋"
+                    },
                 ],
                 "index": 0,
                 "text": "运动形式"
@@ -735,7 +797,7 @@
                 "value": 1,
                 "text": "速度"
             },
-            "num": //movenum
+            "num":
             {
                 "type": "slider",
                 "min": 1,
@@ -743,6 +805,14 @@
                 "step": 1,
                 "value": 1,
                 "text": "物体数量"
+            },
+            "r": {
+                "type": "slider",
+                "min": 0,
+                "max": 300,
+                "step": 1,
+                "value": 60,
+                "text": "环绕半径"
             },
             "link": {
                 "value": false,
@@ -759,6 +829,15 @@
             "shadow": {
                 "value": false,
                 "text": "光影效果"
+            },
+             "background": {
+                "type": "color_rgb",
+                "length": 15,
+                "text": "光影背景"
+            },
+            "follow":{
+                "value": true,
+                "text": "点击跟随"
             },
             "simulate": {
                 "value": false,
@@ -781,14 +860,11 @@
     console.log(c.init())
     console.log(c.viewData())
 
-    // _.ajax("data/opt.json?v=5", function(result) {
-    // var optJson = _.json(result)
-    // })
 
     var draw = _.draw({
+        canvasid:"myCanvas",
+        containerid:"screen",
         ratio: "1:1",
-        // background: "#dedede",
-        callback: function(result) {}
     })
 
     var motion;
@@ -813,6 +889,7 @@
                     return val ? "" : "hide"
                 },
                 picker: function(val) {
+                    // console.log(val)
                     var sel = document.createElement("select");
                     var option;
                     sel.attr("placeholder", val.text);
@@ -872,9 +949,7 @@
                     main.appendChild(li);
                     li.appendChild(txt);
                     if (["color_rgba", "color_rgb", "color"].indexOf(type) >= 0) {
-                        li.style.backgroundColor = option.innerHTML
-
-                        // '<div class="colorblock" style="background-color:'+option.innerHTML+'"></div>'
+                        li.style.backgroundColor = option.innerHTML;
                     }
                     toucher({
                         el: li,
@@ -885,9 +960,6 @@
                                 item.$(".value").text(txt.innerHTML);
                             }
 
-                            // option.selected=true;
-                            // console.log(option)
-                            // console.log(select.id);
                             var id = select.id;
                             var ids = id.split("_");
                             var cdata = c.data[ids[0]][ids[1]];
@@ -905,7 +977,6 @@
                                         cdata.value = txt.innerHTML == "是" ? true : false;
                                     } else {
                                         cdata.index = i;
-
                                     }
                                 }
                             })
@@ -933,7 +1004,6 @@
             tabHandler: function(item, ev) {
                 var target = item.attr("target");
                 item.addClass("active").siblings().removeClass("active");
-                // _.$('#' + this.attr("target")).show().siblings().hide();
 
                 _.$(".tab-body-item").forEach(function(t) {
                     if (t.attr("name") == target) {
@@ -953,10 +1023,8 @@
 
             },
             configHandler: function(item, ev) {
-
-
                 var configPanel = _.$("#configPanel");
-                configPanel.$(".scroll").css({ height: (_.screen.y - 100) + "px" })
+                configPanel.$(".scroll").css({ height: (_.screen.y - 85) + "px" })
                 var icon = item.$(".icon");
                 if (configPanel.hasClass("hide")) {
                     configPanel.removeClass("hide");
@@ -968,7 +1036,6 @@
                     configPanel.addClass("hide");
                     icon.removeClass("downArrow").addClass("upArrow")
                 }
-
             },
             stopHandler: function(item, ev) {
                 draw.stop();
@@ -977,30 +1044,15 @@
                 _.hide("#configPanel");
                 var icon = _.$("#configBtn .icon");
                 icon.removeClass("downArrow").addClass("upArrow")
-                draw.clear(); 
+                draw.clear();
                 var opt = c.init()
                 console.log(opt)
                 draw.setup(opt);
             }
         }, c.methods),
-
         callback: function() {
             _.$(".tab").css({ height: (_.screen.y - 30) + "px" })
             _.$(".screen").appendChild(draw.canvas)
-            // var self = this;
-            // toucher([{
-            //     el: draw.canvas,
-            //     type: "touchstart",
-            //     callback: function(item, ev) {
-            //         self.methods.startHandler(item, ev);
-            //     }
-            // },{
-            //     el: draw.canvas,
-            //     type: "touchmove",
-            //     callback: function(item, ev) {
-            //         self.methods.startHandler(item, ev);
-            //     }
-            // }])
         }
     })
     </script>

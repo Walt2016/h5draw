@@ -1,6 +1,6 @@
 //一个js开发框架
 //template.event.canvas
-//v0.4.20180408
+//v0.4.201804015
 ;
 (function(root, factory) {
     if (typeof define === "function" && define.amd) {
@@ -923,7 +923,7 @@
                 return "rgba(" + arr.join(",") + ")";
             },
             // hex2rgb
-            colorRgb: function(color) {
+            colorRgb: function(color,alpha) {
                 var reg = /^#([0-9a-fA-f]{3}|[0-9a-fA-f]{6})$/;
                 var sColor = color.toLowerCase();
                 if (sColor && reg.test(sColor)) {
@@ -938,6 +938,10 @@
                     var sColorChange = [];
                     for (var i = 1; i < 7; i += 2) {
                         sColorChange.push(parseInt("0x" + sColor.slice(i, i + 2)));
+                    }
+                    if(alpha){
+                        sColorChange.push(alpha);
+                        return "rgba(" + sColorChange.join(",") + ")";
                     }
                     return "RGB(" + sColorChange.join(",") + ")";
                 } else {
@@ -4314,36 +4318,32 @@
                 var x = _.isUndefined(opt.x) ? this.canvas.width / 2 : opt.x;
                 var y = _.isUndefined(opt.y) ? this.canvas.height / 2 : opt.y;
                 var a = _.isUndefined(opt.a) ? 0 : opt.a;
-                var vx = _.isUndefined(opt.vx) ? 1 : opt.vx;
-                var vy = _.isUndefined(opt.vx) ? 1 : opt.vy;
+                // var vx = _.isUndefined(opt.vx) ? 1 : opt.vx;
+                // var vy = _.isUndefined(opt.vx) ? 1 : opt.vy;
                 x += opt.offsetX || 0;
                 y += opt.offsetY || 0;
 
-                var follow = _.isUndefined(opt.follow) ? true : opt.follow;
+                // var follow = _.isUndefined(opt.follow) ? true : opt.follow;
 
                 var opt = this.opt = _.extend({}, opt, {
                     width: opt.r,
                     height: opt.r,
                     //range
-                    top: 0,
-                    left: 0,
-                    right: this.canvas.width,
-                    bottom: this.canvas.height,
+                    // top: 0,
+                    // left: 0,
+                    // right: this.canvas.width,
+                    // bottom: this.canvas.height,
                     x: x,
                     y: y,
                     a: a,
-                    vx: vx,
-                    vy: vy,
-                    zoomState: "in",
-                    followSpeed: 0.01 + Math.random() * 0.04,
-                    follow: follow
+                    // vx: vx,
+                    // vy: vy,
                 });
                 self.setup(opt);
             },
             setup: function(opt) {
                 var self = this;
                 var opt = opt || this.opt;
-                opt.follow && this.follow();
                 var shape = opt.shape;
                 self[shape] && self[shape].call(self, opt);
                 // if (_.isString(shape)) {
@@ -4353,125 +4353,6 @@
                 //     self[t] && self[t](opt);
                 // })
             },
-            //跟随
-            follow: function() {
-                var opt = this.opt;
-                var mouse = this.draw.mouse;
-                if (mouse) {
-                    var dx = mouse.x - opt.x
-                    var dy = mouse.y - opt.y
-                    opt.x += (dx * opt.followSpeed); //+_.sin(opt.a)*opt.r*0.5;
-                    opt.y += (dy * opt.followSpeed); //+_.cos(opt.a)*opt.r*0.5;
-                }
-                this.opt = opt;
-                return this
-            },
-            //变形
-            transform: function() {
-                this.opt.num += this.opt.speed || 1;
-                return this;
-            },
-            //旋转
-            rotate: function(speed) {
-                this.opt.a += speed || this.opt.speed || 1;
-                return this;
-            },
-            //反弹
-            bounce: function() {
-                if (this.opt.bounce) { //碰壁反弹
-                    if (this.opt.x < this.opt.left + this.opt.width) { //碰到左边的边界
-                        this.opt.x = this.opt.width;
-                        this.opt.vx = -this.opt.vx;
-                    } else if (this.opt.y < this.opt.top + this.opt.height) {
-                        this.opt.y = this.opt.height;
-                        this.opt.vy = -this.opt.vy;
-                    } else if (this.opt.x > this.opt.right - this.opt.width) {
-                        this.opt.x = this.opt.right - this.opt.width;
-                        this.opt.vx = -this.opt.vx;
-                    } else if (this.opt.y > this.opt.bottom - this.opt.height) {
-                        this.opt.y = this.opt.bottom - this.opt.height;
-                        this.opt.vy = -this.opt.vy;
-                    }
-                } else { //左出右进
-                    if (this.opt.vx < 0 && this.opt.x < this.opt.left - this.opt.width) { //碰到左边的边界
-                        this.opt.x = this.opt.right + this.opt.r;
-                    } else if (this.opt.vy < 0 && this.opt.y < this.opt.top - this.opt.height) {
-                        this.opt.y = this.opt.bottom + this.opt.r;
-                    } else if (this.opt.vx > 0 && this.opt.x > this.opt.right + this.opt.width) {
-                        this.opt.x = this.opt.left - this.opt.r;
-                    } else if (this.opt.vy > 0 && this.opt.y > this.opt.bottom + this.opt.height) {
-                        this.opt.y = this.opt.top - this.opt.r;
-                    }
-                }
-            },
-            //飘忽不定
-            jiggle: function() {
-                this.opt.x += Math.random() * 2 - 1;
-                this.opt.y += Math.random() * 2 - 1;
-                this.bounce()
-                return this;
-            },
-            //漂浮
-            float: function() {
-
-                // 负相关
-                var deta = Math.random() * 2 - 1;
-                this.opt.vx += deta;
-                this.opt.vy -= deta;
-
-                this.opt.x += this.opt.vx || 1;
-                this.opt.y += this.opt.vy || 1;
-                this.bounce()
-                return this;
-            },
-            //移动
-            move: function() {
-                this.opt.x += this.opt.vx || 1;
-                this.opt.y += this.opt.vy || 1;
-                this.bounce()
-                return this;
-            },
-            curve: function() {
-                this.opt.x += this.opt.vx || 1;
-                this.opt.y += this.opt.vy || 1;
-                this.opt.vy += 0.01 * this.opt.vx * this.opt.vx;
-                this.bounce()
-                return this;
-            },
-            //重力运动 
-            gravitate: function() {
-                this.opt.vy += 0.22; //加速下落
-                this.opt.vx *= 0.998; //地面摩擦
-                if (this.opt.y > this.opt.bottom - this.opt.height) {
-                    this.opt.vy *= 0.96; //地面反弹减速
-                }
-                this.opt.bounce = true;
-                return this.move();
-            },
-            zoom: function() {
-                if (this.opt.r >= this.opt.right / 2) {
-                    this.opt.zoomState = "out";
-                } else if (this.opt.r <= 1) {
-                    this.opt.zoomState = "in";
-                }
-                if (this.opt.zoomState == "in") {
-                    this.zoomin();
-                } else {
-                    this.zoomout();
-                }
-                return this
-            },
-            //放大
-            zoomin: function() {
-                this.opt.r += this.opt.speed || 1
-                return this
-            },
-            //放大
-            zoomout: function() {
-                this.opt.r -= this.opt.speed || 1
-                return this;
-            },
-
             color: function(colorful) {
                 if (colorful) {
                     if (this.opt.fill) {
@@ -5144,16 +5025,14 @@
                 this.context = draw.context;
                 this.canvas = draw.canvas;
 
-                // var x = opt.shape.x,
-                //     y = opt.shape.y,
                 var r = opt.shape.r,
                     color = opt.shape.color,
                     shape = opt.shape.shape || "circle";
                 var colorful = opt.group.colorful;
-                var speed = 3;
-                if (opt.motion) {
-                    speed = opt.motion.speed || 3;
-                }
+                // var speed = 3;
+                // if (opt.motion) {
+                //     speed = opt.motion.speed || 3;
+                // }
 
                 var x = _.isUndefined(opt.group.x) ? this.canvas.width / 2 : opt.group.x;
                 var y = _.isUndefined(opt.group.y) ? this.canvas.height / 2 : opt.group.y;
@@ -5176,10 +5055,12 @@
                 // }
 
 
-                if (opt.motion) { //&& opt.motion.switch == "on"
-                    opt.group.animate = false;
-                    if (_.isUndefined(opt.group.a)) opt.group.a = 0;
-                }
+                // if (opt.motion) { 
+                //     opt.group.animate = false;
+                //     if (_.isUndefined(opt.group.a)) opt.group.a = 0;
+                // }
+
+                if (_.isUndefined(opt.group.a)) opt.group.a = 0;
                 var colorArr = [];
                 var interval = opt.group.interval || 1;
 
@@ -5204,25 +5085,18 @@
                         break;
                 }
                 opt.group = _.extend({}, opt.group, {
-                    speed: speed,
+                    // speed: speed,
                     width: width,
                     height: height,
-                    range: {
-                        top: 0,
-                        left: 0,
-                        right: this.canvas.width,
-                        bottom: this.canvas.height
-                    },
+                    // //range
+                    // top: 0,
+                    // left: 0,
+                    // right: this.canvas.width,
+                    // bottom: this.canvas.height,
                     x: x,
                     y: y,
                     colorArr: colorArr,
-                    zoomState: "in",
-                    followSpeed: 0.01 + Math.random() * 0.04,
-                    follow: true
-                })
-
-
-
+                });
                 this.opt = _.extend({}, opt);
                 this.setup();
             },
@@ -5245,132 +5119,11 @@
             },
             setup: function(opt) {
                 var opt = opt || this.opt;
-                if (opt.group) { //.switch == "on"
-                    opt.group.follow && this.follow();
+                if (opt.group) {
                     this[opt.group.group](opt)
                 } else {
                     this.shape(opt);
                 }
-            },
-            //跟随
-            follow: function() {
-                var opt = this.opt.group;
-                var mouse = this.draw.mouse;
-
-                if (mouse) {
-                    var dx = mouse.x - opt.x;
-                    var dy = mouse.y - opt.y;
-                    opt.x += (dx * opt.followSpeed); //+_.sin(opt.a)*opt.r*0.5;
-                    opt.y += (dy * opt.followSpeed); //+_.cos(opt.a)*opt.r*0.5;
-                }
-                this.opt.group = opt;
-                this.opt.shape.follow = false;
-                return this
-            },
-            //变形
-            transform: function() {
-                this.opt.shape.num += this.opt.group.speed;
-                return this;
-            },
-            //旋转
-            rotate: function() {
-                this.opt.group.a += this.opt.group.speed;
-                return this;
-            },
-            //反弹
-            bounce: function() {
-                var g = this.opt.group
-                if (this.opt.motion.bounce) { //反弹
-                    if (g.x < g.range.left + g.width) { //碰到左边的边界
-                        g.x = g.width;
-                        g.vx = -g.vx;
-                    } else if (g.y < g.range.top + g.height) {
-                        g.y = g.height;
-                        g.vy = -g.vy;
-                    } else if (g.x > g.range.right - g.width) {
-                        g.x = g.range.right - g.width;
-                        g.vx = -g.vx;
-                    } else if (g.y > g.range.bottom - g.height) {
-                        g.y = g.range.bottom - g.height;
-                        g.vy = -g.vy;
-                    }
-                } else { //不反弹
-                    if (g.x < g.range.left - g.width) { //碰到左边的边界
-                        g.x = g.range.right + g.width;
-                    } else if (g.y < g.range.top - g.height) {
-                        g.y = g.range.bottom + g.height;
-                    } else if (g.x > g.range.right + g.width) {
-                        g.x = g.range.left - g.width;
-                    } else if (g.y > g.range.bottom + g.height) {
-                        g.y = g.range.top - g.height;
-                    }
-                }
-            },
-            //颤抖 飘忽不定
-            jiggle: function() {
-                var g = this.opt.group;
-
-                g.x += Math.random() * 2 - 1;
-                g.y += Math.random() * 2 - 1;
-                this.bounce()
-                return this;
-            },
-            //漂浮
-            float: function() {
-                var g = this.opt.group;
-                // 负相关
-                var deta = Math.random() * 2 - 1;
-                g.vx += deta;
-                g.vy -= deta;
-
-                g.x += g.vx;
-                g.y += g.vy;
-                this.bounce()
-                return this;
-            },
-            //移动
-            move: function() {
-                var g = this.opt.group;
-                g.x += g.vx;
-                g.y += g.vy;
-                this.bounce()
-                return this;
-            },
-            //曲线移动
-            curve: function() {
-                var g = this.opt.group;
-                g.x += g.vx;
-                g.y += g.vy;
-                g.vy += 0.01 * g.vx * g.vx;
-                this.bounce()
-                return this;
-            },
-            //重力运动 
-            gravitate: function() {
-                var g = this.opt.group;
-                g.vy += 0.22; //加速下落
-                g.vx *= 0.998; //地面摩擦
-                if (g.y > g.bottom - g.height) {
-                    g.vy *= 0.96; //地面反弹减速
-                }
-                this.opt.motion.bounce = true;
-                return this.move();
-            },
-            //缩放
-            zoom: function() {
-                var g = this.opt.group;
-                if (g.sr + this.opt.shape.r >= g.range.right / 2) {
-                    g.zoomState = "out";
-
-                } else if (g.sr <= 1) {
-                    g.zoomState = "in";
-                }
-                if (g.zoomState == "in") {
-                    g.sr += g.speed;
-                } else {
-                    g.sr -= g.speed;
-                }
-                return this;
             },
             //环形
             ring: function(opt) {
@@ -5414,9 +5167,9 @@
                 var x = opt.group.x,
                     y = opt.group.y;
 
-                var sr = opt.group.sr; //环绕半径
-                if (_.isUndefined(sr)) {
-                    sr = r;
+                var gr = opt.group.r; //环绕半径
+                if (_.isUndefined(gr)) {
+                    gr = r;
                     r = r / 3;
                 }
                 var clockwise = opt.group.clockwise; //顺时针逆时针
@@ -5467,8 +5220,8 @@
                     }
 
                     var opt2 = {
-                        x: x + sr * _.sin(a),
-                        y: y + sr * _.cos(a),
+                        x: x + gr * _.sin(a),
+                        y: y + gr * _.cos(a),
                         r: r
                     }
                     //颜色
@@ -5642,7 +5395,7 @@
 
 
         //运动
-        //rotate move zoom  gravitate  jiggle  float
+        //rotate move zoom  gravitate  jiggle  float circle ellips
         //组合运动 rotate_zoom
         var _motion = _.motion = function(draw, opt) {
             return new _motion.prototype.init(draw, opt);
@@ -5662,30 +5415,50 @@
                     bounce = opt.motion.bounce;
                 this.groups = [];
 
+                var screenWidth = this.screenWidth = this.draw.canvas.width,
+                    screenHeight = this.screenHeight = this.draw.canvas.height;
+
+                this.a = 0;
+                this.r = opt.motion.r||100;
+                //中心点
+                this.centerX = screenWidth / 2;
+                this.centerY = screenHeight / 2;
+
+                var follow=_.isUndefined(opt.motion.follow)?true :opt.motion.follow;
+
+
                 //速度随机
                 var _randomV = function(t) {
                     return _.extend({}, t, {
                         vx: (Math.random() * 2 - 1) * speed,
                         vy: (Math.random() * 2 - 1) * speed,
                         bounce: bounce,
-                        speed: speed
+                        speed: speed,
+                        zoomState: "in",
+                        followSpeed: 0.01 + Math.random() * 0.04,
+                        follow: follow,
+                        mass: t.r * t.r,
+                        //range
+                        top: 0,
+                        left: 0,
+                        right: screenWidth,
+                        bottom: screenHeight,
+                        animate: false
                     });
                 }
 
                 if (_.isArray(opt.shape)) {
                     opt.shape.forEach(function(t) {
-                        t.animate = false;
                         t = _randomV(t);
                         var item = draw.shape(t);
                         item.color(colorful)
                         self.groups.push(item);
                     })
                 } else {
-                    opt.shape.animate = false;
                     for (var i = 0; i < num; i++) {
                         opt.id = i;
                         var t;
-                        if (opt.group) { //&& opt.group.switch == "on"
+                        if (opt.group) {
                             opt.group = _randomV(opt.group);
                             t = draw.group(opt);
                         } else {
@@ -5694,9 +5467,11 @@
                             t.color(colorful)
                         }
                         this.groups.push(t);
+
+                        // 
                     };
                 }
-
+                this.len = this.groups.length;
                 this.setup();
             },
             setup: function() {
@@ -5713,20 +5488,26 @@
 
                 groups.forEach(function(t, i) {
                     mode.split("_").forEach(function(m) {
-                        t[m] && t[m]();
+                        self[m] && self[m](t.opt);
+                        self.follow(t.opt);
+                        // self.revolvingFollow(t.opt);
                     });
                     t.setup();
-
 
                     if (self.link) { //连接线
                         for (var j = i; j < len - 1; j++) {
                             var vs;
-                            if (t.opt.group) { // && t.opt.group.switch == "on"
-                                vs = [t.opt.group, groups[j + 1].opt.group];
+                            var t2 = groups[j + 1];
+                            if (t.opt.group) {
+                                vs = [t.opt.group, t2.opt.group];
                             } else {
-                                vs = [t.opt, groups[j + 1].opt];
+                                vs = [t.opt, t2.opt];
                             }
                             self.draw.link(vs);
+                            // self.collide(t.opt,t2.opt);
+                            //碰撞
+
+
                         }
                     }
                 });
@@ -5738,12 +5519,253 @@
                     self.id = setTimeout(self.setup.bind(self), 17)
                 }
             },
+            //停止
             stop: function() {
                 if (inBrowser) {
                     this.id && cancelAnimationFrame(this.id);
                 } else {
                     this.id && clearTimeout(this.id);
                 }
+            },
+            //跟随
+            follow: function(opt) {
+                var mouse = this.draw.mouse;
+                (function(opt) {
+                    if (opt.follow && mouse) {
+                        var dx = mouse.x - opt.x
+                        var dy = mouse.y - opt.y
+                        opt.x += (dx * opt.followSpeed);
+                        opt.y += (dy * opt.followSpeed);
+                    }
+                })(opt.group || opt)
+            },
+            //旋转着跟随
+            // revolvingFollow: function(opt) {
+            //     var mouse = this.draw.mouse;
+            //     var self=this;
+            //     (function(opt) {
+            //         if (opt.follow && mouse) {
+            //             var dx = mouse.x - opt.x
+            //             var dy = mouse.y - opt.y
+            //             opt.x += (dx * opt.followSpeed)+_.sin(self.a)*self.r*0.1;
+            //             opt.y += (dy * opt.followSpeed)+_.cos(self.a)*self.r*0.1;
+            //             self.a += opt.speed;
+            //         }
+            //     })(opt.group || opt)
+            // },
+            //移动
+            move: function(opt) {
+                (function(opt) {
+                    opt.x += opt.vx || 1;
+                    opt.y += opt.vy || 1;
+                })(opt.group || opt);
+                this.bounce(opt);
+            },
+            //反弹
+            bounce: function(opt) {
+                (function(opt) {
+                    if (opt.bounce) { //碰壁反射 
+                        if (opt.x < opt.left + opt.width) { //碰到左边的边界
+                            opt.x = opt.width;
+                            opt.vx = -opt.vx;
+                        } else if (opt.y < opt.top + opt.height) {
+                            opt.y = opt.height;
+                            opt.vy = -opt.vy;
+                        } else if (opt.x > opt.right - opt.width) {
+                            opt.x = opt.right - opt.width;
+                            opt.vx = -opt.vx;
+                        } else if (opt.y > opt.bottom - opt.height) {
+                            opt.y = opt.bottom - opt.height;
+                            opt.vy = -opt.vy;
+                        }
+                    } else { //左出右进  左进右出
+                        if (opt.vx < 0 && opt.x < opt.left - opt.width) { //碰到左边的边界
+                            opt.x = opt.right + opt.r;
+                        } else if (opt.vy < 0 && opt.y < opt.top - opt.height) {
+                            opt.y = opt.bottom + opt.r;
+                        } else if (opt.vx > 0 && opt.x > opt.right + opt.width) {
+                            opt.x = opt.left - opt.r;
+                        } else if (opt.vy > 0 && opt.y > opt.bottom + opt.height) {
+                            opt.y = opt.top - opt.r;
+                        }
+                    }
+                })(opt.group || opt);
+            },
+            //碰撞
+            collide: function(opt1, opt2) {
+
+                (function(opt1, opt2) {
+                    var dx = opt1.x - opt2.x,
+                        dy = opt1.y - opt2.y,
+                        dist = Math.sqrt(dx * dx + dy * dy);
+
+                    if (dist < opt2.r + opt1.r) {
+                        //calculate angle, sine, and cosine
+                        var angle = Math.atan2(dy, dx),
+                            sin = Math.sin(angle),
+                            cos = Math.cos(angle),
+                            //rotate opt2's position
+                            x0 = 0,
+                            y0 = 0,
+                            //rotate opt1's position
+                            x1 = dx * cos + dy * sin,
+                            y1 = dy * cos - dx * sin,
+                            //rotate opt2's velocity
+                            vx0 = opt2.vx * cos + opt2.vy * sin,
+                            vy0 = opt2.vy * cos - opt2.vx * sin,
+                            //rotate opt1's velocity
+                            vx1 = opt1.vx * cos + opt1.vy * sin,
+                            vy1 = opt1.vy * cos - opt1.vx * sin,
+                            //collision reaction
+                            vxTotal = vx0 - vx1;
+
+                        vx0 = ((opt2.mass - opt1.mass) * vx0 + 2 * opt1.mass * vx1) /
+                            (opt2.mass + opt1.mass);
+                        vx1 = vxTotal + vx0;
+                        x0 += vx0;
+                        x1 += vx1;
+                        //rotate positions back
+                        var x0Final = x0 * cos - y0 * sin,
+                            y0Final = y0 * cos + x0 * sin,
+                            x1Final = x1 * cos - y1 * sin,
+                            y1Final = y1 * cos + x1 * sin;
+                        //adjust positions to actual screen positions
+                        opt1.x = opt2.x + x1Final;
+                        opt1.y = opt2.y + y1Final;
+                        opt2.x = opt2.x + x0Final;
+                        opt2.y = opt2.y + y0Final;
+                        //rotate velocities back
+                        opt2.vx = vx0 * cos - vy0 * sin;
+                        opt2.vy = vy0 * cos + vx0 * sin;
+                        opt1.vx = vx1 * cos - vy1 * sin;
+                        opt1.vy = vy1 * cos + vx1 * sin;
+                    }
+
+                })(opt1.group || opt1, opt2.group || opt2)
+
+
+            },
+            //变形
+            transform: function(opt) {
+                (function(opt) {
+                    opt.num += opt.speed;
+                })(opt.group || opt)
+            },
+            //旋转
+            rotate: function(opt) {
+                (function(opt) {
+                    opt.a += opt.speed;
+                })(opt.group || opt)
+            },
+            //飘忽不定
+            jiggle: function(opt) {
+                (function(opt) {
+                    opt.x += Math.random() * 2 - 1;
+                    opt.y += Math.random() * 2 - 1;
+                })(opt.group || opt)
+                this.bounce(opt)
+            },
+            //漂浮
+            float: function(opt) {
+                // 负相关
+                var deta = Math.random() * 2 - 1;
+                (function(opt) {
+                    opt.vx += deta;
+                    opt.vy -= deta;
+                    opt.x += opt.vx || 1;
+                    opt.y += opt.vy || 1;
+
+                })(opt.group || opt);
+                this.bounce(opt)
+            },
+            //曲线
+            curve: function(opt) {
+                (function(opt) {
+                    opt.x += opt.vx || 1;
+                    opt.y += opt.vy || 1;
+                    opt.vy += 0.01 * opt.vx * opt.vx;
+                })(opt.group || opt)
+                this.bounce(opt)
+            },
+            //重力运动 
+            gravitate: function(opt) {
+                (function(opt) {
+                    opt.vy += 0.22; //加速下落
+                    opt.vx *= 0.998; //地面摩擦
+                    if (opt.y > opt.bottom - opt.height) {
+                        opt.vy *= 0.96; //地面反弹减速
+                    }
+                    opt.bounce = true;
+                })(opt.group || opt);
+                this.move(opt)
+            },
+            //缩放
+            zoom: function(opt) {
+                (function(opt) {
+                    if (opt.r >= opt.right / 2) {
+                        opt.zoomState = "out";
+                    } else if (opt.r <= 1) {
+                        opt.zoomState = "in";
+                    }
+                    if (opt.zoomState == "in") {
+                        opt.r += opt.speed || 1
+                    } else {
+                        opt.r -= opt.speed || 1
+                    }
+                })(opt.group || opt);
+            },
+            //放大
+            zoomin: function(opt) {
+                (function(opt) {
+                    opt.r += opt.speed || 1
+                })(opt.group || opt)
+            },
+            //放大
+            zoomout: function(opt) {
+                (function(opt) {
+                    opt.r -= opt.speed || 1
+                })(opt.group || opt)
+            },
+            //绕圈
+            circle: function(opt) {
+                var self = this;
+                var mouse = this.draw.mouse;
+                if (mouse) {
+                    this.centerX = mouse.x;
+                    this.centerY = mouse.y;
+                }
+                (function(opt) {
+                    opt.x = self.centerX + Math.sin(self.a) * self.r;
+                    opt.y = self.centerY + Math.cos(self.a) * (self.r);
+                    self.a += opt.speed * 0.1;
+                })(opt.group || opt)
+            },
+            //螺旋
+            spiral: function(opt) {
+                var self = this;
+                this.circle(opt);
+                self.r += self.swell || 1;
+                (function(opt) {
+                    if (opt.x + opt.r > self.screenWidth || opt.y + opt.r > self.screenHeight) {
+                        self.swell = -1;
+                    } else if (self.r < 1) {
+                        self.swell = 1;
+                    }
+                })(opt.group || opt)
+            },
+            //椭圆
+            ellipse: function(opt) {
+                var self = this;
+                var mouse = this.draw.mouse;
+                if (mouse) {
+                    this.centerX = mouse.x;
+                    this.centerY = mouse.y;
+                }
+                (function(opt) {
+                    opt.x = self.centerX + Math.sin(self.a) * self.r;
+                    opt.y = self.centerY + Math.cos(self.a) * (self.r) * 2;
+                    self.a += opt.speed;
+                })(opt.group || opt)
             }
         }
         _motion.prototype.init.prototype = _motion.prototype;
@@ -5858,7 +5880,7 @@
                                 div2.css({ width: w / 2, height: h, top: 0, left: 0, position: "absolute", background: background });
                             }
                             var val = c.val();
-                            if (["color", "lineColor"].indexOf(x) >= 0) {
+                            if (["color", "lineColor","background"].indexOf(x) >= 0) {
                                 val = optCycle.filters.color(val);
                             }
                             item && item.html(_.isObject(val) ? val.text : val);
@@ -5954,7 +5976,6 @@
             optCycle.init = function() {
                 var opt = {};
                 for (var k in optCycle.data) {
-
                     var o = optCycle.data[k];
                     if (_.isObject(o)) {
                         if (["group", "motion"].indexOf(k) >= 0) {
@@ -5999,18 +6020,6 @@
                     if (_.isObject(o)) {
                         for (var x in o) {
                             var val = o[x];
-                            // if (x == "random") {
-                            //     for (var y in val) {
-                            //         var item = { key: y, value: val[y], text: y, method: _.camelCase("next", k, "Random", y) };
-                            //         if (optCycle.data[k][y].text) {
-                            //             item.text = optCycle.data[k][y].text;
-                            //         }
-                            //         if (_.isBoolean(val[y])) {
-                            //             item.value = optCycle.filters.toggle(val[y]);
-                            //         }
-                            //         tab.random.push(item);
-                            //     }
-                            // } else 
                             if (x == "text") {
                                 tab[x] = val;
                             } else if (x == "switch") {
@@ -6033,26 +6042,13 @@
                                         if (_.isObject(val.val())) {
                                             item.value = val.val().text ? val.val().text : val.val();
                                         } else {
-                                            if (["color", "lineColor"].indexOf(item.key) >= 0) {
+                                            if (["color", "lineColor","background"].indexOf(item.key) >= 0) {
                                                 item.value = optCycle.filters.color(val.val());
                                             } else {
                                                 item.value = val.val();
                                             }
                                         }
                                     }
-                                    // if (val.text) {
-                                    //     item.text = val.text;
-                                    // }
-                                    // if (val.auto) {
-                                    //     item.auto = val.auto;
-                                    // }
-                                    // if(val.type){
-                                    //     item.type=val.type;
-                                    // }
-                                    // if(val.values){
-                                    //     item.values=val.values
-                                    // }
-
                                 } else {
                                     item.filter = x;
                                 }
@@ -6106,35 +6102,73 @@
 
                         this.context = this.canvas.getContext("2d");
 
+                        var isDragging = false;
+                        var startHnadler = function(item, ev) {
+                            var offset = _.pos(item);
+                            var pos = _.pos(ev);
+                            self.mouse = {
+                                x: pos.x - offset.x,
+                                y: pos.y - offset.y
+                            }
+                            if (self.opt) {
+                                if (!self.opt.motion) {
+                                    self.opt.shape.begin && self.clear();
+                                    self.opt.shape = _.extend(self.opt.shape, { x: pos.x, y: pos.y });
+                                    if(self.opt.group){
+                                        self.opt.group = _.extend(self.opt.group, { x: pos.x, y: pos.y });
+                                    }
+                                    self.setup.call(self, self.opt)
+                                }
+                            }
+                            isDragging = true;
+                        }
+                        var moveHandler = function(item, ev) {
+                            if (isDragging) {
+                                var offset = _.pos(item);
+                                var pos = _.pos(ev);
+                                self.mouse = {
+                                    x: pos.x - offset.x,
+                                    y: pos.y - offset.y
+                                }
+                            }
+                        }
+                        var endHandler = function(item, ev) {
+                            isDragging = false;
+
+                        }
+
                         //事件
                         toucher([{
                             el: this.canvas,
                             type: "touchstart",
                             callback: function(item, ev) {
-                                var pos = _.pos(ev);
-                                self.mouse = {
-                                    x: pos.x,
-                                    y: pos.y
-                                }
-                                if (self.opt) {
-                                    if (!self.opt.motion) { // && self.opt.motion.switch == "off"
-                                        self.opt.shape.begin && self.clear();
-                                        self.opt.shape = _.extend(self.opt.shape, { x: pos.x, y: pos.y })
-                                        self.opt.group = _.extend(self.opt.group, { x: pos.x, y: pos.y })
-                                        self.setup.call(self, self.opt)
-                                    }
-                                }
+                                startHnadler(item, ev);
                             }
                         }, {
                             el: this.canvas,
                             type: "touchmove",
                             callback: function(item, ev) {
-                                var pos = _.pos(ev);
-                                self.mouse = {
-                                    x: pos.x,
-                                    y: pos.y
-                                }
+                                moveHandler(item, ev);
 
+
+                            }
+                        }, {
+                            el: this.canvas,
+                            type: "mousedown",
+                            callback: function(item, ev) {
+                                startHnadler(item, ev)
+                            }
+                        }, {
+                            el: this.canvas,
+                            type: "mousemove",
+                            callback: function(item, ev) {
+                                moveHandler(item, ev);
+                            }
+                        }, {
+                            el: this.canvas,
+                            type: "mouseup",
+                            callback: function(item, ev) {
+                                endHandler(item, ev)
                             }
                         }])
                     }
@@ -6143,6 +6177,7 @@
                 if (_.isObject(options)) {
                     this.options = options;
                     if (options.parent) this.parent = options.parent;
+                    if (options.containerid) this.containerid = options.containerid;
 
                     //比率
                     if (options.ratio) this.ratio(options.ratio);
@@ -6191,10 +6226,11 @@
             },
             //比率
             ratio: function(key) {
-                var wraper = this.parent ? this.canvas.parent() : document.documentElement; // ||
+                var container = this.containerid ? _.$("#" + this.containerid) : document.documentElement;
+                // var wraper = this.parent ? this.canvas.parent() : document.documentElement; // ||
                 var screen = {
-                    w: wraper.clientWidth,
-                    h: wraper.clientHeight
+                    w: container.clientWidth,
+                    h: container.clientHeight
                 }
                 var w = screen.w,
                     h = screen.h;
@@ -6417,8 +6453,13 @@
             shadow: function() {
                 var canvas = this.canvas;
                 var ctx = this.context;
+                var bg=this.opt.motion.background;
+                var color='rgba(0,0,0,0.05)';
+                if(bg){
+                    color=_.colorRgb(bg,0.05);
+                }
                 //光影效果
-                this.setFillStyle('rgba(0,0,0,0.05)');
+                this.setFillStyle(color);
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
             },
             clear: function(color) {
@@ -6560,10 +6601,12 @@
                 // }
                 // self.callback && self.callback(result);
                 if (opt && opt.animate) { //动画
+                    opt = _.extend(opt, { animate: false })
+                    var animationInterval = opt.animationInterval || 0;
                     vsGroup.forEach(function(t, i) {
                         setTimeout(function() {
-                            self.link(t, opt)
-                        }, 200 * i);
+                            self.link(t, opt);
+                        }, animationInterval * i);
                     })
                 } else {
                     vsGroup.forEach(function(t) {
@@ -6591,9 +6634,8 @@
             },
             //图形组合
             group: function(opt) {
-                // opt.shape = this.default(opt.shape);
                 var t;
-                if (opt.group) { //&& opt.group.switch == "on"
+                if (opt.group) {
                     opt.group = this.shortName(opt.group);
                     opt.group = this.default(opt.group);
                     t = _shapeGroup(this, opt);
@@ -6603,13 +6645,10 @@
                 this.canvas.callback && this.canvas.callback.call(this.context, this.context);
                 return t;
             },
-
-
             //运动
             motion: function(opt) {
                 var self = this;
                 opt.motion = this.shortName(opt.motion);
-
 
                 //模拟鼠标点击，改变位置
                 var _randomMouse = function() {
@@ -6619,11 +6658,8 @@
                     }
                     self.mouseTimmer = setTimeout(_randomMouse, opt.motion.simulateInterval || 1000)
                 }
-                if (opt.motion.simulate) {
-                    self.mouseTimmer && clearTimeout(self.mouseTimmer);
-                    _randomMouse();
-                }
-
+                self.mouseTimmer && clearTimeout(self.mouseTimmer);
+                opt.motion.simulate && _randomMouse();
                 return _motion(this, opt);
             },
             //star

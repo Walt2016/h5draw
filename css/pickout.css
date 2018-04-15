@@ -21,11 +21,11 @@
 .pk-arrow {
     position: absolute;
     cursor: pointer;
-    right: -2px;
+    right: 2px;
     bottom: 0;
     text-align: center;
     width: 30px;
-    padding-bottom: 2px;
+    /*padding-bottom: 2px;*/
 }
 
 .pk-arrow,
@@ -85,7 +85,9 @@
     top: 30px;
     border-radius: 3px;
     position: absolute;
-    width: 280px;
+    min-width: 280px;
+    width: 80%;
+    max-width: 600px;
     max-height: 90%;
     overflow-y: auto;
     z-index: 1111;
