@@ -15,40 +15,43 @@
         margin: 0;
         padding: 0
     }
+
     .container {
-    display: flex;
-    flex-direction: column;
-    max-width: 680px;
-    margin: 0 auto;
-    height: 100vh;
-    min-width: 300px;
-    position: relative;
-}
+        display: flex;
+        flex-direction: column;
+        max-width: 680px;
+        margin: 0 auto;
+        height: 100vh;
+        min-width: 300px;
+        position: relative;
+    }
+
     .screen {
-    /*background-color: rgb(55, 58, 63);*/
-    font-size: 12px;
-    color: #fff;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    width: 100vw;
-    max-width: 680px;
-    min-width: 300px;
-}
+        /*background-color: rgb(55, 58, 63);*/
+        font-size: 12px;
+        color: #fff;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        width: 100vw;
+        max-width: 680px;
+        min-width: 300px;
+    }
 
-.rlt {
-    position: relative;
-}
+    .rlt {
+        position: relative;
+    }
 
-.abs {
-    position: absolute;
-}
+    .abs {
+        position: absolute;
+    }
+
     .tab-head {
         background: rgba(100, 100, 100, 1);
         padding-left: 14px;
         padding-right: 14px;
-        color:#fff;
+        color: #fff;
     }
 
     .tab-head-item {
@@ -75,7 +78,7 @@
     .tab-body {
         padding-left: 14px;
         padding-right: 14px;
-        background: rgba(0,0,0,0.1)
+        background: rgba(0, 0, 0, 0.1)
     }
 
     .scroll {
@@ -277,8 +280,7 @@
         top: 0;
         left: 0;
         right: 0;
-        background: rgba(255,255,255,0.9);
-
+        background: rgba(255, 255, 255, 0.9);
     }
 
     #configPanel.center {
@@ -288,6 +290,68 @@
         top: 50%;
         transform: translate(-50%, -50%);
         width: 95%
+    }
+
+    input[type="range"] {
+        /*设置滑块下面那条线的样式*/
+        outline: none;
+        /*去掉点击时出现的外边框*/
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        appearance: none;
+        /*这三个是去掉那条线原有的默认样式，划重点！！*/
+        /*width: 100%;
+     height: 1px;*/
+        /*background: orange;*/
+        background: #000000;
+
+        /*这三个是设置滑块下面那条线的样式*/
+        /*border-radius: 10px;*/
+        /*这个属性设置使填充进度条时的图形为圆角*/
+        /*background: -webkit-linear-gradient(#059CFA, #059CFA) no-repeat;*/
+        /*background:  -webkit-linear-gradient(red, black) no-repeat; */
+        /*background-size: 0% 100%;*/
+        /*        background: linear-gradient(45deg,#1a6adf 25%,#578cdf 25%,#578cdf 50%,#1a6adf 50%,#1a6adf 75%,#578cdf 75%,#578cdf 100%);
+    background-size: 28px 28px;*/
+    }
+
+    input.slider {
+        height: 3px;
+        width: 80%;
+        margin-left: 14px;
+    }
+
+    input.toggle,
+    input.switch {
+        width: 50px;
+        border-radius: 50px;
+    }
+
+    input.switch {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+    }
+    /*滑块*/
+
+    input[type="range"]::-webkit-slider-thumb {
+        /*::-webkit-slider-thumb是代表给滑块的样式进行变更*/
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        appearance: none;
+
+        width: 18px;
+        height: 18px;
+        /*margin-top: -5px;*/
+        /*使滑块超出轨道部分的偏移量相等*/
+        background: #fff;
+        border-radius: 50%;
+        /*外观设置为圆形*/
+        border: solid 0.125em rgba(205, 224, 230, 0.5);
+
+        /*设置边框*/
+        box-shadow: 0 .125em .125em #3b4547;
+        /*添加底部阴影*/
     }
     </style>
 </head>
@@ -331,7 +395,9 @@
             <div class="grid mt4">
                 <div class="row head">
                     <div class="hd flex">{=key}
-                        <div class="switchBtn {=switch}" on="{=switchMethod}"></div>
+                        <!-- <div class="switchBtn {=switch}" on="{=switchMethod}"></div> -->
+                        <!-- <input type="range" class="" min="0" max="1" value=""> -->
+                        {=switch|switch}
                     </div>
                 </div>
             </div>
@@ -354,12 +420,14 @@
                 <input type="checkbox" name="{=key}" on="autoNext" {=auto|checkbox}/>
             </div>
             <div class="td flex" on="pickerHandler">
+                {=$this|$type}
                 <span class="value">{=value}</span>
-                <span class="pk-arrow -clean"></span> {=$this|picker}
+                <!-- <span class="pk-arrow -clean"></span>  -->
+                <!-- {=$this|picker} -->
             </div>
         </div>
     </script>
-    <script src="js/tpler.js"></script>
+    <script src="js/tpler.js?v=2"></script>
     <script>
     // _.debug();
     // return ;
@@ -434,10 +502,10 @@
                         "key": "ring",
                         "text": "环形"
                     },
-                    {
-                        "key": "mirror",
-                        "text": "镜像"
-                    },
+                    // {
+                    //     "key": "mirror",
+                    //     "text": "镜像"
+                    // },
                     {
                         "key": "spiral",
                         "text": "螺线"
@@ -446,14 +514,15 @@
                         "key": "fibonacci",
                         "text": "斐波那契螺线"
                     },
+                    // {
+                    //     "key": "zebra",
+                    //     "text": "斑马"
+                    // },
+                    // {
+                    //     "key": "diagonal",
+                    //     "text": "对角线"
+                    // }, 
                     {
-                        "key": "zebra",
-                        "text": "斑马"
-                    },
-                    {
-                        "key": "diagonal",
-                        "text": "对角线"
-                    }, {
                         "key": "axialMirror",
                         "text": "轴对称"
                     }, {
@@ -466,7 +535,7 @@
                     }
                 ],
 
-                "index": 19,
+                "index": 4,
                 "text": "图形"
 
             },
@@ -544,6 +613,10 @@
                 "value": false,
                 "text": "显示外切圆"
             },
+            "showIncircle": {
+                "value": false,
+                "text": "显示内切圆"
+            },
 
             "showVertices": {
                 "value": false,
@@ -561,6 +634,15 @@
                 "value": false,
                 "text": "显示圆心"
             },
+            "showDiagonal": {
+                "value": false,
+                "text": "显示对角线"
+            },
+            "showMirror": {
+                "value": false,
+                "text": "顶点镜像"
+            },
+
 
             "lineWidth": {
                 "type": "slider",
@@ -575,16 +657,20 @@
                 "length": 15,
                 "text": "线条颜色"
             },
-
             "fill": {
                 "value": false,
                 "text": "填色"
+            },
+            "fillInterval": {
+                "value": false,
+                "text": "间隔填色"
             },
             "color": {
                 "type": "color_rgba",
                 "length": 15,
                 "text": "颜色"
             },
+
             "animate": {
                 "value": false,
                 "text": "动画"
@@ -797,8 +883,7 @@
                 "value": 1,
                 "text": "速度"
             },
-            "num":
-            {
+            "num": {
                 "type": "slider",
                 "min": 1,
                 "max": 100,
@@ -830,18 +915,18 @@
                 "value": false,
                 "text": "光影效果"
             },
-             "background": {
+            "background": {
                 "type": "color_rgb",
                 "length": 15,
                 "text": "光影背景"
             },
-            "follow":{
+            "follow": {
                 "value": true,
                 "text": "点击跟随"
             },
             "simulate": {
                 "value": false,
-                "text": "虚拟点击"
+                "text": "模拟点击"
             },
             "simulateInterval": {
                 "type": "slider",
@@ -859,11 +944,12 @@
     console.log(c)
     console.log(c.init())
     console.log(c.viewData())
+    var color = ["#059CFA", "#ccc"];
 
 
     var draw = _.draw({
-        canvasid:"myCanvas",
-        containerid:"screen",
+        canvasid: "myCanvas",
+        containerid: "screen",
         ratio: "1:1",
     })
 
@@ -872,123 +958,231 @@
     tpler({
         el: "#container",
         data: c.viewData(),
-        filters: _.extend({
-                tabItem: function(val) {
-                    return _.parseTpl({
-                        template: "_tab-body-item-row_tpl",
-                        data: val,
-                    })
-                },
-                checkbox: function(val) {
-                    return val ? 'checked' : ""
-                },
-                tabActive: function(val) {
-                    return val ? 'active' : "";
-                },
-                tabBodyActive: function(val) {
-                    return val ? "" : "hide"
-                },
-                picker: function(val) {
-                    // console.log(val)
-                    var sel = document.createElement("select");
-                    var option;
-                    sel.attr("placeholder", val.text);
-                    sel.id = val.id;
-                    sel.className = val.type; //"pickout" 
-                    sel.style.display = "none"
-                    val.values && val.values.forEach && val.values.forEach(function(t, i) {
-                        var selected = i == val.index ? true : false;
-                        if (t.text) {
-                            option = new Option(t.text, t.key, selected);
-                        } else {
-                            option = new Option(t, t, selected);
-                        }
-                        sel.options.add(option)
-                    });
-                    return sel.outerHTML;
-                }
-
+        filters: {
+            tabItem: function(val) {
+                return _.parseTpl({
+                    template: "_tab-body-item-row_tpl",
+                    data: val,
+                    filters: this.filters
+                })
             },
-            c.filters
-        ),
+            checkbox: function(val) {
+                return val ? 'checked' : ""
+            },
+            tabActive: function(val) {
+                return val ? 'active' : "";
+            },
+            tabBodyActive: function(val) {
+                return val ? "" : "hide"
+            },
+            slider: function(val) {
+                var slider = document.createElement("input");
+                slider.attr("type", "range");
+                slider.className = val.type;
+                slider.attr("placeholder", val.text);
+                ["min", "max", "step", "value", "id"].forEach(function(t) {
+                    slider.attr(t, val[t]);
+                });
+                var ps = parseInt(100 * val.value / val.max);
+                var color = ["#059CFA", "#ccc"];
+                slider.css({ 'background': '-webkit-linear-gradient(0deg, ' + color[0] + ' ' + ps + '%, ' + color[1] + ' ' + ps + '%)' })
+
+                if (val.max > 1) {
+                    slider.addClass('hide')
+                    var arrow = document.createElement("span");
+                    arrow.className = "pk-arrow -clean"
+                    return slider.outerHTML + arrow.outerHTML
+                }
+                return slider.outerHTML
+            },
+            switch: function(val) {
+                var range = {
+                    min: 0,
+                    max: 1,
+                    step: 1
+                }
+                range.value = val == "on" ? 1 : 0;
+                range.type = val == "none" ? "switch hide" : "switch";
+                // range.id=val.id;
+
+                return this.filters.slider(range)
+            },
+            toggle: function(val) {
+                var range = {
+                    min: 0,
+                    max: 1,
+                    step: 1
+                }
+                range.value = val.value == "是" ? 1 : 0;
+                range.type = val.type;
+                range.id = val.id
+                return this.filters.slider(range)
+            },
+            color_rgb: function(val) {
+                return this.filters.picker(val)
+            },
+            color_rgba: function(val) {
+                return this.filters.picker(val)
+            },
+            picker: function(val) {
+                var sel = document.createElement("select");
+                var option;
+                sel.attr("placeholder", val.text);
+                sel.id = val.id;
+                sel.className = val.type; //"pickout" 
+                sel.style.display = "none"
+                val.values && val.values.forEach && val.values.forEach(function(t, i) {
+                    var selected = i == val.index ? true : false;
+                    if (t.text) {
+                        option = new Option(t.text, t.key, selected);
+                    } else {
+                        option = new Option(t, t, selected);
+                    }
+                    sel.options.add(option)
+                });
+                var arrow = document.createElement("span");
+                arrow.className = "pk-arrow -clean"
+                return sel.outerHTML + arrow.outerHTML;
+            }
+        },
+
+        //,
+        //    c.filters//
         methods: _.extend({
             pickerHandler: function(item, ev) {
                 // console.log(item);
                 var overlay = _.$(".pk-overlay");
                 var modal = _.$(".pk-modal");
                 var main = modal.$('.main');
+
                 var select = item.$("select");
-                var head = modal.querySelector('.head')
-                var title = select.hasAttribute('placeholder') ? select.getAttribute('placeholder') : 'Select to option';
-                head.innerHTML = title;
-                var type = select.className;
+                var slider = item.$("input.slider");
+                if (select.length == 0 && slider.length == 0) {
+                    return;
+                }
+
 
                 var close = document.createElement('span');
                 close.setAttribute('class', 'close');
                 close.innerHTML = '&times;';
                 modal.appendChild(close);
 
+
                 var closeModal = function() {
                     overlay.removeClass("-show");
                     modal.removeClass("-show");
                     setTimeout(function() {
+                        if (slider.length > 0) {
+                            item.appendChild(slider.hide())
+                        }
                         main.innerHTML = '';
+
+
                     }, 500);
                 }
 
-                var options = Array.prototype.slice.call(select);
+                function showModal() {
+                    overlay.addClass("-show");
+                    modal.addClass("-show");
 
-                options.map(function(option, key) {
-                    var li = document.createElement('li');
-                    li.addClass("pk-option");
-                    var selected = option.hasAttribute('selected') ? '-selected' : '';
-                    selected && li.addClass(selected);
-                    var txt = document.createElement('span');
-                    txt.setAttribute('class', 'txt');
-                    txt.innerHTML = option.innerHTML;
-                    main.appendChild(li);
-                    li.appendChild(txt);
-                    if (["color_rgba", "color_rgb", "color"].indexOf(type) >= 0) {
-                        li.style.backgroundColor = option.innerHTML;
-                    }
+                }
+                var head = modal.$('.head');
+
+
+                //slider
+                if (slider.length > 0) {
+                    var title = slider.hasAttribute('placeholder') ? slider.getAttribute('placeholder') : 'Select to option';
+                    head.innerHTML = title;
+                    _.show(slider)
+                    main.appendChild(slider);
+
+                    var id = slider.id;
+                    var ids = id.split("_");
+                    var cdata = c.data[ids[0]][ids[1]];
+                    var output = item.$(".value");
+
                     toucher({
-                        el: li,
-                        callback: function() {
-                            if (["color_rgba", "color_rgb", "color"].indexOf(type) >= 0) {
-                                item.$(".value").innerHTML = txt.innerHTML + '<div class="colorblock" style="background-color:' + option.innerHTML + '"></div>';
-                            } else {
-                                item.$(".value").text(txt.innerHTML);
-                            }
+                        el: slider, //"input[type='range']",
+                        type: "input",
+                        callback: function(item, ev) { //
+                            output.innerHTML = this.value;
 
-                            var id = select.id;
-                            var ids = id.split("_");
-                            var cdata = c.data[ids[0]][ids[1]];
-
-                            options.forEach(function(t, i) {
-                                t.removeAttr('selected')
-                                if (t == option) {
-                                    if (cdata.type == "picker") {
-                                        cdata.index = i
-                                    } else if (cdata.type == "slider") {
-                                        cdata.value = Number(txt.innerHTML);
-                                        cdata.index = i;
-                                    } else if (cdata.type == "toggle") {
-                                        cdata.index = i;
-                                        cdata.value = txt.innerHTML == "是" ? true : false;
-                                    } else {
-                                        cdata.index = i;
-                                    }
-                                }
-                            })
-                            option.setAttribute('selected', 'selected');
-                            closeModal();
+                            cdata.value = Number(this.value);
+                            cdata.index = cdata.values.indexOf(cdata.value);
+                            // console.log(cdata);
+                            var ps = parseInt(100 * this.value / this.max);
+                            var color = ["#059CFA", "#ccc"];
+                            item.css({ 'background': '-webkit-linear-gradient(0deg, ' + color[0] + ' ' + ps + '%, ' + color[1] + ' ' + ps + '%)' })
+                            // cdata.index = i;
                         }
                     })
-                });
+                    showModal();
+
+                }
+
+                //select
+                if (select.length > 0) {
+
+                    var title = select.hasAttribute('placeholder') ? select.getAttribute('placeholder') : 'Select to option';
+                    head.innerHTML = title;
+                    var type = select.className;
 
 
-                overlay.addClass("-show");
-                modal.addClass("-show");
+                    var options = Array.prototype.slice.call(select);
+
+                    options.map(function(option, key) {
+                        var li = document.createElement('li');
+                        li.addClass("pk-option");
+                        var selected = option.hasAttribute('selected') ? '-selected' : '';
+                        selected && li.addClass(selected);
+                        var txt = document.createElement('span');
+                        txt.setAttribute('class', 'txt');
+                        txt.innerHTML = option.innerHTML;
+                        main.appendChild(li);
+                        li.appendChild(txt);
+                        if (["color_rgba", "color_rgb", "color"].indexOf(type) >= 0) {
+                            li.style.backgroundColor = option.innerHTML;
+                        }
+                        toucher({
+                            el: li,
+                            callback: function() {
+                                if (["color_rgba", "color_rgb", "color"].indexOf(type) >= 0) {
+                                    item.$(".value").innerHTML = txt.innerHTML + '<div class="colorblock" style="background-color:' + option.innerHTML + '"></div>';
+                                } else {
+                                    item.$(".value").text(txt.innerHTML);
+                                }
+
+                                var id = select.id;
+                                var ids = id.split("_");
+                                var cdata = c.data[ids[0]][ids[1]];
+
+                                options.forEach(function(t, i) {
+                                    t.removeAttr('selected')
+                                    if (t == option) {
+                                        if (cdata.type == "picker") {
+                                            cdata.index = i
+                                        } else if (cdata.type == "slider") {
+                                            cdata.value = Number(txt.innerHTML);
+                                            cdata.index = i;
+                                        } else if (cdata.type == "toggle") {
+                                            cdata.index = i;
+                                            cdata.value = txt.innerHTML == "是" ? true : false;
+                                        } else {
+                                            cdata.index = i;
+                                        }
+                                    }
+                                })
+                                option.setAttribute('selected', 'selected');
+                                closeModal();
+                            }
+                        })
+                    });
+                    showModal();
+
+                }
+
+
+
                 ev.preventDefault();
                 ev.stopPropagation();
 
@@ -1053,6 +1247,68 @@
         callback: function() {
             _.$(".tab").css({ height: (_.screen.y - 30) + "px" })
             _.$(".screen").appendChild(draw.canvas)
+
+
+            toucher([{
+                el: "input.toggle",
+                type: "input",
+                callback: function(item, ev) { //
+                    item.parent().$(".value").innerHTML = this.value == 1 ? "是" : "否"
+                    // output.innerHTML = this.value;
+
+                    var id = item.id;
+                    var ids = id.split("_");
+                    var cdata = c.data[ids[0]][ids[1]];
+
+                    cdata.value = this.value == 1 ? "是" : "否"; //Number(this.value);
+                    cdata.index = this.value == 1 ? 0 : 1;
+                    //Number(this.value);
+                    //cdata.values.indexOf(cdata.value);
+                    // console.log(cdata);
+                    var ps = parseInt(100 * this.value / this.max);
+                    var color = ["#059CFA", "#ccc"];
+                    item.css({ 'background': '-webkit-linear-gradient(0deg, ' + color[0] + ' ' + ps + '%, ' + color[1] + ' ' + ps + '%)' })
+                    // cdata.index = i;
+                }
+            }, {
+                el: "input.switch",
+                type: "input",
+                callback: function(item, ev) {
+                    console.log(item)
+                    var key = item.closest(".tab-body-item").attr("name");
+                    var bd = item.closest(".tab-body-item").$(".switchBody")
+
+                    if (item.value == "1") {
+                        // val = "off";
+                        // item.value=="0"
+                        bd.removeClass("off").addClass("on");
+
+                    } else {
+                        // val = "on";
+                        // item.value=="1"
+                        bd.removeClass("on").addClass("off");
+
+                    }
+                    var ps = parseInt(100 * this.value / this.max);
+                    var color = ["#059CFA", "#ccc"];
+                    item.css({ 'background': '-webkit-linear-gradient(0deg, ' + color[0] + ' ' + ps + '%, ' + color[1] + ' ' + ps + '%)' })
+
+                    // var cdata = c.data[key]["switch"];
+                    c.data[key]["switch"] = this.value == "1" ? "on" : "off"; //Number(this.value);
+                    // cdata.index = cdata.values.indexOf(cdata.value);
+                    // if (k == "motion") {
+                    //     if (val == "on") {
+                    //         _.show("#stopBtn");
+                    //     } else {
+                    //         _.hide("#stopBtn");
+                    //     }
+                    // }
+                }
+
+
+            }])
+
+
         }
     })
     </script>

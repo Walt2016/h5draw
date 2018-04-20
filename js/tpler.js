@@ -1,6 +1,6 @@
 //一个js开发框架
 //template.event.canvas
-//v0.4.201804015
+//v0.5.201804020
 ;
 (function(root, factory) {
     if (typeof define === "function" && define.amd) {
@@ -923,7 +923,7 @@
                 return "rgba(" + arr.join(",") + ")";
             },
             // hex2rgb
-            colorRgb: function(color,alpha) {
+            colorRgb: function(color, alpha) {
                 var reg = /^#([0-9a-fA-f]{3}|[0-9a-fA-f]{6})$/;
                 var sColor = color.toLowerCase();
                 if (sColor && reg.test(sColor)) {
@@ -939,7 +939,7 @@
                     for (var i = 1; i < 7; i += 2) {
                         sColorChange.push(parseInt("0x" + sColor.slice(i, i + 2)));
                     }
-                    if(alpha){
+                    if (alpha) {
                         sColorChange.push(alpha);
                         return "rgba(" + sColorChange.join(",") + ")";
                     }
@@ -2724,7 +2724,7 @@
             },
             //兼容jquery  常用方法
             attr: function(key, value) {
-                if (value) {
+                if (!_.isUndefined(value)) {
                     this.setAttribute(key, value);
                     return this;
                 }
@@ -3380,7 +3380,7 @@
 
                     switch (type) {
                         case TAP:
-                            var starHandler = function(ev) {
+                            var startHandler = function(ev) {
                                 startPos = _.pos(ev);
                             }
                             var endHandler = function(ev) {
@@ -3402,12 +3402,12 @@
                                     }
                                 }
                             }
-                            addEvent(_touchstart, el, starHandler);
+                            addEvent(_touchstart, el, startHandler);
                             addEvent(_touchend, el, endHandler);
                             break;
                         case LONGTAP: //长按
                             var _longtap;
-                            var starHandler = function(ev) {
+                            var startHandler = function(ev) {
                                 _longtap = setTimeout(function() {
                                     if (_.isFunction(listener)) {
                                         listener.call(el, el, ev);
@@ -3424,7 +3424,7 @@
                             var endHandler = function(ev) {
                                 _longtap && clearTimeout(_longtap);
                             }
-                            addEvent(_touchstart, el, starHandler);
+                            addEvent(_touchstart, el, startHandler);
                             addEvent(_touchend, el, endHandler);
                             break;
                         case DRAG:
@@ -3457,7 +3457,7 @@
                                     top: y
                                 }
                             }
-                            var starHandler = function(ev) {
+                            var startHandler = function(ev) {
                                 startPos = _.pos(ev);
                                 offset = _.pos(el);
                                 el.css({ position: "absolute", cursor: "move" });
@@ -3497,7 +3497,7 @@
                             addEvent("mouseout", el, function(ev) {
                                 el.css({ cursor: "normal" })
                             });
-                            addEvent(_touchstart, el, starHandler);
+                            addEvent(_touchstart, el, startHandler);
                             addEvent(_touchmove, document, moveHandler);
                             addEvent(_touchend, document, endHandler);
                             break;
@@ -4057,6 +4057,12 @@
             },
             text: function(str) {
                 this.text = str;
+            },
+            attr: function(opt) {
+                for (var k in opt) {
+                    this[k] = opt[k]
+                }
+                return this;
             }
         }
         cycle.prototype.init.prototype = cycle.prototype;
@@ -4087,7 +4093,7 @@
                 t = Number((t + step).toFixed(n));
                 i++;
             }
-            return _.cycle(values, index);
+            return _.cycle(values, index).attr(options);
 
         };
 
@@ -4618,7 +4624,9 @@
                 if (!_.isUndefined(text)) {
                     ctx.fillStyle = "#000";
                     ctx.font = "12px Verdana";
-                    ctx.fillText(text, x - 4, y + 5);
+                    var measure = ctx.measureText(text);
+                    ctx.fillText(text, x - measure.width / 2, y + r / 2);
+                    // ctx.fillText(text, x - 4, y + 5);
 
                     // mPaint.setTextAlign(Paint.Align.CENTER);
                     // Paint.FontMetrics fm = mPaint.getFontMetrics();
@@ -4797,32 +4805,6 @@
                     }))
                     vs.push(p2);
                 }
-                return this.draw.link(vs, opt);
-            },
-            //对角线
-            diagonal: function(opt) {
-                var vs = this.vertices(opt);
-                var vsGroup = [];
-                var len = vs.length;
-                for (var i = 0; i < len - 2; i++) {
-                    for (var j = i + 2; j < len; j++) {
-                        if (!(i == 0 && j == len - 1)) {
-                            vsGroup.push([vs[i], vs[j]]);
-                        }
-                    }
-                }
-                this.draw.linkGroup(vsGroup, _.extend({}, opt, { showVertices: false }));
-                return this.draw.link(vs, opt);
-            },
-            //斑马
-            zebra: function(opt) {
-                var vs = this.vertices(opt);
-                var x = opt.x,
-                    y = opt.y;
-                var vsGroup = _.slice(vs, 2).map(function(t) {
-                    return t.concat([{ x: x, y: y }])
-                })
-                this.draw.linkGroup(vsGroup, _.extend({}, opt, { fill: true, showVertices: false, showExcircle: false }));
                 return this.draw.link(vs, opt);
             },
             //交叉线
@@ -5419,12 +5401,12 @@
                     screenHeight = this.screenHeight = this.draw.canvas.height;
 
                 this.a = 0;
-                this.r = opt.motion.r||100;
+                this.r = opt.motion.r || 100;
                 //中心点
                 this.centerX = screenWidth / 2;
                 this.centerY = screenHeight / 2;
 
-                var follow=_.isUndefined(opt.motion.follow)?true :opt.motion.follow;
+                var follow = _.isUndefined(opt.motion.follow) ? true : opt.motion.follow;
 
 
                 //速度随机
@@ -5880,7 +5862,7 @@
                                 div2.css({ width: w / 2, height: h, top: 0, left: 0, position: "absolute", background: background });
                             }
                             var val = c.val();
-                            if (["color", "lineColor","background"].indexOf(x) >= 0) {
+                            if (["color", "lineColor", "background"].indexOf(x) >= 0) {
                                 val = optCycle.filters.color(val);
                             }
                             item && item.html(_.isObject(val) ? val.text : val);
@@ -5910,7 +5892,7 @@
                         var val = o[x];
                         if (x == "switch") {
                             optCycle.data[k][x] = val;
-                            _next(k, x);
+                            // _next(k, x);
 
                         } else {
                             var type = val.type;
@@ -5920,6 +5902,7 @@
                                     c = _.cycle(val.values, val.index || 0);
                                     break;
                                 case "slider":
+                                    // c=val;
                                     c = _.sliderCycle(val);
                                     break;
                                 case "color":
@@ -5945,7 +5928,7 @@
                                         c = _.cycle([{ key: true, text: "是" }, { key: false, text: "否" }], val ? 0 : 1);
                                         c.type = "toggle";
                                         c.value = val;
-                                        _toggle(k, x, val);
+                                        // _toggle(k, x, val);
                                     } else if (_.isObject(val)) {
                                         if (_.isBoolean(val.value)) {
                                             // optCycle.data[k][x] = val;
@@ -5953,7 +5936,7 @@
                                             c = _.cycle([{ key: true, text: "是" }, { key: false, text: "否" }], val.value ? 0 : 1)
                                             c.type = "toggle";
                                             c.value = val.value;
-                                            _toggle(k, x, val);
+                                            // _toggle(k, x, val);
                                         }
                                     } else if (_.isString(val)) {
                                         optCycle.data[k][x] = val;
@@ -5965,7 +5948,7 @@
                                 if (val.auto) c.auto = val.auto;
                                 if (val.type) c.type = val.type;
                                 optCycle.data[k][x] = c;
-                                _next(k, x);
+                                // _next(k, x);
                             }
                         }
                     }
@@ -6025,10 +6008,11 @@
                             } else if (x == "switch") {
                                 tab[x] = val;
                                 tab[x + "Method"] = _.camelCase("next", k, x);
+                                // tab.id=k + "_" + x ;
                             } else if (x == "active") {
                                 tab[x] = val;
                             } else {
-                                var item = { key: x, value: val, text: x, method: _.camelCase("next", k, x), id: k + "_" + x };
+                                var item = { key: x, value: val, text: x, id: k + "_" + x }; //method: _.camelCase("next", k, x),
                                 if (_.isBoolean(val)) {
                                     item.filter = "toggle";
                                     item.value = optCycle.filters.toggle(val);
@@ -6042,7 +6026,7 @@
                                         if (_.isObject(val.val())) {
                                             item.value = val.val().text ? val.val().text : val.val();
                                         } else {
-                                            if (["color", "lineColor","background"].indexOf(item.key) >= 0) {
+                                            if (["color", "lineColor", "background"].indexOf(item.key) >= 0) {
                                                 item.value = optCycle.filters.color(val.val());
                                             } else {
                                                 item.value = val.val();
@@ -6106,17 +6090,17 @@
                         var startHnadler = function(item, ev) {
                             var offset = _.pos(item);
                             var pos = _.pos(ev);
-                            self.mouse = {
+                            var mouse = self.mouse = {
                                 x: pos.x - offset.x,
                                 y: pos.y - offset.y
                             }
                             if (self.opt) {
                                 if (!self.opt.motion) {
                                     self.opt.shape.begin && self.clear();
-                                    self.opt.shape = _.extend(self.opt.shape, { x: pos.x, y: pos.y });
-                                    if(self.opt.group){
-                                        self.opt.group = _.extend(self.opt.group, { x: pos.x, y: pos.y });
-                                    }
+                                    if (self.opt.shape)
+                                        self.opt.shape = _.extend(self.opt.shape, { x: mouse.x, y: mouse.y });
+                                    if (self.opt.group)
+                                        self.opt.group = _.extend(self.opt.group, { x: mouse.x, y: mouse.y });
                                     self.setup.call(self, self.opt)
                                 }
                             }
@@ -6177,7 +6161,10 @@
                 if (_.isObject(options)) {
                     this.options = options;
                     if (options.parent) this.parent = options.parent;
-                    if (options.containerid) this.containerid = options.containerid;
+                    if (options.container || options.containerid)
+                        this.container = options.container ? _.$(options.container) : options.containerid ? _.$("#" + options.containerid) : document.documentElement;
+
+                    if (options.scale) this._scale = options.scale;
 
                     //比率
                     if (options.ratio) this.ratio(options.ratio);
@@ -6226,14 +6213,10 @@
             },
             //比率
             ratio: function(key) {
-                var container = this.containerid ? _.$("#" + this.containerid) : document.documentElement;
-                // var wraper = this.parent ? this.canvas.parent() : document.documentElement; // ||
-                var screen = {
-                    w: container.clientWidth,
-                    h: container.clientHeight
-                }
-                var w = screen.w,
-                    h = screen.h;
+                var container = this.container || document.documentElement;
+                var _scale = this._scale || 1;
+                var w = container.clientWidth,
+                    h = container.clientHeight;
                 if (_.isString(key)) {
                     if (key.indexOf(":") >= 0) {
                         key.replace(/(\d+):(\d+)/, function(match, x, y) {
@@ -6245,8 +6228,8 @@
                 } else if (_.isNumber(key)) {
                     h = w * key;
                 }
-                this.canvas.setAttribute('width', w);
-                this.canvas.setAttribute('height', h);
+                this.canvas.setAttribute('width', w * _scale);
+                this.canvas.setAttribute('height', h * _scale);
                 return this;
 
             },
@@ -6453,10 +6436,10 @@
             shadow: function() {
                 var canvas = this.canvas;
                 var ctx = this.context;
-                var bg=this.opt.motion.background;
-                var color='rgba(0,0,0,0.05)';
-                if(bg){
-                    color=_.colorRgb(bg,0.05);
+                var bg = this.opt.motion.background;
+                var color = 'rgba(0,0,0,0.05)';
+                if (bg) {
+                    color = _.colorRgb(bg, 0.05);
                 }
                 //光影效果
                 this.setFillStyle(color);
@@ -6511,6 +6494,9 @@
                     { k: "showV", v: "showVertices" },
                     { k: "showC", v: "showCenter" },
                     { k: "showEC", v: "showExcircle" },
+                    { k: "showIC", v: "showIncircle" },
+                    { k: "showD", v: "showDiagonal" },
+                    { k: "showM", v: "showMirror" },
                 ].forEach(function(t) {
                     if (!_.isUndefined(opt[t.k]))
                         opt[t.v] = opt[t.k];
@@ -6537,62 +6523,156 @@
                 if (opt) {
                     //显示外切圆
                     if (opt.showExcircle) {
-                        opt.text = "";
-                        self.shape().circle(opt);
-                        // _.shape(this).circle(opt);
+                        this.excircle(opt);
+                    }
+                    //显示内切圆
+                    if (opt.showIncircle) {
+                        this.incircle(opt);
                     }
                     //显示半径
                     if (opt.showRadius) {
-                        var x = opt.x,
-                            y = opt.y;
-                        ctx.beginPath();
-                        vs.forEach(function(t) {
-                            ctx.moveTo(x, y);
-                            ctx.lineTo(t.x, t.y)
-                        })
-                        self.render(opt);
+                        this.radius(vs, opt);
                     }
-
-                    var _shape = self.shape();
-                    var verticesColor = _.rgb();
                     //显示顶点
                     if (opt.showVertices || opt.identifierVertices) {
-                        var animate = opt.animate,
-                            animationInterval = opt.animationInterval || 200;
-
-                        vs.forEach(function(t, i) {
-                            t.fill = true;
-                            if (opt.identifierVertices) {
-                                t.r = 10
-                                t.text = i + 1;
-                                t.color = "rgba(0,0,0,0.2)"
-                            } else {
-                                t.color = verticesColor;
-                                t.r = 3;
-                            }
-                            if (animate) {
-                                setTimeout(function() {
-                                    _shape.circle(t);
-                                }, animationInterval * i)
-                            } else {
-                                _shape.circle(t);
-                            }
-                        });
+                        this.vertices(vs, opt);
                     }
                     //显示圆心
                     if (opt.showCenter) {
-                        _shape.circle({
-                            r: 3,
-                            x: opt.x,
-                            y: opt.y,
-                            color: verticesColor,
-                            fill: true
-                        });
+                        this.centerPoint(opt)
                     }
-
+                    //对角线
+                    if (opt.showDiagonal) {
+                        this.diagonal(vs, opt)
+                    }
+                    //间隔填色
+                    if (opt.fillInterval) {
+                        this.zebra(vs, opt);
+                    }
+                    //顶点镜像
+                    if (opt.showMirror) {
+                        this.mirror(vs, opt);
+                    }
                 }
                 return this;
             },
+            // 外切圆
+            excircle: function(opt) {
+                this.shape(_.extend({}, opt, { shape: "circle", text: "" }));
+                // this.shape().circle(_.extend({}, opt, { text: "" }));
+            },
+            //内切圆
+            incircle: function(opt) {
+                var r = opt.r * _.cos(180 / opt.num);
+                this.shape(_.extend({}, opt, { shape: "circle", r: r, text: "" }));
+            },
+            //旁切圆
+            escribedcircle: function(opt) {
+
+            },
+            //则该三角形内切圆圆心坐标：
+            // [ax1+bx2+cx3] / [a+b+c]， [ay1+by2+cy3] / [a+b+c]
+            //半径 r=s/p  s=p(p-a)(p-b)([-c])^1/2
+            // incircle: function(opt) {
+            //     // var vs = this.vertices(opt);
+            //     // var num=3,d=[],p=0;
+            //     // for (var i = 0; i < num; i++) {
+            //     //     d[i]=this.distance(vs[i],vs[i>=num?0:i+1]);
+            //     //     p +=d[i];
+            //     // }
+            //     // p=p/2;
+            // },
+            //半径
+            radius: function(vs, opt) {
+                var ctx = this.context;
+                var x = opt.x,
+                    y = opt.y;
+                ctx.beginPath();
+                vs.forEach(function(t) {
+                    ctx.moveTo(x, y);
+                    ctx.lineTo(t.x, t.y)
+                })
+                this.render(opt);
+            },
+            //顶点
+            vertices: function(vs, opt) {
+                var _shape = self.shape();
+                var verticesColor = _.rgb();
+
+                var animate = opt.animate,
+                    animationInterval = opt.animationInterval || 200;
+
+                vs.forEach(function(t, i) {
+                    t.fill = true;
+                    if (opt.identifierVertices) {
+                        t.r = 10
+                        t.text = i + 1;
+                        t.color = "rgba(0,0,0,0.2)"
+                    } else {
+                        t.color = verticesColor;
+                        t.r = 3;
+                    }
+                    if (animate) {
+                        setTimeout(function() {
+                            _shape.circle(t);
+                        }, animationInterval * i)
+                    } else {
+                        _shape.circle(t);
+                    }
+                });
+
+            },
+            //圆心
+            centerPoint: function(opt) {
+                this.shape().circle({
+                    r: 3,
+                    x: opt.x,
+                    y: opt.y,
+                    color: _.rgb(), //verticesColor,
+                    fill: true
+                });
+            },
+            //对角线
+            diagonal: function(vs, opt) {
+                var vs = vs || this.vertices(opt);
+                var vsGroup = [];
+                var len = vs.length;
+                for (var i = 0; i < len - 2; i++) {
+                    for (var j = i + 2; j < len; j++) {
+                        if (!(i == 0 && j == len - 1)) {
+                            vsGroup.push([vs[i], vs[j]]);
+                        }
+                    }
+                }
+                this.linkGroup(vsGroup, _.extend({}, opt, { showVertices: false }));
+                // return this.draw.link(vs, opt);
+            },
+            //间隔填色
+            zebra: function(vs, opt) {
+                var vs = vs || this.vertices(opt);
+                var x = opt.x,
+                    y = opt.y;
+                var vsGroup = _.slice(vs, 2).map(function(t) {
+                    return t.concat([{ x: x, y: y }])
+                })
+                this.linkGroup(vsGroup, _.extend({}, opt, { fill: true, showVertices: false, showExcircle: false, fillInterval: false }));
+                // return this.draw.link(vs, opt);
+            },
+            //顶点镜像
+            mirror: function(vs, opt) {
+                var vsGroup = [];
+                var vs = vs || this.vertices(opt);
+                // vsGroup.push(vs);
+                vs.forEach(function(t) {
+                    var vs2 = []
+                    vs.forEach(function(t2) {
+                        vs2.push(t2.mirror(t));
+                    })
+                    vsGroup.push(vs2);
+                });
+                this.linkGroup(vsGroup, _.extend({}, opt, { showMirror: false }));
+            },
+
             linkGroup: function(vsGroup, opt) {
                 var self = this;
                 // console.log("图形个数：" + vsGroup.length)
@@ -6619,10 +6699,6 @@
             shape: function(opt) {
                 var self = this;
                 if (_.isArray(opt)) {
-                    // opt = opt.map(function(t) {
-                    //     t = self.shortName(t);
-                    //     return self.default(t);
-                    // })
                     opt.forEach(function(t) {
                         self.shape(t)
                     })
@@ -6690,17 +6766,17 @@
                 this.motionCache && this.motionCache.stop();
             },
             //路径
-            path: function(opt) {
-                var self = this;
-                var opt = self.default(opt);
-                // var x = opt.x,
-                //     y = opt.y,
-                //     r = opt.r,
-                //     color = opt.color,
-                //     shape = opt.shape || "circle";
+            // path: function(opt) {
+            //     var self = this;
+            //     var opt = self.default(opt);
+            //     // var x = opt.x,
+            //     //     y = opt.y,
+            //     //     r = opt.r,
+            //     //     color = opt.color,
+            //     //     shape = opt.shape || "circle";
 
-                // self[shape](opt);
-            },
+            //     // self[shape](opt);
+            // },
             verticesGroup: function(opt) {
                 var self = this;
                 var path = self.vertices(opt.group); //path
@@ -6734,17 +6810,17 @@
                 }
                 return vs;
             },
-            translateX: function(opt, tx) {
+            // translateX: function(opt, tx) {
 
-            },
-            translateY: function(opt, ty) {
+            // },
+            // translateY: function(opt, ty) {
 
-            },
-            //相似图形 ， 变大小
-            scale: function() {
-                //context.scale(scalewidth,scaleheight);
+            // },
+            // //相似图形 ， 变大小
+            // scale: function() {
+            //     //context.scale(scalewidth,scaleheight);
 
-            },
+            // },
 
             //格子
             grid: function(opt) {
@@ -6766,22 +6842,7 @@
                 }
                 return this.linkGroup(vsGroup, opt);
             },
-            //旁切圆
-            escribedcircle: function(opt) {
 
-            },
-            //则该三角形内切圆圆心坐标：
-            // [ax1+bx2+cx3] / [a+b+c]， [ay1+by2+cy3] / [a+b+c]
-            //半径 r=s/p  s=p(p-a)(p-b)([-c])^1/2
-            incircle: function(opt) {
-                // var vs = this.vertices(opt);
-                // var num=3,d=[],p=0;
-                // for (var i = 0; i < num; i++) {
-                //     d[i]=this.distance(vs[i],vs[i>=num?0:i+1]);
-                //     p +=d[i];
-                // }
-                // p=p/2;
-            },
             // 反转颜色
             reverse: function() {
                 var canvas = this.canvas;
