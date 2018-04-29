@@ -3,6 +3,8 @@
 
 ![image](https://github.com/Walt2016/h5draw/blob/master/pic/star.gif)
 
+![image](https://github.com/Walt2016/h5draw/blob/master/pic/mgi.gif)
+
 ![image](https://github.com/Walt2016/h5draw/blob/master/pic/fd10.gif)
 
 ![image](https://github.com/Walt2016/h5draw/blob/master/pic/fp12.gif)
