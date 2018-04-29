@@ -9,351 +9,8 @@
     <link rel="stylesheet" href="css/layout.css">
     <link rel="stylesheet" href="css/console.css">
     <link rel="stylesheet" href="css/pickout.css">
-    <style>
-    html,
-    body {
-        margin: 0;
-        padding: 0
-    }
-
-    .container {
-        display: flex;
-        flex-direction: column;
-        max-width: 680px;
-        margin: 0 auto;
-        height: 100vh;
-        min-width: 300px;
-        position: relative;
-    }
-
-    .screen {
-        /*background-color: rgb(55, 58, 63);*/
-        font-size: 12px;
-        color: #fff;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        width: 100vw;
-        max-width: 680px;
-        min-width: 300px;
-    }
-
-    .rlt {
-        position: relative;
-    }
-
-    .abs {
-        position: absolute;
-    }
-
-    .tab-head {
-        background: rgba(100, 100, 100, 1);
-        padding-left: 14px;
-        padding-right: 14px;
-        color: #fff;
-    }
-
-    .tab-head-item {
-        /*color: #666;*/
-        min-width: 50px;
-        text-align: center;
-        font-size: 16px;
-        cursor: pointer;
-        user-select: none;
-        height: 40px;
-        line-height: 40px;
-        border-bottom: 1px solid #dcdcdc;
-    }
-
-    .tab-head-item.active {
-        color: #000;
-        background: #cecece
-    }
-
-    .tab-body-item.hide {
-        display: none;
-    }
-
-    .tab-body {
-        padding-left: 14px;
-        padding-right: 14px;
-        background: rgba(0, 0, 0, 0.1)
-    }
-
-    .scroll {
-        overflow-y: auto;
-        -webkit-overflow-scrolling: touch;
-    }
-
-    .tab-body-item {
-        font-size: 12px;
-        word-wrap: break-word;
-        margin-bottom: 62px;
-    }
-
-    .tab-body-item .header {
-        height: 22px;
-        background-color: #cecece;
-        line-height: 22px;
-        padding: 6px;
-    }
-
-    .tab-body-item .body {
-        border-bottom: 1px solid rgb(220, 220, 220);
-        margin-bottom: 20px;
-        min-height: 30px;
-        padding: 6px;
-    }
-
-
-
-
-    .mt10 {
-        margin-top: 10px
-    }
-
-    .mt4 {
-        margin-top: 4px
-    }
-
-    .ml4 {
-        margin-left: 4px;
-    }
-
-    .grid {
-        line-height: 40px;
-        font-size: 15px;
-        border: 1px solid #dcdcdc;
-    }
-
-    .grid .body.off {
-        display: none;
-    }
-
-    .grid .row {
-        border-bottom: 1px solid #dcdcdc;
-    }
-
-    .grid .row:last-child {
-        border-bottom: none
-    }
-
-    .grid .row .hd {
-        width: 100px;
-        height: 40px;
-        padding-left: 4px;
-        border-right: 1px solid #dcdcdc;
-        position: relative;
-        background-color: rgba(248, 248, 248, 0.5);
-        overflow: hidden;
-    }
-
-    .grid .row .hd:last-child {
-        border-right: none
-    }
-
-    .grid .row .td {
-        padding-left: 4px;
-        height: 40px;
-        position: relative;
-    }
-
-    .hide {
-        display: none
-    }
-
-    .fixedbottom {
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        z-index: 999;
-        max-width: 680px;
-        margin: 0 auto;
-    }
-
-    .btn-group {
-        border-top: 1px solid #ccc;
-    }
-
-    .btn {
-        font-size: 15px;
-        height: 40px;
-        line-height: 40px;
-        -webkit-user-select: none;
-        -webkit-box-flex: 1;
-        -webkit-flex: 1;
-        -ms-flex: 1;
-        flex: 1;
-        text-align: center;
-        /*background: rgba(0, 0, 0, 0.2)*/
-        margin: 1px;
-        border-right: 1px dashed #dedede;
-        cursor: pointer;
-    }
-
-    .btn:last-child {
-        border-right: none;
-    }
-
-    .btn.w100 {
-        width: 100px;
-        max-width: 100px;
-    }
-
-    .scroll {
-        overflow-y: auto;
-        -webkit-overflow-scrolling: touch;
-    }
-
-    .switchBtn {
-        width: 40px;
-        height: 20px;
-        border: 1px solid #666;
-        background-image: -webkit-linear-gradient(right, #dedede, #dedede 50%, #cccccc 50%, #cccccc);
-        position: absolute;
-        top: 10px;
-        right: 10px;
-    }
-
-    .switchBtn.on {
-        background-image: -webkit-linear-gradient(left, #dedede, #dedede 50%, #ff6414 50%, #ff6414);
-    }
-
-    .rightArrow {
-        width: 0px;
-        height: 0px;
-        border: 10px solid transparent;
-        border-left-color: #cecece;
-    }
-
-    .leftArrow {
-        width: 0px;
-        height: 0px;
-        border: 10px solid transparent;
-        border-right-color: #cecece;
-    }
-
-    .upArrow {
-        width: 0px;
-        height: 0px;
-        border: 8px solid transparent;
-        border-bottom-color: #cecece;
-        margin-bottom: 8px;
-    }
-
-    .downArrow {
-        width: 0px;
-        height: 0px;
-        border: 8px solid transparent;
-        border-top-color: #cecece;
-        margin-top: 8px;
-    }
-
-    .colorblock {
-        width: 20px;
-        height: 10px;
-        position: absolute;
-        right: 25px;
-        top: 15px;
-    }
-
-    .switchBody.off {
-        display: none;
-    }
-
-    .switchBtn.none {
-        display: none;
-    }
-
-    #startBtn {
-        background-color: #ccc
-    }
-
-    #configPanel.hide {
-        display: none;
-    }
-
-    #configPanel {
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        background: rgba(255, 255, 255, 0.9);
-    }
-
-    #configPanel.center {
-        position: fixed;
-        z-index: 2000;
-        left: 50%;
-        top: 50%;
-        transform: translate(-50%, -50%);
-        width: 95%
-    }
-
-    input[type="range"] {
-        /*设置滑块下面那条线的样式*/
-        outline: none;
-        /*去掉点击时出现的外边框*/
-        -webkit-appearance: none;
-        -moz-appearance: none;
-        appearance: none;
-        /*这三个是去掉那条线原有的默认样式，划重点！！*/
-        /*width: 100%;
-     height: 1px;*/
-        /*background: orange;*/
-        background: #000000;
-
-        /*这三个是设置滑块下面那条线的样式*/
-        /*border-radius: 10px;*/
-        /*这个属性设置使填充进度条时的图形为圆角*/
-        /*background: -webkit-linear-gradient(#059CFA, #059CFA) no-repeat;*/
-        /*background:  -webkit-linear-gradient(red, black) no-repeat; */
-        /*background-size: 0% 100%;*/
-        /*        background: linear-gradient(45deg,#1a6adf 25%,#578cdf 25%,#578cdf 50%,#1a6adf 50%,#1a6adf 75%,#578cdf 75%,#578cdf 100%);
-    background-size: 28px 28px;*/
-    }
-
-    input.slider {
-        height: 3px;
-        width: 80%;
-        margin-left: 14px;
-    }
-
-    input.toggle,
-    input.switch {
-        width: 50px;
-        border-radius: 50px;
-    }
-
-    input.switch {
-        position: absolute;
-        top: 10px;
-        right: 10px;
-    }
-    /*滑块*/
-
-    input[type="range"]::-webkit-slider-thumb {
-        /*::-webkit-slider-thumb是代表给滑块的样式进行变更*/
-        -webkit-appearance: none;
-        -moz-appearance: none;
-        appearance: none;
-
-        width: 18px;
-        height: 18px;
-        /*margin-top: -5px;*/
-        /*使滑块超出轨道部分的偏移量相等*/
-        background: #fff;
-        border-radius: 50%;
-        /*外观设置为圆形*/
-        border: solid 0.125em rgba(205, 224, 230, 0.5);
-
-        /*设置边框*/
-        box-shadow: 0 .125em .125em #3b4547;
-        /*添加底部阴影*/
-    }
-    </style>
+    <link rel="stylesheet" href="css/draw.min.css">
+    
 </head>
 
 <body>
@@ -395,8 +52,6 @@
             <div class="grid mt4">
                 <div class="row head">
                     <div class="hd flex">{=key}
-                        <!-- <div class="switchBtn {=switch}" on="{=switchMethod}"></div> -->
-                        <!-- <input type="range" class="" min="0" max="1" value=""> -->
                         {=switch|switch}
                     </div>
                 </div>
@@ -422,12 +77,10 @@
             <div class="td flex" on="pickerHandler">
                 {=$this|$type}
                 <span class="value">{=value}</span>
-                <!-- <span class="pk-arrow -clean"></span>  -->
-                <!-- {=$this|picker} -->
             </div>
         </div>
     </script>
-    <script src="js/tpler.js?v=2"></script>
+    <script src="js/tpler.js?v=4"></script>
     <script>
     // _.debug();
     // return ;
@@ -470,8 +123,8 @@
                         "text": "内切多边形"
                     },
                     {
-                        "key": "flower",
-                        "text": "花"
+                        "key": "rose",
+                        "text": "玫瑰花"
                     },
                     {
                         "key": "sunflower",
@@ -480,7 +133,11 @@
 
                     {
                         "key": "sierpinski",
-                        "text": "谢尔宾斯基"
+                        "text": "谢尔宾斯基三角形"
+                    },
+                    {
+                        "key": "carpet",
+                        "text": "谢尔宾斯基地毯"
                     },
                     {
                         "key": "ray",
@@ -502,10 +159,6 @@
                         "key": "ring",
                         "text": "环形"
                     },
-                    // {
-                    //     "key": "mirror",
-                    //     "text": "镜像"
-                    // },
                     {
                         "key": "spiral",
                         "text": "螺线"
@@ -514,14 +167,6 @@
                         "key": "fibonacci",
                         "text": "斐波那契螺线"
                     },
-                    // {
-                    //     "key": "zebra",
-                    //     "text": "斑马"
-                    // },
-                    // {
-                    //     "key": "diagonal",
-                    //     "text": "对角线"
-                    // }, 
                     {
                         "key": "axialMirror",
                         "text": "轴对称"
@@ -532,7 +177,28 @@
                     {
                         "key": "pentagram",
                         "text": "五角星"
-                    }
+                    },
+                    {
+                        "key": "vertices",
+                        "text": "顶点"
+                    },
+                    {
+                        "key": "reuleaux",
+                        "text": "勒洛三角形"
+                    },
+                    {
+                        "key": "Kohn",
+                        "text": "科赫曲线"
+                    },
+                    {
+                        "key": "beads",
+                        "text": "佛珠"
+                    },
+                    {
+                        "key": "rayFractal",
+                        "text": "射线分形"
+                    },
+                    
                 ],
 
                 "index": 4,
@@ -670,6 +336,19 @@
                 "length": 15,
                 "text": "颜色"
             },
+            "shadowBlur": {
+                "type": "slider",
+                "min": 0,
+                "max": 20,
+                "step": 1,
+                "value": 0,
+                "text": "阴影大小"
+            },
+            "shadowColor": {
+                "type": "color_rgb",
+                "length": 15,
+                "text": "阴影颜色"
+            },
 
             "animate": {
                 "value": false,
@@ -689,7 +368,12 @@
             "switch": "off",
             "group": {
                 "type": "picker",
-                "values": [{
+                "values": [
+                {
+                        "key": "polygon",
+                        "text": "多边形"
+                    },
+                {
                         "key": "surround",
                         "text": "环绕"
                     },
@@ -697,10 +381,6 @@
                         "key": "concentric",
                         "text": "同心"
                     },
-                    // {
-                    //     "key": "inpolygon",
-                    //     "text": "内切多边形"
-                    // },
                     {
                         "key": "excircle",
                         "text": "外切圆"
@@ -713,10 +393,33 @@
                         "key": "ring",
                         "text": "环形"
                     },
+                    {
+                        "key": "fractal",
+                        "text": "分形"
+                    },
+                    
 
                 ],
                 "index": 0,
                 "text": "组合"
+            },
+            "a": {
+                "type": "slider",
+                "min": 0,
+                "max": 180,
+                "step": 1,
+                "value": 0,
+                "text": "角度",
+                "auto": true
+            },
+            "num": {
+                "type": "slider",
+                "min": 1,
+                "max": 100,
+                "step": 1,
+                "value": 3,
+                "text": "边数",
+                "auto": true
             },
             "r": {
                 "type": "slider",
@@ -764,10 +467,6 @@
                 "value": 10,
                 "text": "动画间隔"
             },
-            // "colorful": {
-            //     "value": true,
-            //     "text": "多彩"
-            // },
             "colorful": {
                 "type": "picker",
                 "values": [{
@@ -797,11 +496,31 @@
                 "value": false,
                 "text": "显示圆心"
             },
+            "link": {
+                "value": false,
+                "text": "相互连线"
+            },
+            "neighborLink": {
+                "value": false,
+                "text": "相邻连线"
+            },
+            "vertexLink": {
+                "value": false,
+                "text": "顶点连线"
+            },
+            "conic": {
+                "value": false,
+                "text": "锥线"
+            },
+            "identifierCenter": {
+                "value": false,
+                "text": "圆心编号"
+            },
         },
         "motion": {
             "text": "运动",
             "switch": "off",
-            "mode": {
+            "motion": {
                 "type": "picker",
                 "values": [{
                         "key": "move",
@@ -871,6 +590,18 @@
                         "key": "rotate_spiral",
                         "text": "旋转+螺旋"
                     },
+                    {
+                        "key": "light",
+                        "text": "发光"
+                    },
+                    {
+                        "key": "light_rotate",
+                        "text": "发光+旋转"
+                    },
+                    {
+                        "key": "sineMove",
+                        "text": "正弦函数运动"
+                    },
                 ],
                 "index": 0,
                 "text": "运动形式"
@@ -919,6 +650,10 @@
                 "type": "color_rgb",
                 "length": 15,
                 "text": "光影背景"
+            },
+             "click": {
+                "value": false,
+                "text": "点击重绘"
             },
             "follow": {
                 "value": true,
@@ -976,24 +711,60 @@
                 return val ? "" : "hide"
             },
             slider: function(val) {
-                var slider = document.createElement("input");
-                slider.attr("type", "range");
-                slider.className = val.type;
-                slider.attr("placeholder", val.text);
-                ["min", "max", "step", "value", "id"].forEach(function(t) {
-                    slider.attr(t, val[t]);
+
+                var range = document.createElement("input");
+                range.attr("type", "range");
+                range.className = val.type;
+
+                ["min", "max", "step", "value"].forEach(function(t) { //, "id"
+                    range.attr(t, val[t]);
                 });
                 var ps = parseInt(100 * val.value / val.max);
                 var color = ["#059CFA", "#ccc"];
-                slider.css({ 'background': '-webkit-linear-gradient(0deg, ' + color[0] + ' ' + ps + '%, ' + color[1] + ' ' + ps + '%)' })
+                range.css({ 'background': '-webkit-linear-gradient(0deg, ' + color[0] + ' ' + ps + '%, ' + color[1] + ' ' + ps + '%)' })
 
-                if (val.max > 1) {
-                    slider.addClass('hide')
-                    var arrow = document.createElement("span");
-                    arrow.className = "pk-arrow -clean"
-                    return slider.outerHTML + arrow.outerHTML
+
+                if (val.type == "slider") {
+                    var slider = document.createElement("div");
+                    slider.className = "slider"
+                    slider.id = val.id;
+                    slider.attr("placeholder", val.text);
+                    var subBtn = document.createElement("div");
+                    subBtn.className = "btn-sub";
+                    subBtn.innerText = "-"
+                    var addBtn = document.createElement("div");
+                    addBtn.className = "btn-add"
+                    addBtn.innerText = "+"
+                    var output=document.createElement("div");
+                    output.className = "output";
+                    output.innerText = range.value
+
+                    slider.appendChild(subBtn);
+                    slider.appendChild(range);
+                    slider.appendChild(addBtn);
+                    slider.appendChild(output);
+
+                    if (val.max > 1) {
+                        slider.addClass('hide')
+                        var arrow = document.createElement("span");
+                        arrow.className = "pk-arrow -clean"
+                        return slider.outerHTML + arrow.outerHTML
+                    }
+                    return slider.outerHTML
+
+                } else {
+
+                    range.id = val.id;
+
+                    // slider.appendChild(range);
+                    return range.outerHTML;
+
                 }
-                return slider.outerHTML
+
+
+
+
+
             },
             switch: function(val) {
                 var range = {
@@ -1056,7 +827,7 @@
                 var main = modal.$('.main');
 
                 var select = item.$("select");
-                var slider = item.$("input.slider");
+                var slider = item.$("div.slider"); //input
                 if (select.length == 0 && slider.length == 0) {
                     return;
                 }
@@ -1096,26 +867,44 @@
                     _.show(slider)
                     main.appendChild(slider);
 
+                    var range = slider.$("input[type='range']")
                     var id = slider.id;
                     var ids = id.split("_");
                     var cdata = c.data[ids[0]][ids[1]];
                     var output = item.$(".value");
+                    var color = ["#059CFA", "#ccc"];
 
-                    toucher({
-                        el: slider, //"input[type='range']",
+                    var update = function(value, max) {
+                        var value=Number(range.value);
+                        var max=Number(range.max);
+                        output.innerHTML = value;
+                        slider.$(".output").innerHTML = value;
+                        cdata.value = Number(value);
+                        cdata.index = cdata.values.indexOf(cdata.value);
+                        var ps = parseInt(100 * value / max);
+                        range.css({ 'background': '-webkit-linear-gradient(0deg, ' + color[0] + ' ' + ps + '%, ' + color[1] + ' ' + ps + '%)' })
+
+                    }
+
+                    toucher([{
+                        el: range,
                         type: "input",
-                        callback: function(item, ev) { //
-                            output.innerHTML = this.value;
-
-                            cdata.value = Number(this.value);
-                            cdata.index = cdata.values.indexOf(cdata.value);
-                            // console.log(cdata);
-                            var ps = parseInt(100 * this.value / this.max);
-                            var color = ["#059CFA", "#ccc"];
-                            item.css({ 'background': '-webkit-linear-gradient(0deg, ' + color[0] + ' ' + ps + '%, ' + color[1] + ' ' + ps + '%)' })
-                            // cdata.index = i;
+                        callback: function(item, ev) {
+                            update();
                         }
-                    })
+                    }, {
+                        el: slider.$(".btn-sub"),
+                        callback: function(item, ev) {
+                            range.value = Number(range.value) - Number(range.step);
+                            update();
+                        }
+                    }, {
+                        el: slider.$(".btn-add"),
+                        callback: function(item, ev) {
+                            range.value = Number(range.value) + Number(range.step);;
+                            update();
+                        }
+                    }])
                     showModal();
 
                 }
