@@ -1,5 +1,5 @@
 # h5draw
-几何画图（h5）
+几何画图（h5）：开向几何世界的神奇校车出发了
 
 ![image](https://github.com/Walt2016/h5draw/blob/master/pic/star.gif)
 
