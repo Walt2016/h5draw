@@ -1,6 +1,6 @@
 //一个js开发框架
 //template.event.canvas
-//v0.5.201804029
+//v0.6.20180502
 ;
 (function(root, factory) {
     if (typeof define === "function" && define.amd) {
@@ -1139,7 +1139,7 @@
                 ]
                 //var reg = new RegExp('(\\s|^)' + cls + '(\\s|$)');
 
-                var _star = function(tag, options) {
+                var _start = function(tag, options) {
                     var sb = [];
                     sb.push('<');
                     sb.push(tag);
@@ -1154,7 +1154,7 @@
                 }
 
                 var _wrap = function(tag, text, options) {
-                    return text ? _star(tag, options) + text + _end(tag) : _star(tag, options);
+                    return text ? _start(tag, options) + text + _end(tag) : _start(tag, options);
                 }
 
                 var escape = {
@@ -4530,21 +4530,6 @@
         _vertex.prototype = {
             constructor: _vertex,
             init: function(options) {
-                // this.shape = opt.group || opt.shape;
-                // this.r = opt.r || 100;
-                // this.a = opt.a || 0;
-                // this.x = opt.x;
-                // this.y = opt.y;
-                // this.rRatio = opt.rRatio || 1;
-                // this.aRatio = opt.aRatio || 1;
-                // this.turns = opt.turns || 1;
-                // this.num = opt.num || 3;
-                // //变化类型：加速 匀速
-                // var rRatioType = opt.rRatioType;
-
-                // var o = { x: draw.canvas.width / 2, y: draw.canvas.height / 2 }
-                // var p = _.pointPolar({ o: o })
-
                 if (options) {
                     this.po = this.centerPoint(options);
                     this.vs = this.vertices(options);
@@ -4557,7 +4542,7 @@
                     x: opt.x,
                     y: opt.y
                 }
-                return this.po = _.pointPolar({ o: o });
+                return _.pointPolar({ o: o }); //this.po =
             },
             //顶点 polygon 多边形
             vertices: function(opt) {
@@ -4664,8 +4649,8 @@
             },
             //内切三角形  递归
             intriangle: function(vs) {
-                var vsGroup = []
                 var self = this;
+                var vsGroup = [];
                 (function _intriangle(vs) {
                     var vs2 = self.invertices(vs);
                     if (vs2) {
@@ -4719,12 +4704,6 @@
                     this.context = draw.context;
                 }
                 if (!opt) return;
-                var x = _.isUndefined(opt.x) ? this.canvas.width / 2 : opt.x;
-                var y = _.isUndefined(opt.y) ? this.canvas.height / 2 : opt.y;
-                var a = _.isUndefined(opt.a) ? 0 : opt.a;
-                x += opt.offsetX || 0;
-                y += opt.offsetY || 0;
-
                 //图形合并
                 [{ k: "line", num: 2 }, { k: "triangle", num: 3 }, { k: "square", num: 4 }].forEach(function(t) {
                     if (t.k == opt.shape) {
@@ -4732,9 +4711,16 @@
                         opt.num = t.num;
                     }
                 });
-
+                var shape = _.isUndefined(opt.shape) ? "polygon" : opt.shape;
+                var x = _.isUndefined(opt.x) ? this.canvas.width / 2 : opt.x;
+                var y = _.isUndefined(opt.y) ? this.canvas.height / 2 : opt.y;
+                var a = _.isUndefined(opt.a) ? 0 : opt.a;
+                x += opt.offsetX || 0;
+                y += opt.offsetY || 0;
+               
 
                 var opt = this.opt = _.extend({}, opt, {
+                    shape: shape,
                     width: opt.r,
                     height: opt.r,
                     x: x,
@@ -4744,26 +4730,46 @@
                 self.setup(opt);
             },
             setup: function(opt) {
-                var self = this;
                 var opt = opt || this.opt;
                 var shape = opt.shape;
+                
 
-                //重新计算vs
+                if (this[shape]) {
+                    if (opt.fractal) {
+                        this.fractal(opt);
+                    } else {
+                        //重新计算vs
+                        this._vertex(opt);
+                        this[shape].call(this, opt);
+                    }
+                } else {
+                    console.log(+"not support:" + shape)
+                }
+            },
+            _vertex: function(opt) {
                 var vertex = this.vertex = _.vertex(opt);
                 this.vs = vertex.vs;
                 this.po = vertex.po;
 
-                if (self[shape]) {
-                    self[shape].call(self, opt);
-                } else {
-                    console.log(+"not support:" + shape)
+            },
+            //分形
+            fractal: function(opt) {
+                var self = this;
+                var level = opt.fractalLevel || 1;
+                level--;
+                var r = opt.r * (level || 1);
+                var opt = _.extend({}, opt, { r: r, fractalLevel: level })
+                if (level == 0) {
+                    opt.fractal = false;
                 }
-                // if (_.isString(shape)) {
-                //     shape = shape.split("|");
-                // }
-                // shape.forEach(function(t) {
-                //     self[t] && self[t](opt);
-                // })
+                this._vertex(opt);
+                this.vs.forEach(function(t) {
+                    var opt2 = _.extend({}, opt, { x: t.x, y: t.y });
+                    self.setup(opt2);
+                });
+                if (level > 0) {
+                    self.fractal(opt);
+                }
             },
             color: function(colorful) {
                 if (colorful) {
@@ -5104,17 +5110,17 @@
             },
             //正五角星
             pentagram: function(opt) {
-                var self = this;
-                var num = opt.num || 5; //num of edge
-                var a = opt.a; //offset
-                var ratio = opt.ratio || (3 - 4 * Math.pow(_.sin(18), 2)) //正五角星2.61803
-                var vs = this.vs;
-                var vs2 = [];
+                var num = opt.num || 5, //num of edge
+                    // a = opt.a, //offset 
+                    r = opt.r,
+                    ratio = opt.ratio || (3 - 4 * Math.pow(_.sin(18), 2)), //正五角星2.61803
+                    vs = this.vs,
+                    vs2 = [];
                 for (var i = 0; i < num; i++) {
                     var p1 = vs[i];
                     var p2 = p1.clone({
                         a: p1.a + 180 / num,
-                        r: opt.r / ratio
+                        r: r / ratio
                     });
                     vs2.push(p1);
                     vs2.push(p2);
@@ -5398,15 +5404,11 @@
                         vs2.push(t)
                         ps.splice(1, 0, pm)
                         vs2 = vs2.concat(ps)
-                        // vsGroup.push(vs2)
                     })
-                    // return vsGroup
                     if (level++ > 0) {
                         return
                     }
-
                     _Kohn(vs2);
-                    // return vs2;
                 })(vs);
 
                 this.draw.link(vs2, opt)
@@ -5449,9 +5451,6 @@
                             vsGroup.push([po, vs[i], vs[i + 1 == len ? 0 : i + 1]])
                         }
                     } else {
-                        // vsGroup.push(vs.map(function(v, i) {
-                        //     return [po, v];
-                        // }));
                         vs.forEach(function(v, i) {
                             vsGroup.push([po, v]);
                         })
@@ -5464,11 +5463,31 @@
                 vs.forEach(function(t) {
                     _ray(_.extend({}, opt, { x: t.x, y: t.y }))
                 })
+            },
 
-                // self.draw.linkGroup(vsGroup, opt);
+            // 顶点变形
+            transform: function() {
+                var self = this;
+                var speed = 1;
+                var vs = this.vs;
+                vs.forEach(function(t) {
+                    _.extend(t, {
+                        vx: (Math.random() * 2 - 1) * speed,
+                        vy: (Math.random() * 2 - 1) * speed,
 
+                    })
+                });
+
+                (function _move() {
+                    vs.forEach(function(t) {
+                        t.x += t.vx;
+                        t.y += t.vy;
+                    });
+                    // self.draw.clear();
+                    self.draw.link(vs);
+                    setTimeout(_move, 100);
+                })()
             }
-
         }
         _shape.prototype.init.prototype = _shape.prototype;
 
@@ -5538,7 +5557,7 @@
             },
             //图形
             shape: function(opt) {
-                this.draw.shape(opt.shape)
+                return this.draw.shape(opt.shape)
             },
             color: function(opt) {
                 var colorful = opt.group.colorful;
@@ -5557,33 +5576,32 @@
                 var opt = opt || this.opt;
                 if (opt.group) {
                     //重新计算vs
-                    // var vertex = this.vertex = _.vertex(opt.group);
-                    // this.vs = vertex.vs;
-                    // this.po = vertex.po;
+                    var vertex = this.vertex = _.vertex(opt.group);
+                    this.vs = vertex.vs;
+                    this.po = vertex.po;
 
-                    this[opt.group.group](opt)
+                    return this.groups = this[opt.group.group](opt)
                 } else {
-                    this.shape(opt);
+                    return this.shape(opt);
                 }
             },
             //多边形
             polygon: function(opt) {
                 var self = this;
-                var groupVertex = _.vertex(opt.group);
-                var groups = groupVertex.vs; //组合顶点
-                var po = groupVertex.po; //组合中心
+                // var groupVertex = _.vertex(opt.group);
+                // var groups = groupVertex.vs; //组合顶点
+                // var po = groupVertex.po; //组合中心
+
+                var groups = this.vs;
+                var po = this.vo;
                 var len = groups.length;
 
-
-
                 var vertex = _.vertex(opt.shape);
-                // var vs=vertex.vs;
                 var vsGroup = [];
 
-                groups.forEach(function(t, i) {
-
+                return groups.map(function(t, i) {
                     opt.shape = _.extend({}, opt.shape, { x: t.x, y: t.y })
-                    self.shape(opt);
+                    var drawShpe = self.shape(opt);
 
                     //半径
                     if (opt.group.showRadius) {
@@ -5611,31 +5629,25 @@
                     //显示圆心编号
                     if (opt.group.identifierCenter) {
                         self.draw.point({ x: t, y: t.y, text: i })
-                        // self.draw.shape({
-                        //     shape: "circle",
-                        //     r: 3,
-                        //     x: t.x,
-                        //     y: t.y,
-                        //     color: opt.group.colorArr[0], //_.rgb(),
-                        //     fill: true,
-                        //     text: i
-                        // });
                     }
 
                     //锥线
                     if (opt.group.conic) {
-
+                        drawShpe.vs.forEach(function(t) {
+                            self.draw.link([po, t]);
+                        });
                     }
+                    return drawShpe;
                 });
 
-                vertex.vs.forEach(function(t, i) {
-                    var links = [];
-                    vsGroup.forEach(function(vs, j) {
-                        links.push(vs[i])
-                    });
-                    this.draw.link(links);
-
-                })
+                // vertex.vs.forEach(function(t, i) {
+                //     var links = [];
+                //     vsGroup.forEach(function(vs, j) {
+                //         links.push(vs[i])
+                //     });
+                //     this.draw.link(links);
+                // });
+                // return groups;
             },
             //分形
             fractal: function(opt) {
@@ -5647,6 +5659,25 @@
                     opt.shape = _.extend({}, opt.shape, { x: t.x, y: t.y })
                     self.shape(opt);
                 })
+            },
+            // 锥形
+            cone: function(opt) {
+                var self = this;
+                var o = { x: opt.group.x, y: opt.group.y };
+                var groups = _.vertex(opt.group).vs;
+
+                var vsGroup = [];
+                groups.forEach(function(t) {
+                    opt.shape = _.extend({}, opt.shape, { x: t.x, y: t.y })
+                    var drawShpe = self.shape(opt);
+                    var vs = drawShpe.vs;
+                    // vsGroup.push(vs)
+
+                    vs.forEach(function(s) {
+                        vsGroup.push([s, o]);
+                    });
+                })
+                this.draw.linkGroup(vsGroup, opt.shape);
             },
             //环形
             ring: function(opt) {
@@ -5871,6 +5902,29 @@
                 })();
                 return self;
             },
+            // 顶点变形
+            transform: function() {
+                var self = this;
+                var speed = 1;
+                var vs = this.vs;
+                vs.forEach(function(t) {
+                    _.extend(t, {
+                        vx: (Math.random() * 2 - 1) * speed,
+                        vy: (Math.random() * 2 - 1) * speed,
+
+                    })
+                });
+
+                (function _move() {
+                    vs.forEach(function(t) {
+                        t.x += t.vx;
+                        t.y += t.vy;
+                    });
+                    self.draw.clear();
+                    self.polygon(self.opt)
+                    setTimeout(_move, 100);
+                })()
+            }
 
 
             // repeatX: function(opt) {
@@ -6554,9 +6608,23 @@
                                 this.canvas = document.createElement("canvas");
                                 this.canvas.id = options.canvasid;
                             }
+                        } else if (options.container || options.containerid) {
+                            this.container = options.container ? _.$(options.container) : options.containerid ? _.$("#" + options.containerid) : document.documentElement;
+                            if (this.container.length == 0) {
+                                console.log("not found container:" + options.container);
+                            } else {
+                                if (this.container.$("canvas").length == 0) {
+                                    this.canvas = document.createElement("canvas");
+                                    this.container.appendChild(this.canvas);
+                                } else {
+                                    this.canvas = this.container.$("canvas");
+                                }
+                            }
                         } else {
                             this.canvas = document.createElement("canvas");
                         }
+
+
 
                         this.context = this.canvas.getContext("2d");
 
@@ -6632,12 +6700,9 @@
 
                 if (_.isObject(options)) {
                     this.options = options;
-                    if (options.parent) this.parent = options.parent;
-                    if (options.container || options.containerid)
-                        this.container = options.container ? _.$(options.container) : options.containerid ? _.$("#" + options.containerid) : document.documentElement;
+                    // if (options.parent) this.parent = options.parent;
 
                     if (options.scale) this._scale = options.scale;
-
                     //比率
                     if (options.ratio) this.ratio(options.ratio);
 
@@ -6890,16 +6955,20 @@
             stroke: function(opt) {
                 var ctx = this.context;
                 if (opt) {
-                    if (opt.lineWidth > 0) {
-                        opt.lineJoin && this.setLineJoin(opt.lineJoin);
+                    if (opt.lineWidth == 0) {
+                        return this;
+                    } else { //if (opt.lineWidth > 0) 
+                        // opt.lineJoin && 
+                        this.setLineJoin(opt.lineJoin);
+                        //opt.lineWidth && 
                         this.setLineWidth(opt.lineWidth);
                         if (opt.randomColor) {
                             opt.color = _.rgb();
                         }
-                        if (_.isUndefined(opt.stroke) || opt.stroke) {
-                            this.setStrokeStyle(opt.lineColor || opt.color);
-                            ctx.stroke();
-                        }
+                        //if (_.isUndefined(opt.stroke) || opt.stroke) {
+                        this.setStrokeStyle(opt.lineColor || opt.color);
+                        ctx.stroke();
+                        //}
                     }
 
                 } else {
@@ -7183,7 +7252,7 @@
                 vs.forEach(function(t) {
                     var vs2 = []
                     vs.forEach(function(t2) {
-                        vs2.push(t2.mirror(t));
+                        t2.mirror && vs2.push(t2.mirror(t));
                     })
                     vsGroup.push(vs2);
                 });
@@ -7272,17 +7341,17 @@
             setup: function(opt) {
                 self = this;
                 if (_.isArray(opt)) {
-                    opt.forEach(function(t) {
-                        self.setup.call(self, t);
+                    return opt.map(function(t) {
+                        return self.setup.call(self, t);
                     });
                     return;
                 }
                 this.opt = opt;
                 this.motionCache && this.motionCache.stop();
                 if (opt.motion) { //&& opt.motion.switch == "on"
-                    this.motionCache = this.motion(opt);
+                    return this.motionCache = this.motion(opt);
                 } else {
-                    this.group(opt);
+                    return this.group(opt);
                 }
             },
             stop: function() {
