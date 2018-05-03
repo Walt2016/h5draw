@@ -4247,7 +4247,7 @@
             //对称点 y=x是 线段（x,y）,(y,x)的垂直平分线
             //斜率k1*k2=-1 垂直平分线
             //中垂线是线段的一条对称轴
-            //斜率
+            //斜率 slope
             slope: function(p) {
                 return (this.y - p.y) / (this.x - p.x);
             },
@@ -4291,23 +4291,49 @@
                 o2.y = 2 * (p.y - y) + o.x;
                 return this.clone({ o: o2 })
             },
+
+            //两点确定的直线上 移动距离
+            //k=tanθ=sinA/cosA
+            translate: function(p, d) {
+                d = d || 0;
+                var x = this.x,
+                    y = this.y,
+                    o = this.o;
+                if (this.x == p.x) {
+                    return this._translateXY(0, d);
+                } else if (this.y == p.y) {
+                    return this._translateXY(d, 0);
+                }
+                var k = this.slope(p); //斜率
+                //ra不变，位移原点
+                return this._translate(k, d, o);
+            },
+            //vertical line
+            //垂直线，垂线上的点与垂点距离
+            vertical: function(p, d) {
+                d = d || 0;
+                var x = this.x,
+                    y = this.y,
+                    o = this.o;
+                if (this.x == p.x) {
+                    return this._translateXY(d, 0);
+                } else if (this.y == p.y) {
+                    return this._translateXY(0, d);
+                }
+                var k = this.slope(p);
+                //垂线斜率
+                var vk = -1 / k;
+                return this._translate(vk, d, o);
+            },
             //平移
-            translateXY: function(x, y) {
+            _translateXY: function(x, y) {
                 var o2 = {
                     x: this.o.x + x || 0,
                     y: this.o.y + y || 0
                 }
                 return this.clone({ o: o2 });
             },
-            //两点确定的直线上 移动距离
-            //k=tanθ=sinA/cosA
-            translate: function(k, d) {
-                // var k = this.slope(p); 斜率
-                d = d || 0;
-                var x = this.x,
-                    y = this.y,
-                    o = this.o;
-                //ra不变，位移原点
+            _translate: function(k, d, o) {
                 var r = Math.sqrt(Math.pow(k, 2) + 1);
                 var sina = k / r;
                 var cosa = 1 / r;
@@ -4315,13 +4341,6 @@
                 o2.x = k * d * cosa + o.x;
                 o2.y = k * d * sina + o.y;
                 return this.clone({ o: o2 })
-            },
-            //vertical line
-            //垂直线，垂线上的点与垂点距离
-            vertical: function(k, d) {
-                //垂线斜率
-                var k = -1 / k; //this.slope(p); 
-                return this.translate(k, d)
             },
             //旋转
             rotate: function(a) {
@@ -4717,7 +4736,7 @@
                 var a = _.isUndefined(opt.a) ? 0 : opt.a;
                 x += opt.offsetX || 0;
                 y += opt.offsetY || 0;
-               
+
 
                 var opt = this.opt = _.extend({}, opt, {
                     shape: shape,
@@ -4732,7 +4751,7 @@
             setup: function(opt) {
                 var opt = opt || this.opt;
                 var shape = opt.shape;
-                
+
 
                 if (this[shape]) {
                     if (opt.fractal) {
@@ -4757,11 +4776,14 @@
                 var self = this;
                 var level = opt.fractalLevel || 1;
                 level--;
-                var r = opt.r * (level || 1);
-                var opt = _.extend({}, opt, { r: r, fractalLevel: level })
+                var r = opt.r;
                 if (level == 0) {
                     opt.fractal = false;
+                } else {
+                    r = r * (level + 1);
                 }
+                var opt = _.extend({}, opt, { r: r, fractalLevel: level })
+
                 this._vertex(opt);
                 this.vs.forEach(function(t) {
                     var opt2 = _.extend({}, opt, { x: t.x, y: t.y });
@@ -5372,46 +5394,57 @@
                 this.draw.link(vs, opt);
             },
             // 科赫曲线  雪花曲线 todo
-            Kohn: function(opt) {
-
+            kohn: function(opt) {
                 var self = this;
-                // this.draw.link(vs, opt)
-                //求vs[0] vs[1] 之间的两个三等分点
-                var vs = this.vs; //_.vertex(opt).vs;
-                var len = vs.length;
-                var num = opt.num;
-                var level = 0;
-                // var r = opt.r * _.sin(180 / num);
-                // var vsGroup=[];
-                var vs2 = [];
-                (function _Kohn(vs) {
+                var vs = this.vs;
+                // return this.draw.link(vs, opt)
 
-                    vs.forEach(function(t, i) {
-                        var t2 = vs[i + 1 == len ? 0 : i + 1];
-                        var ps = t.split(t2, 2);
-                        var pm = t.rotate(180 / num)
-                        // var p = t.middle(vs[i + 1 < len ? i + 1 : 0]);
-                        // vs2.push(p);
-                        // var p1 = {
-                        //     x: (t2.x + t.x) / 3,
-                        //     y: (t2.y + t.y) / 3
-                        // }
-                        // var p2 = {
-                        //     x: 2 * (t2.x + t.x) / 3,
-                        //     y: 2 * (t2.y + t.y) / 3
-                        // }
-
-                        vs2.push(t)
-                        ps.splice(1, 0, pm)
-                        vs2 = vs2.concat(ps)
-                    })
-                    if (level++ > 0) {
-                        return
+                var _kohn = function(p, p1) {
+                    var ps = p.split(p1, 2);
+                    var d = ps[0].distance(ps[1]) / Math.sqrt(2);
+                    var m = ps[0].middle(ps[1]);
+                    var p2 = m.vertical(ps[1], d);
+                    ps.splice(1, 0, p2);
+                    var ps2 = [p].concat(ps);
+                    ps2.push(p1)
+                    // return ps2;
+                    if (d < 10) {
+                        return ps2
                     }
-                    _Kohn(vs2);
-                })(vs);
 
-                this.draw.link(vs2, opt)
+                    var ps3 = [];
+                    var len = ps2.length;
+
+                    ps2.forEach(function(t, i) {
+                        if (i + 1 < len) {
+                            var ps = _kohn(t, ps2[i + 1])
+                            if (i == len - 2) {
+                                ps3 = ps3.concat(ps);
+                            } else {
+                                ps3 = ps3.concat(ps.slice(0, ps.length - 1));
+                            }
+                        }
+                    });
+                    return ps3;
+                }
+
+                // var vs2 = _kohn(vs[0], vs[1]);
+                // var vs2=[];
+                var vsGroup = [];
+                var len = vs.length;
+                vs.forEach(function(t, i) {
+                    // if (i + 1 < vs.length) {
+                    var t2 = vs[i + 1 == len ? 0 : i + 1];
+                    vsGroup.push(_kohn(t, t2));
+                    // self.draw.point({
+                    //     x: t.x,
+                    //     y: t.y,
+                    //     text: i
+                    // })
+                    // self.draw.link(_kohn(t, t2), opt)
+                    // }
+                });
+                this.draw.linkGroup(vsGroup, opt)
             },
             //等角射线
             ray: function(opt) {
@@ -7094,15 +7127,36 @@
                 var self = this;
                 var ctx = this.context;
                 this.beginPath(opt);
-                vs.forEach(function(t, i) {
-                    if (t) {
-                        if (i == 0) {
-                            ctx.moveTo(t.x, t.y);
-                        } else {
-                            ctx.lineTo(t.x, t.y);
+                if (opt.dashed) {
+                    //虚线
+                    var len = vs.length;
+                    vs.forEach(function(t, i) {
+                        var t2 = vs[i + 1 == len ? 0 : i + 1];
+                        var d=t.distance(t2);
+                        var ps = t.split(t2, Math.floor(d/5));
+                        ps.unshift(t);
+                        ps.push(t2);
+                        ps.forEach(function(t, i) {
+                            if (i % 2 == 0) {
+                                ctx.moveTo(t.x, t.y);
+                            } else {
+                                ctx.lineTo(t.x, t.y);
+                            }
+                        })
+                    })
+                } else {
+                    //实线
+                    vs.forEach(function(t, i) {
+                        if (t) {
+                            if (i == 0) {
+                                ctx.moveTo(t.x, t.y);
+                            } else {
+                                ctx.lineTo(t.x, t.y);
+                            }
                         }
-                    }
-                })
+                    })
+                }
+
                 self.closePath(opt);
                 self.render(opt);
 
