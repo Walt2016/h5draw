@@ -4354,6 +4354,40 @@
 
         //点
         //直角坐标 xy Coordinate
+        var _point = _.point = function(opt) {
+            return new _point.prototype.init(opt);
+        }
+        _point.prototype = {
+            constructor: _point,
+            init: function(opt) {
+                this.x = opt.x;
+                this.y = opt.y;
+                this.r = opt.r;
+                this.color = opt.color;
+                this.vx = Math.random() * 2 - 1
+                this.vy = Math.random() * 2 - 1
+            },
+            move: function() {
+                this.x += this.vx;
+                this.y += this.vy;
+                // this.a=this.a*0.9;
+                // this.vy+=0.22; //加速下落
+                // this.vy += 0.01 * this.vx * this.vx; //*this.vx
+
+                // this.vx+=0.41*this.vy
+
+                // if (this.x < 0 || this.x > canvas.width) {
+                //     this.vx *= -1;
+                // }
+                // if (this.y < 0 || this.y > canvas.height) {
+                //     this.vy *= -1;
+                // }
+
+                return this;
+            },
+        }
+        _point.prototype.init.prototype = _point.prototype;
+
         //极坐标Polar Coordinate
         //复合坐标系
         //原点x,y在直角坐标定位，用r ,a在极坐标系中作图。
@@ -4755,12 +4789,13 @@
 
                 if (this[shape]) {
                     if (opt.fractal) {
-                        this.fractal(opt);
+                        return this.fractal2(opt);
                     } else {
                         //重新计算vs
                         this._vertex(opt);
-                        this[shape].call(this, opt);
+                        return this[shape].call(this, opt);
                     }
+
                 } else {
                     console.log(+"not support:" + shape)
                 }
@@ -4771,6 +4806,7 @@
                 this.po = vertex.po;
 
             },
+
             //分形
             fractal: function(opt) {
                 var self = this;
@@ -4792,6 +4828,18 @@
                 if (level > 0) {
                     self.fractal(opt);
                 }
+            },
+            //分形 半径缩进分形
+            fractal2: function(opt) {
+                var self = this;
+                opt.fractal = false;
+                this.setup(opt);
+                opt.r = opt.r * (opt.fractalRatio || 0.618);
+                opt.fractal = opt.r < 5 ? false : true;
+                this.vs.forEach(function(t) {
+                    var opt2 = _.extend({}, opt, { x: t.x, y: t.y });
+                    self.setup(opt2);
+                });
             },
             color: function(colorful) {
                 if (colorful) {
@@ -7132,8 +7180,8 @@
                     var len = vs.length;
                     vs.forEach(function(t, i) {
                         var t2 = vs[i + 1 == len ? 0 : i + 1];
-                        var d=t.distance(t2);
-                        var ps = t.split(t2, Math.floor(d/5));
+                        var d = t.distance(t2);
+                        var ps = t.split(t2, Math.floor(d / 5));
                         ps.unshift(t);
                         ps.push(t2);
                         ps.forEach(function(t, i) {
@@ -7357,10 +7405,20 @@
                 opt = self.default(opt);
                 if (opt.delay) {
                     return self.queue.delay(function() {
-                        _.shape(self, opt);
+                        // _.shape(self, opt);
+                        // if (opt.disappear) {
+                        //     this.disappear(opt);
+                        // }
+                        self.shape(opt)
                     })
                 }
-                return _.shape(self, opt);
+
+                var s = _.shape(self, opt);
+                if (opt.disappear) {
+                    this.disappear(opt);
+                }
+
+                return s;
             },
             //图形组合
             group: function(opt) {
@@ -7373,6 +7431,7 @@
                     t = this.shape(opt.shape);
                 }
                 this.canvas.callback && this.canvas.callback.call(this.context, this.context);
+
                 return t;
             },
             //运动
@@ -7496,6 +7555,62 @@
                     imgData.data[i + 3] = 255;
                 }
                 ctx.putImageData(imgData, 0, 0);
+            },
+            //粒子
+            getPixels: function() {
+                var canvas = this.canvas;
+                var ctx = this.context;
+                var imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                var cols = 100,
+                    rows = 100;
+                var s_width = parseInt(imgData.width / cols);
+                var s_heihgt = parseInt(imgData.height / rows);
+
+                console.log(imgData.data.length)
+                var ps = []
+                for (var i = 0; i < cols; i++) { //imgData.width
+                    for (var j = 0; j < rows; j++) { //imgData.height
+                        var pos = j * s_heihgt * imgData.width + i * s_width
+                        var r = imgData.data[pos * 4],
+                            g = imgData.data[pos * 4 + 1],
+                            b = imgData.data[pos * 4 + 2],
+                            a = imgData.data[pos * 4 + 3], //alpha 通道 (0-255; 0 是透明的，255 是完全可见的)
+                            x = i * s_width, //+ (Math.random() - 0.5) * 20,
+                            y = j * s_heihgt; //+ (Math.random() - 0.5) * 20,
+                        var color = "rgba(" + [r, g, b, Math.round(10 * a / 255) / 10].join(",") + ")";
+                        if (a > 10) {
+                            var p1 = _.point({
+                                x: x,
+                                y: y,
+                                color: color,
+                                r: 1
+                            })
+                            ps.push(p1)
+                        }
+                    }
+                }
+                return ps;
+            },
+            //粒子消散 particle
+            disappear: function(opt) {
+                var self = this;
+                var time = opt.disappear || 1000;
+                var dots = this.getPixels();
+                var timeout;
+                var _disappear = function() {
+                    self.clear();
+                    dots.forEach(function(t) {
+                        self.point(t.move());
+                    });
+                    timeout = setTimeout(_disappear, 17)
+                };
+                setTimeout(function() {
+                    _disappear();
+                }, time);
+                setTimeout(function() {
+                    self.clear();
+                    timeout && clearTimeout(timeout)
+                }, time + 10000);
             }
         }
         draw.prototype.init.prototype = draw.prototype;
