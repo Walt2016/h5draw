@@ -312,15 +312,14 @@
                 "value": false,
                 "text": "分形"
             },
-            "fractalLevel": {
+            "fractalRatio": {
                 "type": "slider",
-                "min": 1,
-                "max": 3,
-                "step": 1,
-                "value": 1,
-                "text": "分形级数"
+                "min": 0.1,
+                "max": 0.9,
+                "step": 0.1,
+                "value": 0.5,
+                "text": "分形系数"
             },
-            
             "lineWidth": {
                 "type": "slider",
                 "min": 0,
@@ -772,27 +771,17 @@
                     slider.appendChild(addBtn);
                     slider.appendChild(output);
 
-                    if (val.max > 1) {
+                    if (val.max) {
                         slider.addClass('hide')
                         var arrow = document.createElement("span");
                         arrow.className = "pk-arrow -clean"
                         return slider.outerHTML + arrow.outerHTML
                     }
                     return slider.outerHTML
-
                 } else {
-
                     range.id = val.id;
-
-                    // slider.appendChild(range);
                     return range.outerHTML;
-
                 }
-
-
-
-
-
             },
             switch: function(val) {
                 var range = {
@@ -802,8 +791,6 @@
                 }
                 range.value = val == "on" ? 1 : 0;
                 range.type = val == "none" ? "switch hide" : "switch";
-                // range.id=val.id;
-
                 return this.filters.slider(range)
             },
             toggle: function(val) {
