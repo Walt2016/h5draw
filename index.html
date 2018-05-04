@@ -9,15 +9,259 @@
     <link rel="stylesheet" href="css/layout.css">
     <link rel="stylesheet" href="css/console.css">
     <link rel="stylesheet" href="css/pickout.css">
-    <link rel="stylesheet" href="css/draw.min.css">
-    
+    <style>
+    html,
+    body {
+        margin: 0;
+        padding: 0
+    }
+
+    .tab-head {
+        background: rgba(255, 255, 255, 1);
+        padding-left: 14px;
+        padding-right: 14px;
+    }
+
+    .tab-head-item {
+        color: #666;
+        min-width: 50px;
+        text-align: center;
+        font-size: 16px;
+        cursor: pointer;
+        user-select: none;
+        height: 40px;
+        line-height: 40px;
+        border-bottom: 1px solid #dcdcdc;
+    }
+
+    .tab-head-item.active {
+        color: #000;
+        background: #cecece
+    }
+
+    .tab-body-item.hide {
+        display: none;
+    }
+
+    .tab-body {
+        padding-left: 14px;
+        padding-right: 14px;
+    }
+
+    .scroll {
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .tab-body-item {
+        font-size: 12px;
+        word-wrap: break-word;
+        margin-bottom: 62px;
+    }
+
+    .tab-body-item .header {
+        height: 22px;
+        background-color: #cecece;
+        line-height: 22px;
+        padding: 6px;
+    }
+
+    .tab-body-item .body {
+        border-bottom: 1px solid rgb(220, 220, 220);
+        margin-bottom: 20px;
+        min-height: 30px;
+        padding: 6px;
+    }
+
+
+
+
+    .mt10 {
+        margin-top: 10px
+    }
+
+    .mt4 {
+        margin-top: 4px
+    }
+
+    .ml4 {
+        margin-left: 4px;
+    }
+
+    .grid {
+        line-height: 40px;
+        font-size: 15px;
+        border: 1px solid #dcdcdc;
+    }
+
+    .grid .body.off {
+        display: none;
+    }
+
+    .grid .row {
+        border-bottom: 1px solid #dcdcdc;
+    }
+
+    .grid .row:last-child {
+        border-bottom: none
+    }
+
+    .grid .row .hd {
+        width: 100px;
+        height: 40px;
+        padding-left: 4px;
+        border-right: 1px solid #dcdcdc;
+        position: relative;
+        background-color: rgba(248, 248, 248, 0.5);
+        overflow: hidden;
+    }
+
+    .grid .row .hd:last-child {
+        border-right: none
+    }
+
+    .grid .row .td {
+        padding-left: 4px;
+        height: 40px;
+        position: relative;
+    }
+
+    .hide {
+        display: none
+    }
+
+    .fixedbottom {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        z-index: 999;
+        max-width: 680px;
+        margin: 0 auto;
+    }
+
+    .btn-group {
+        border-top: 1px solid #ccc;
+    }
+
+    .btn {
+        font-size: 15px;
+        height: 40px;
+        line-height: 40px;
+        -webkit-user-select: none;
+        -webkit-box-flex: 1;
+        -webkit-flex: 1;
+        -ms-flex: 1;
+        flex: 1;
+        text-align: center;
+        /*background: rgba(0, 0, 0, 0.2)*/
+        margin: 1px;
+        border-right: 1px dashed #dedede;
+    }
+
+    .btn:last-child {
+        border-right: none;
+    }
+
+    .btn.w100 {
+        width: 100px;
+        max-width: 100px;
+    }
+
+    .scroll {
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .switchBtn {
+        width: 40px;
+        height: 20px;
+        border: 1px solid #666;
+        background-image: -webkit-linear-gradient(right, #dedede, #dedede 50%, #cccccc 50%, #cccccc);
+        position: absolute;
+        top: 10px;
+        right: 10px;
+    }
+
+    .switchBtn.on {
+        background-image: -webkit-linear-gradient(left, #dedede, #dedede 50%, #ff6414 50%, #ff6414);
+    }
+
+    .rightArrow {
+        width: 0px;
+        height: 0px;
+        border: 10px solid transparent;
+        border-left-color: #cecece;
+    }
+
+    .leftArrow {
+        width: 0px;
+        height: 0px;
+        border: 10px solid transparent;
+        border-right-color: #cecece;
+    }
+
+    .upArrow {
+        width: 0px;
+        height: 0px;
+        border: 8px solid transparent;
+        border-bottom-color: #cecece;
+        margin-bottom: 8px;
+    }
+
+    .downArrow {
+        width: 0px;
+        height: 0px;
+        border: 8px solid transparent;
+        border-top-color: #cecece;
+        margin-top: 8px;
+    }
+
+    .colorblock {
+        width: 20px;
+        height: 10px;
+        position: absolute;
+        right: 10px;
+        top: 15px;
+    }
+
+    .switchBody.off {
+        display: none;
+    }
+
+    .switchBtn.none {
+        display: none;
+    }
+
+    #startBtn {
+        background-color: #ccc
+    }
+
+    #configPanel.hide {
+        display: none;
+    }
+
+    #configPanel {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+    }
+
+    #configPanel.center {
+        position: fixed;
+        z-index: 2000;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        width: 95%
+    }
+    </style>
 </head>
 
 <body>
-    <div class="container" id="container">
-        <div class="screen" id="screen">
-            <canvas id="myCanvas"></canvas>
-        </div>
+    <div id="container">
+        <div class="screen"></div>
         <div id="configPanel" class="hide">
             <div class="tab" layout="col">
                 <div class="tab-head" layout="row" layout-align="between center" template="_tab-head-item_tpl" data="tabs">
@@ -52,7 +296,7 @@
             <div class="grid mt4">
                 <div class="row head">
                     <div class="hd flex">{=key}
-                        {=switch|switch}
+                        <div class="switchBtn {=switch}" on="{=switchMethod}"></div>
                     </div>
                 </div>
             </div>
@@ -75,12 +319,12 @@
                 <input type="checkbox" name="{=key}" on="autoNext" {=auto|checkbox}/>
             </div>
             <div class="td flex" on="pickerHandler">
-                {=$this|$type}
                 <span class="value">{=value}</span>
+                <span class="pk-arrow -clean"></span> {=$this|picker}
             </div>
         </div>
     </script>
-    <script src="js/tpler.js?v=4"></script>
+    <script src="js/tpler.js"></script>
     <script>
     // _.debug();
     // return ;
@@ -123,8 +367,8 @@
                         "text": "内切多边形"
                     },
                     {
-                        "key": "rose",
-                        "text": "玫瑰花"
+                        "key": "flower",
+                        "text": "花"
                     },
                     {
                         "key": "sunflower",
@@ -133,11 +377,7 @@
 
                     {
                         "key": "sierpinski",
-                        "text": "谢尔宾斯基三角形"
-                    },
-                    {
-                        "key": "carpet",
-                        "text": "谢尔宾斯基地毯"
+                        "text": "谢尔宾斯基"
                     },
                     {
                         "key": "ray",
@@ -160,6 +400,10 @@
                         "text": "环形"
                     },
                     {
+                        "key": "mirror",
+                        "text": "镜像"
+                    },
+                    {
                         "key": "spiral",
                         "text": "螺线"
                     },
@@ -168,40 +412,22 @@
                         "text": "斐波那契螺线"
                     },
                     {
-                        "key": "axialMirror",
-                        "text": "轴对称"
-                    }, {
-                        "key": "comb",
-                        "text": "蜂巢"
+                        "key": "zebra",
+                        "text": "斑马"
                     },
                     {
-                        "key": "pentagram",
-                        "text": "五角星"
-                    },
-                    {
-                        "key": "vertices",
-                        "text": "顶点"
-                    },
-                    {
-                        "key": "reuleaux",
-                        "text": "勒洛三角形"
-                    },
-                    {
-                        "key": "Kohn",
-                        "text": "科赫曲线"
-                    },
-                    {
-                        "key": "beads",
-                        "text": "佛珠"
-                    },
-                    {
-                        "key": "rayFractal",
-                        "text": "射线分形"
-                    },
-                    
+                        "key": "diagonal",
+                        "text": "对角线"
+                    },{
+                        "key":"axialMirror",
+                        "text":"轴对称"
+                    },{
+                        "key":"comb",
+                        "text":"蜂巢"
+                    }
                 ],
 
-                "index": 4,
+                "index": 19,
                 "text": "图形"
 
             },
@@ -279,10 +505,6 @@
                 "value": false,
                 "text": "显示外切圆"
             },
-            "showIncircle": {
-                "value": false,
-                "text": "显示内切圆"
-            },
 
             "showVertices": {
                 "value": false,
@@ -300,29 +522,10 @@
                 "value": false,
                 "text": "显示圆心"
             },
-            "showDiagonal": {
-                "value": false,
-                "text": "显示对角线"
-            },
-            "showMirror": {
-                "value": false,
-                "text": "顶点镜像"
-            },
-            "fractal": {
-                "value": false,
-                "text": "分形"
-            },
-            "fractalRatio": {
-                "type": "slider",
-                "min": 0.1,
-                "max": 0.9,
-                "step": 0.1,
-                "value": 0.5,
-                "text": "分形系数"
-            },
+
             "lineWidth": {
                 "type": "slider",
-                "min": 0,
+                "min": 0.5,
                 "max": 20,
                 "step": 0.5,
                 "value": 1,
@@ -333,70 +536,23 @@
                 "length": 15,
                 "text": "线条颜色"
             },
-            "dashed": {
-                "value": false,
-                "text": "虚线"
-            },
+
             "fill": {
                 "value": false,
                 "text": "填色"
-            },
-            "fillInterval": {
-                "value": false,
-                "text": "间隔填色"
             },
             "color": {
                 "type": "color_rgba",
                 "length": 15,
                 "text": "颜色"
-            },
-            "shadowBlur": {
-                "type": "slider",
-                "min": 0,
-                "max": 20,
-                "step": 1,
-                "value": 0,
-                "text": "阴影大小"
-            },
-            "shadowColor": {
-                "type": "color_rgb",
-                "length": 15,
-                "text": "阴影颜色"
-            },
-
-            "disappear": {
-                "type": "slider",
-                "min": 0,
-                "max": 2000,
-                "step": 100,
-                "value": 0,
-                "text": "粒子消散"
-            },
-
-            "animate": {
-                "value": false,
-                "text": "动画"
-            },
-            "animationInterval": {
-                "type": "slider",
-                "min": 0,
-                "max": 2000,
-                "step": 100,
-                "value": 10,
-                "text": "动画间隔"
-            },
+            }
         },
         "group": {
             "text": "组合",
             "switch": "off",
             "group": {
                 "type": "picker",
-                "values": [
-                {
-                        "key": "polygon",
-                        "text": "多边形"
-                    },
-                {
+                "values": [{
                         "key": "surround",
                         "text": "环绕"
                     },
@@ -404,6 +560,10 @@
                         "key": "concentric",
                         "text": "同心"
                     },
+                    // {
+                    //     "key": "inpolygon",
+                    //     "text": "内切多边形"
+                    // },
                     {
                         "key": "excircle",
                         "text": "外切圆"
@@ -416,39 +576,12 @@
                         "key": "ring",
                         "text": "环形"
                     },
-                    {
-                        "key": "fractal",
-                        "text": "分形"
-                    },
-                    {
-                        "key": "cone",
-                        "text": "锥形"
-                    },
-                    
 
                 ],
                 "index": 0,
                 "text": "组合"
             },
-            "a": {
-                "type": "slider",
-                "min": 0,
-                "max": 180,
-                "step": 1,
-                "value": 0,
-                "text": "角度",
-                "auto": true
-            },
-            "num": {
-                "type": "slider",
-                "min": 1,
-                "max": 100,
-                "step": 1,
-                "value": 3,
-                "text": "边数",
-                "auto": true
-            },
-            "r": {
+            "sr": {
                 "type": "slider",
                 "min": 0,
                 "max": 300,
@@ -494,6 +627,10 @@
                 "value": 10,
                 "text": "动画间隔"
             },
+            // "colorful": {
+            //     "value": true,
+            //     "text": "多彩"
+            // },
             "colorful": {
                 "type": "picker",
                 "values": [{
@@ -523,112 +660,21 @@
                 "value": false,
                 "text": "显示圆心"
             },
-            "link": {
-                "value": false,
-                "text": "相互连线"
-            },
-            "neighborLink": {
-                "value": false,
-                "text": "相邻连线"
-            },
-            "vertexLink": {
-                "value": false,
-                "text": "顶点连线"
-            },
-            "conic": {
-                "value": false,
-                "text": "锥线"
-            },
-            "identifierCenter": {
-                "value": false,
-                "text": "圆心编号"
-            },
+
         },
         "motion": {
             "text": "运动",
             "switch": "off",
-            "motion": {
+            "mode": {
                 "type": "picker",
                 "values": [{
                         "key": "move",
                         "text": "自由移动"
                     },
                     {
-                        "key": "rotate",
+                        "key": "rotation",
                         "text": "旋转"
-                    },
-                    {
-                        "key": "zoom",
-                        "text": "缩放"
-                    },
-                    {
-                        "key": "rotate_zoom",
-                        "text": "旋转+缩放"
-                    },
-                    {
-                        "key": "move_zoom",
-                        "text": "移动+缩放"
-                    },
-                    {
-                        "key": "move_rotate",
-                        "text": "移动+旋转"
-                    },
-                    {
-                        "key": "move_rotate_zoom",
-                        "text": "移动+旋转+缩放"
-                    },
-                    {
-                        "key": "gravitate",
-                        "text": "跳一跳"
-                    },
-                    {
-                        "key": "rotate_gravitate",
-                        "text": "旋转+跳一跳"
-                    },
-                    {
-                        "key": "curve",
-                        "text": "曲线运动"
-                    },
-                    {
-                        "key": "transform",
-                        "text": "变形"
-                    },
-                    {
-                        "key": "jiggle",
-                        "text": "颤抖"
-                    },
-                    {
-                        "key": "float",
-                        "text": "漂浮"
-                    },
-                    {
-                        "key": "circle",
-                        "text": "绕圆"
-                    },
-                    {
-                        "key": "ellipse",
-                        "text": "椭圆"
-                    },
-                    {
-                        "key": "spiral",
-                        "text": "螺旋"
-                    },
-                    {
-                        "key": "rotate_spiral",
-                        "text": "旋转+螺旋"
-                    },
-                    {
-                        "key": "light",
-                        "text": "发光"
-                    },
-                    {
-                        "key": "light_rotate",
-                        "text": "发光+旋转"
-                    },
-                    {
-                        "key": "sineMove",
-                        "text": "正弦函数运动"
-                    },
+                    }
                 ],
                 "index": 0,
                 "text": "运动形式"
@@ -641,21 +687,14 @@
                 "value": 1,
                 "text": "速度"
             },
-            "num": {
+            "num": //movenum
+            {
                 "type": "slider",
                 "min": 1,
-                "max": 100,
+                "max": 20,
                 "step": 1,
                 "value": 1,
                 "text": "物体数量"
-            },
-            "r": {
-                "type": "slider",
-                "min": 0,
-                "max": 300,
-                "step": 1,
-                "value": 60,
-                "text": "环绕半径"
             },
             "link": {
                 "value": false,
@@ -668,36 +707,7 @@
             "colorful": {
                 "value": true,
                 "text": "多彩"
-            },
-            "shadow": {
-                "value": false,
-                "text": "光影效果"
-            },
-            "background": {
-                "type": "color_rgb",
-                "length": 15,
-                "text": "光影背景"
-            },
-             "click": {
-                "value": false,
-                "text": "点击重绘"
-            },
-            "follow": {
-                "value": true,
-                "text": "点击跟随"
-            },
-            "simulate": {
-                "value": false,
-                "text": "模拟点击"
-            },
-            "simulateInterval": {
-                "type": "slider",
-                "min": 100,
-                "max": 2000,
-                "step": 100,
-                "value": 1,
-                "text": "点击频率"
-            },
+            }
         }
     };
 
@@ -706,13 +716,15 @@
     console.log(c)
     console.log(c.init())
     console.log(c.viewData())
-    var color = ["#059CFA", "#ccc"];
 
+    // _.ajax("data/opt.json?v=5", function(result) {
+    // var optJson = _.json(result)
+    // })
 
     var draw = _.draw({
-        canvasid: "myCanvas",
-        containerid: "screen",
         ratio: "1:1",
+        // background: "#dedede",
+        callback: function(result) {}
     })
 
     var motion;
@@ -720,273 +732,128 @@
     tpler({
         el: "#container",
         data: c.viewData(),
-        filters: {
-            tabItem: function(val) {
-                return _.parseTpl({
-                    template: "_tab-body-item-row_tpl",
-                    data: val,
-                    filters: this.filters
-                })
-            },
-            checkbox: function(val) {
-                return val ? 'checked' : ""
-            },
-            tabActive: function(val) {
-                return val ? 'active' : "";
-            },
-            tabBodyActive: function(val) {
-                return val ? "" : "hide"
-            },
-            slider: function(val) {
-
-                var range = document.createElement("input");
-                range.attr("type", "range");
-                range.className = val.type;
-
-                ["min", "max", "step", "value"].forEach(function(t) { //, "id"
-                    range.attr(t, val[t]);
-                });
-                var ps = parseInt(100 * val.value / val.max);
-                var color = ["#059CFA", "#ccc"];
-                range.css({ 'background': '-webkit-linear-gradient(0deg, ' + color[0] + ' ' + ps + '%, ' + color[1] + ' ' + ps + '%)' })
-
-
-                if (val.type == "slider") {
-                    var slider = document.createElement("div");
-                    slider.className = "slider"
-                    slider.id = val.id;
-                    slider.attr("placeholder", val.text);
-                    var subBtn = document.createElement("div");
-                    subBtn.className = "btn-sub";
-                    subBtn.innerText = "-"
-                    var addBtn = document.createElement("div");
-                    addBtn.className = "btn-add"
-                    addBtn.innerText = "+"
-                    var output=document.createElement("div");
-                    output.className = "output";
-                    output.innerText = range.value
-
-                    slider.appendChild(subBtn);
-                    slider.appendChild(range);
-                    slider.appendChild(addBtn);
-                    slider.appendChild(output);
-
-                    if (val.max) {
-                        slider.addClass('hide')
-                        var arrow = document.createElement("span");
-                        arrow.className = "pk-arrow -clean"
-                        return slider.outerHTML + arrow.outerHTML
-                    }
-                    return slider.outerHTML
-                } else {
-                    range.id = val.id;
-                    return range.outerHTML;
+        filters: _.extend({
+                tabItem: function(val) {
+                    return _.parseTpl({
+                        template: "_tab-body-item-row_tpl",
+                        data: val,
+                    })
+                },
+                checkbox: function(val) {
+                    return val ? 'checked' : ""
+                },
+                tabActive: function(val) {
+                    return val ? 'active' : "";
+                },
+                tabBodyActive: function(val) {
+                    return val ? "" : "hide"
+                },
+                picker: function(val) {
+                    var sel = document.createElement("select");
+                    var option;
+                    sel.attr("placeholder", val.text);
+                    sel.id = val.id;
+                    sel.className = val.type; //"pickout" 
+                    sel.style.display = "none"
+                    val.values && val.values.forEach && val.values.forEach(function(t, i) {
+                        var selected = i == val.index ? true : false;
+                        if (t.text) {
+                            option = new Option(t.text, t.key, selected);
+                        } else {
+                            option = new Option(t, t, selected);
+                        }
+                        sel.options.add(option)
+                    });
+                    return sel.outerHTML;
                 }
-            },
-            switch: function(val) {
-                var range = {
-                    min: 0,
-                    max: 1,
-                    step: 1
-                }
-                range.value = val == "on" ? 1 : 0;
-                range.type = val == "none" ? "switch hide" : "switch";
-                return this.filters.slider(range)
-            },
-            toggle: function(val) {
-                var range = {
-                    min: 0,
-                    max: 1,
-                    step: 1
-                }
-                range.value = val.value == "是" ? 1 : 0;
-                range.type = val.type;
-                range.id = val.id
-                return this.filters.slider(range)
-            },
-            color_rgb: function(val) {
-                return this.filters.picker(val)
-            },
-            color_rgba: function(val) {
-                return this.filters.picker(val)
-            },
-            picker: function(val) {
-                var sel = document.createElement("select");
-                var option;
-                sel.attr("placeholder", val.text);
-                sel.id = val.id;
-                sel.className = val.type; //"pickout" 
-                sel.style.display = "none"
-                val.values && val.values.forEach && val.values.forEach(function(t, i) {
-                    var selected = i == val.index ? true : false;
-                    if (t.text) {
-                        option = new Option(t.text, t.key, selected);
-                    } else {
-                        option = new Option(t, t, selected);
-                    }
-                    sel.options.add(option)
-                });
-                var arrow = document.createElement("span");
-                arrow.className = "pk-arrow -clean"
-                return sel.outerHTML + arrow.outerHTML;
-            }
-        },
 
-        //,
-        //    c.filters//
+            },
+            c.filters
+        ),
         methods: _.extend({
             pickerHandler: function(item, ev) {
                 // console.log(item);
                 var overlay = _.$(".pk-overlay");
                 var modal = _.$(".pk-modal");
                 var main = modal.$('.main');
-
                 var select = item.$("select");
-                var slider = item.$("div.slider"); //input
-                if (select.length == 0 && slider.length == 0) {
-                    return;
-                }
-
+                var head = modal.querySelector('.head')
+                var title = select.hasAttribute('placeholder') ? select.getAttribute('placeholder') : 'Select to option';
+                head.innerHTML = title;
+                var type = select.className;
 
                 var close = document.createElement('span');
                 close.setAttribute('class', 'close');
                 close.innerHTML = '&times;';
                 modal.appendChild(close);
 
-
                 var closeModal = function() {
                     overlay.removeClass("-show");
                     modal.removeClass("-show");
                     setTimeout(function() {
-                        if (slider.length > 0) {
-                            item.appendChild(slider.hide())
-                        }
                         main.innerHTML = '';
-
-
                     }, 500);
                 }
 
-                function showModal() {
-                    overlay.addClass("-show");
-                    modal.addClass("-show");
+                var options = Array.prototype.slice.call(select);
 
-                }
-                var head = modal.$('.head');
+                options.map(function(option, key) {
+                    var li = document.createElement('li');
+                    li.addClass("pk-option");
+                    var selected = option.hasAttribute('selected') ? '-selected' : '';
+                    selected && li.addClass(selected);
+                    var txt = document.createElement('span');
+                    txt.setAttribute('class', 'txt');
+                    txt.innerHTML = option.innerHTML;
+                    main.appendChild(li);
+                    li.appendChild(txt);
+                    if (["color_rgba", "color_rgb", "color"].indexOf(type) >= 0) {
+                        li.style.backgroundColor = option.innerHTML
 
-
-                //slider
-                if (slider.length > 0) {
-                    var title = slider.hasAttribute('placeholder') ? slider.getAttribute('placeholder') : 'Select to option';
-                    head.innerHTML = title;
-                    _.show(slider)
-                    main.appendChild(slider);
-
-                    var range = slider.$("input[type='range']")
-                    var id = slider.id;
-                    var ids = id.split("_");
-                    var cdata = c.data[ids[0]][ids[1]];
-                    var output = item.$(".value");
-                    var color = ["#059CFA", "#ccc"];
-
-                    var update = function(value, max) {
-                        var value=Number(range.value);
-                        var max=Number(range.max);
-                        output.innerHTML = value;
-                        slider.$(".output").innerHTML = value;
-                        cdata.value = Number(value);
-                        cdata.index = cdata.values.indexOf(cdata.value);
-                        var ps = parseInt(100 * value / max);
-                        range.css({ 'background': '-webkit-linear-gradient(0deg, ' + color[0] + ' ' + ps + '%, ' + color[1] + ' ' + ps + '%)' })
-
+                        // '<div class="colorblock" style="background-color:'+option.innerHTML+'"></div>'
                     }
-
-                    toucher([{
-                        el: range,
-                        type: "input",
-                        callback: function(item, ev) {
-                            update();
-                        }
-                    }, {
-                        el: slider.$(".btn-sub"),
-                        callback: function(item, ev) {
-                            range.value = Number(range.value) - Number(range.step);
-                            update();
-                        }
-                    }, {
-                        el: slider.$(".btn-add"),
-                        callback: function(item, ev) {
-                            range.value = Number(range.value) + Number(range.step);;
-                            update();
-                        }
-                    }])
-                    showModal();
-
-                }
-
-                //select
-                if (select.length > 0) {
-
-                    var title = select.hasAttribute('placeholder') ? select.getAttribute('placeholder') : 'Select to option';
-                    head.innerHTML = title;
-                    var type = select.className;
-
-
-                    var options = Array.prototype.slice.call(select);
-
-                    options.map(function(option, key) {
-                        var li = document.createElement('li');
-                        li.addClass("pk-option");
-                        var selected = option.hasAttribute('selected') ? '-selected' : '';
-                        selected && li.addClass(selected);
-                        var txt = document.createElement('span');
-                        txt.setAttribute('class', 'txt');
-                        txt.innerHTML = option.innerHTML;
-                        main.appendChild(li);
-                        li.appendChild(txt);
-                        if (["color_rgba", "color_rgb", "color"].indexOf(type) >= 0) {
-                            li.style.backgroundColor = option.innerHTML;
-                        }
-                        toucher({
-                            el: li,
-                            callback: function() {
-                                if (["color_rgba", "color_rgb", "color"].indexOf(type) >= 0) {
-                                    item.$(".value").innerHTML = txt.innerHTML + '<div class="colorblock" style="background-color:' + option.innerHTML + '"></div>';
-                                } else {
-                                    item.$(".value").text(txt.innerHTML);
-                                }
-
-                                var id = select.id;
-                                var ids = id.split("_");
-                                var cdata = c.data[ids[0]][ids[1]];
-
-                                options.forEach(function(t, i) {
-                                    t.removeAttr('selected')
-                                    if (t == option) {
-                                        if (cdata.type == "picker") {
-                                            cdata.index = i
-                                        } else if (cdata.type == "slider") {
-                                            cdata.value = Number(txt.innerHTML);
-                                            cdata.index = i;
-                                        } else if (cdata.type == "toggle") {
-                                            cdata.index = i;
-                                            cdata.value = txt.innerHTML == "是" ? true : false;
-                                        } else {
-                                            cdata.index = i;
-                                        }
-                                    }
-                                })
-                                option.setAttribute('selected', 'selected');
-                                closeModal();
+                    toucher({
+                        el: li,
+                        callback: function() {
+                            if (["color_rgba", "color_rgb", "color"].indexOf(type) >= 0) {
+                                item.$(".value").innerHTML=txt.innerHTML + '<div class="colorblock" style="background-color:' + option.innerHTML + '"></div>';
+                            } else {
+                                item.$(".value").text(txt.innerHTML);
                             }
-                        })
-                    });
-                    showModal();
 
-                }
+                            // option.selected=true;
+                            console.log(option)
+                            console.log(select.id);
+                            var id = select.id;
+                            var ids = id.split("_");
+                            var cdata = c.data[ids[0]][ids[1]];
+
+                            options.forEach(function(t, i) {
+                                t.removeAttr('selected')
+                                if (t == option) {
+                                    if (cdata.type == "picker") {
+                                        cdata.index = i
+                                    } else if (cdata.type == "slider") {
+                                        cdata.value = Number(txt.innerHTML);
+                                        cdata.index = i;
+                                    } else if (cdata.type == "toggle") {
+                                        cdata.index = i;
+                                        cdata.value = txt.innerHTML == "是" ? true : false;
+                                    }else{
+                                        cdata.index = i;
+
+                                    }
+                                }
+                            })
+                            option.setAttribute('selected', 'selected');
+                            closeModal();
+                        }
+                    })
+                });
 
 
-
+                overlay.addClass("-show");
+                modal.addClass("-show");
                 ev.preventDefault();
                 ev.stopPropagation();
 
@@ -1002,6 +869,7 @@
             tabHandler: function(item, ev) {
                 var target = item.attr("target");
                 item.addClass("active").siblings().removeClass("active");
+                // _.$('#' + this.attr("target")).show().siblings().hide();
 
                 _.$(".tab-body-item").forEach(function(t) {
                     if (t.attr("name") == target) {
@@ -1021,8 +889,10 @@
 
             },
             configHandler: function(item, ev) {
+
+
                 var configPanel = _.$("#configPanel");
-                configPanel.$(".scroll").css({ height: (_.screen.y - 85) + "px" })
+                configPanel.$(".scroll").css({ height: (_.screen.y - 100) + "px" })
                 var icon = item.$(".icon");
                 if (configPanel.hasClass("hide")) {
                     configPanel.removeClass("hide");
@@ -1034,85 +904,46 @@
                     configPanel.addClass("hide");
                     icon.removeClass("downArrow").addClass("upArrow")
                 }
+
             },
             stopHandler: function(item, ev) {
+                // motion && motion.stop();
                 draw.stop();
             },
             startHandler: function(item, ev) {
                 _.hide("#configPanel");
                 var icon = _.$("#configBtn .icon");
                 icon.removeClass("downArrow").addClass("upArrow")
-                draw.clear();
+                // console.log(c.init())
+
+                draw.clear(); //"#dedede"
                 var opt = c.init()
-                console.log(opt)
+
+                if (item.id != "startBtn") {
+                    var pos = _.pos(ev)
+                    opt.shape = _.extend(opt.shape, { x: pos.x, y: pos.y });
+                    opt.group = _.extend(opt.group, { x: pos.x, y: pos.y });
+                }
+
                 draw.setup(opt);
             }
         }, c.methods),
+
         callback: function() {
+            // _.$(".tab-head-item").tab("active", function(ev) {})
+            // _.active(_.$(".tab-head-item").first());
+            // _.show(_.$(".tab-body-item").first());
             _.$(".tab").css({ height: (_.screen.y - 30) + "px" })
+
             _.$(".screen").appendChild(draw.canvas)
-
-
-            toucher([{
-                el: "input.toggle",
-                type: "input",
-                callback: function(item, ev) { //
-                    item.parent().$(".value").innerHTML = this.value == 1 ? "是" : "否"
-                    // output.innerHTML = this.value;
-
-                    var id = item.id;
-                    var ids = id.split("_");
-                    var cdata = c.data[ids[0]][ids[1]];
-
-                    cdata.value = this.value == 1 ? "是" : "否"; //Number(this.value);
-                    cdata.index = this.value == 1 ? 0 : 1;
-                    //Number(this.value);
-                    //cdata.values.indexOf(cdata.value);
-                    // console.log(cdata);
-                    var ps = parseInt(100 * this.value / this.max);
-                    var color = ["#059CFA", "#ccc"];
-                    item.css({ 'background': '-webkit-linear-gradient(0deg, ' + color[0] + ' ' + ps + '%, ' + color[1] + ' ' + ps + '%)' })
-                    // cdata.index = i;
-                }
-            }, {
-                el: "input.switch",
-                type: "input",
+            var self = this;
+            toucher({
+                el: draw.canvas,
+                type: "touchstart",
                 callback: function(item, ev) {
-                    console.log(item)
-                    var key = item.closest(".tab-body-item").attr("name");
-                    var bd = item.closest(".tab-body-item").$(".switchBody")
-
-                    if (item.value == "1") {
-                        // val = "off";
-                        // item.value=="0"
-                        bd.removeClass("off").addClass("on");
-
-                    } else {
-                        // val = "on";
-                        // item.value=="1"
-                        bd.removeClass("on").addClass("off");
-
-                    }
-                    var ps = parseInt(100 * this.value / this.max);
-                    var color = ["#059CFA", "#ccc"];
-                    item.css({ 'background': '-webkit-linear-gradient(0deg, ' + color[0] + ' ' + ps + '%, ' + color[1] + ' ' + ps + '%)' })
-
-                    // var cdata = c.data[key]["switch"];
-                    c.data[key]["switch"] = this.value == "1" ? "on" : "off"; //Number(this.value);
-                    // cdata.index = cdata.values.indexOf(cdata.value);
-                    // if (k == "motion") {
-                    //     if (val == "on") {
-                    //         _.show("#stopBtn");
-                    //     } else {
-                    //         _.hide("#stopBtn");
-                    //     }
-                    // }
+                    self.methods.startHandler(item, ev);
                 }
-
-
-            }])
-
-
+            })
         }
     })
     </script>
