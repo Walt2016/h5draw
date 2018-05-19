@@ -196,6 +196,26 @@
                         "key": "rayFractal",
                         "text": "射线分形"
                     },
+                    {
+                        "key": "pie",
+                        "text": "一笔画饼"
+                    },
+                    {
+                        "key": "sun",
+                        "text": "太阳"
+                    },
+                    {
+                        "key": "text",
+                        "text": "文字"
+                    },
+                    {
+                        "key": "windmill",
+                        "text": "风车"
+                    },
+                    // {
+                    //     "key": "fractalMirror",
+                    //     "text": "顶点镜像分形"
+                    // },
 
                 ],
 
@@ -318,6 +338,30 @@
                 "step": 0.1,
                 "value": 0.5,
                 "text": "分形系数"
+            },
+            "minR": {
+                "type": "slider",
+                "min": 1,
+                "max": 30,
+                "step": 1,
+                "value": 5,
+                "text": "最小半径"
+            },
+            "fractalIn": {
+                "value": false,
+                "text": "分形放大"
+            },
+            "fractalMirror": {
+                "value": false,
+                "text": "顶点镜像分形"
+            },
+            "maxLevel": {
+                "type": "slider",
+                "min": 1,
+                "max": 8,
+                "step": 1,
+                "value": 5,
+                "text": "最大级数"
             },
             "lineWidth": {
                 "type": "slider",
@@ -806,8 +850,7 @@
 
     var draw = _.draw({
         canvasid: "myCanvas",
-        containerid: "screen",
-        ratio: "1:1",
+        ratio: "fullscreen",
     })
 
     var motion;
