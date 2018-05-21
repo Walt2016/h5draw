@@ -1,6 +1,6 @@
 //一个js开发框架
 //template.event.canvas
-//v0.7.20180516
+//v0.7.20180521
 ;
 (function(root, factory) {
     if (typeof define === "function" && define.amd) {
@@ -776,7 +776,7 @@
                     var aColor = color.replace(/(?:|||rgb|RGB)*/g, "").split(",");
                     var strHex = "#";
                     for (var i = 0; i < aColor.length; i++) {
-                        var hex = Number(aColor[i]).toString(16);
+                        var hex = (+aColor[i]).toString(16);
                         if (hex === "0") hex += hex;
                         strHex += hex;
                     }
@@ -804,18 +804,17 @@
                 var startRGB = this.colorRgb(startColor); //转换为rgb数组模式
                 var startR, startG, startB;
                 startRGB.replace(/(\d{1,3}),(\d{1,3}),(\d{1,3})/g, function(m, r, g, b) {
-                    startR = Number(r);
-                    startG = Number(g);
-                    startB = Number(b);
+                    startR = +r;
+                    startG = +g;
+                    startB = +b;
                 });
                 var endRGB = this.colorRgb(endColor);
                 var endR, endG, endB;
                 endRGB.replace(/(\d{1,3}),(\d{1,3}),(\d{1,3})/g, function(m, r, g, b) {
-                    endR = Number(r);
-                    endG = Number(g);
-                    endB = Number(b);
+                    endR = +r;
+                    endG = +g;
+                    endB = +b;
                 });
-
                 sR = (endR - startR) / step; //总差值
                 sG = (endG - startG) / step;
                 sB = (endB - startB) / step;
@@ -1876,7 +1875,7 @@
 
                         if (option.method === "GET") {
                             if (option.data) {
-                                uri += !!~(uri.indexOf("?") ? "&" : "?") + option.data;
+                                uri += (!!~uri.indexOf("?") ? "&" : "?") + option.data;
                                 option.data = null;
                             }
                             xmlHttp.open("GET", uri, option.isAsync);
@@ -2035,7 +2034,7 @@
 
         _.updateAfterImgLoad = function(id, fn) {
             var self = this;
-            var $dom = _.query("#" + id); //$("#" + id);
+            var $dom = _.query("#" + id);
             var $img = $dom.query("img");
 
             var t_img; // 定时器
@@ -2150,7 +2149,7 @@
             } else if (_.isEmpty(str)) {
                 return new Date();
             } else if (/^\d*$/.test(str)) {
-                return new Date(Number(str));
+                return new Date(+str);
             } else if (_.isString(str)) {
                 if (this.isTimeString(str)) str = this().format("yyyy-MM-dd") + " " + str;
                 return new Date(Date.parse(str.replace(/-/g, "/")));
@@ -2512,8 +2511,8 @@
                     result = (this / arg);
 
                 } else {
-                    r1 = Number(this.toString().replace(".", ""));
-                    r2 = Number(arg.toString().replace(".", ""));
+                    r1 = +(this.toString().replace(".", ""));
+                    r2 = +(arg.toString().replace(".", ""));
 
                     // result =Math.round(r1 / r2)* m;
 
@@ -3017,11 +3016,6 @@
         };
 
         //原型扩展 
-        // _.extproto(Object.prototype, _prototype.obj);
-        // _.extproto(Number.prototype, _prototype.num);
-        // _.extproto(String.prototype, _prototype.str);
-        // _.extproto(Date.prototype, _prototype.dat);
-        // _.extproto(Array.prototype, _prototype.arr);
         // if (inBrowser) {
         //     _.extproto(Element.prototype, _prototype.ele);
         // };
@@ -3056,9 +3050,7 @@
             };
 
             if (typeof window !== 'undefined') {
-                if (typeof window.btoa !== 'undefined') {
-                    window.btoa(encodeUTF8string(stringToEncode))
-                }
+                if (typeof window.btoa !== 'undefined') window.btoa(encodeUTF8string(stringToEncode))
             } else {
                 return new Buffer(stringToEncode).toString('base64')
             }
@@ -3186,9 +3178,7 @@
                 }
                 var i = el.events.length;
                 while (i--) {
-                    if (el.events[i].type === type && el.events[i].listener === listener) {
-                        el.events.splice(i, 1);
-                    }
+                    if (el.events[i].type === type && el.events[i].listener === listener) el.events.splice(i, 1);
                 }
             } else {
                 el.events && el.events.forEach(function(t) {
@@ -3859,10 +3849,10 @@
                 this.length = this.values.length;
             },
             next: function() {
-                return this.values[this.index = this.index >= this.values.length - 1 ? 0 : this.index + 1];
+                return this.values[this.index = this.index + 1 >= this.length ? 0 : this.index + 1];
             },
             prev: function() {
-                return this.values[this.index = this.index <= 0 ? this.values.length - 1 : this.index - 1];
+                return this.values[this.index = this.index <= 0 ? this.length - 1 : this.index - 1];
             },
             current: function() {
                 return this.values[this.index = this.index === -1 ? 0 : this.index];
@@ -3905,7 +3895,7 @@
             while (t <= max) {
                 values.push(t);
                 if (t === value) index = i;
-                t = Number((t + step).toFixed(n));
+                t = +((t + step).toFixed(n));
                 i++;
             }
             return _.cycle(values, index).attr(options);
@@ -3972,8 +3962,8 @@
             if (n === 1) return [0];
             if (n === 2) return [0, 1];
             var arr = [0, 1];
-            while (n-- - 2) arr.push(arr[arr.length - 1] + arr[arr.length - 2]);
-            // for (var i = 0; i < n - 2; i++) arr.push(arr[i] + arr[i + 1])
+            // while (n-- - 2) arr.push(arr[arr.length - 1] + arr[arr.length - 2]);
+            for (var i = 0; i < n - 2; i++) arr.push(arr[i] + arr[i + 1])
             return arr;
         }
 
@@ -4095,10 +4085,8 @@
                 this._yoyo = options.yoyo;
                 this.type = options.type || "linear";
                 // this.step = 0;
-                this._deta = {}
-                for (var key in this._end) {
-                    this._deta[key] = this._end[key] - this._start[key] || 0;
-                }
+                this._deta = {};
+                for (var key in this._end) this._deta[key] = this._end[key] - this._start[key] || 0;
                 this._delayTime = options.delay || 0;
                 this._startTime = +new Date(); // Date.now();
                 this._startTime += this._delayTime;
@@ -4111,42 +4099,33 @@
                 var vk;
                 if (_.isObject(this.type)) {
                     vk = {};
-                    for (var key in this._deta) { //this.type
-                        vk[key] = Easing[this.type[key] || "linear"](k);
-                    }
+                    for (var key in this._deta) vk[key] = Easing[this.type[key] || "linear"](k);
                 } else {
-                    var fn = Easing[this.type];
-                    vk = fn(k);
+                    vk = Easing[this.type](k);
                 }
 
                 //重复
                 if (this._repeat) {
                     if (k === 1) {
                         this._startTime = time;
-                        if (isFinite(this._repeat)) {
-                            this._repeat--;
-                        }
-
+                        if (isFinite(this._repeat)) this._repeat--;
                         if (this._yoyo) { // start end替换
                             var temp = this._start;
                             this._start = this._end;
                             this._end = temp;
-                            for (var key in this._end) {
-                                this._deta[key] = this._end[key] - this._start[key] || 0;
-                            }
-
+                            for (var key in this._end) this._deta[key] = this._end[key] - this._start[key] || 0;
                         }
                     }
                 }
                 var obj = {};
                 for (var key in this._deta) {
                     // var vk = curve[this.type[key]](k);
-                    var v;
-                    if (_.isObject(vk)) {
-                        v = vk[key]
-                    } else {
-                        v = vk;
-                    }
+                    var v = key in vk ? vk[key] : vk;
+                    // if (_.isObject(vk)) {
+                    //     v = vk[key]
+                    // } else {
+                    //     v = vk;
+                    // }
                     obj[key] = v * this._deta[key] + this._start[key];
                 }
                 return obj
@@ -4256,9 +4235,7 @@
             },
             //方向 向量的弧度
             rad: function(rad) {
-                if (_.isUndefined(rad))
-                    return Math.atan2(this.y, this.x);
-
+                if (_.isUndefined(rad)) return Math.atan2(this.y, this.x);
                 var r = this.abs();
                 this.x = r * Math.cos(rad);
                 this.y = r * Math.sin(rad);
@@ -4544,13 +4521,8 @@
                 // this.vx+=0.41*this.vy
 
 
-                if (this.x < this.left || this.x > this.right) {
-                    this.vx *= -1;
-                }
-                if (this.y < this.top || this.y > this.bottom) {
-                    this.vy *= -1;
-                }
-
+                if (this.x < this.left || this.x > this.right) this.vx *= -1;
+                if (this.y < this.top || this.y > this.bottom) this.vy *= -1;
                 return this;
             },
         }
@@ -4657,9 +4629,7 @@
                 //夹角
                 var ia = 360 / num;
                 var vs = [p];
-                for (var i = 0; i < num; i++) {
-                    vs.push(p = po.rotate(ia));
-                }
+                for (var i = 0; i < num; i++) vs.push(p = po.rotate(ia));
                 return vs;
             },
             //变形
@@ -4765,20 +4735,13 @@
             setup: function(opt) {
                 var opt = opt || this.opt;
                 var shape = opt.shape;
-                if (this[shape]) {
-                    if (opt.fractalMirror) {
-                        return this.fractalMirror(opt);
-                    }
-                    if (opt.fractal) {
-                        return this.fractal(opt);
-                    }
-                    if (opt.fractalIn) {
-                        return this.fractalIn(opt);
-                    } else {
-                        //重新计算vs
-                        this._vertex(opt);
-                        return this[shape].call(this, opt);
-                    }
+                if (shape in this) {
+                    if (opt.fractalMirror) return this.fractalMirror(opt);
+                    if (opt.fractal) return this.fractal(opt);
+                    if (opt.fractalIn) return this.fractalIn(opt);
+                    //重新计算vs
+                    this._vertex(opt);
+                    return this[shape].call(this, opt);
                 } else {
                     console.log(+"not support:" + shape)
                 }
@@ -4798,7 +4761,7 @@
                 var fractalLevel = opt.fractalLevel || 0;
                 var maxLevel = _.isUndefined(opt.maxLevel) ? 5 : opt.maxLevel;
                 fractalLevel++;
-                var fractal = fractalLevel >= maxLevel || r < minR ? false : true;
+                var fractal = !(fractalLevel >= maxLevel || r < minR); // ? false : true;
                 this.vs.forEach(function(t) {
                     var opt2 = _.clone(opt, { x: t.x, y: t.y, r: r, fractal: fractal, fractalLevel: fractalLevel });
 
@@ -4839,9 +4802,7 @@
                 var minR = opt.minR || 5;
                 vs.forEach(function(t, i) {
                     var o = po.mirror(t, fractalRatio);
-                    if (o.r < minR) {
-                        return
-                    }
+                    if (o.r < minR) return;
                     var opt2 = _.clone(opt, { r: o.r, x: o.x, y: o.y, a: o.a + 180, fractalLevel: fractalLevel }); //,showMirror: showMirror
                     self.shape(opt2);
                 })
@@ -5213,9 +5174,7 @@
                 var opt = _.clone(opt, { num: opt.num * 2 });
                 // var vs = _.vertex(opt).vs; //改变num 需要重新计算
                 var vs = vertex.vertices(opt)
-                for (var i = 0; i < opt.num; i++) {
-                    vsGroup.push([vs[i], vs[i + num]]);
-                }
+                for (var i = 0; i < opt.num; i++) vsGroup.push([vs[i], vs[i + num]]);
                 return this.draw.linkGroup(vsGroup, opt);
             },
             //玫瑰花
@@ -5228,9 +5187,7 @@
                 var level = 0;
                 var turns = opt.turns || 3;
                 (function _rose(vs) {
-                    if (level >= turns) {
-                        return;
-                    }
+                    if (level >= turns) return;
                     var r = opt.r / Math.pow(2, ++level);
                     var vs2 = vertex.clone({ r: r });
                     vsGroup.push(vs2);
@@ -5289,9 +5246,7 @@
 
                 (function _carpet(opt) {
                     var r = opt.r;
-                    if (r < 5) {
-                        return
-                    }
+                    if (r < 5) return;
                     var vertex = _.vertex(opt);
                     var r2 = r / 3;
                     var vs2 = vertex.clone({ r: r2 });
@@ -5536,9 +5491,7 @@
                         po = vertex.po;
                     var vsGroup = [];
                     if (opt.fillInterval) {
-                        for (var i = 0; i < len; i += 2) {
-                            vsGroup.push([po, vs[i], vs[i + 1 === len ? 0 : i + 1]])
-                        }
+                        for (var i = 0; i < len; i += 2) vsGroup.push([po, vs[i], vs[i + 1 === len ? 0 : i + 1]])
                     } else {
                         vs.forEach(function(v, i) {
                             vsGroup.push([po, v]);
@@ -5558,7 +5511,7 @@
                 var speed = 1;
                 var vs = this.vs;
                 vs.forEach(function(t) {
-                    _.extend(t, {
+                    t = _.extend(t, {
                         vx: (Math.random() * 2 - 1) * speed,
                         vy: (Math.random() * 2 - 1) * speed,
 
@@ -5604,7 +5557,7 @@
 
                 var vs2 = vs.map(function(t, i) {
                     var t2 = vs[i + 1 === len ? 0 : i + 1];
-                    var v = t.toVector().add(t2.toVector());
+                    var v = t.toV().add(t2.toV());
                     return t.clone(v.toP());
                 });
 
@@ -5694,9 +5647,7 @@
                 switch (colorful) {
                     case "random":
                         //随机色
-                        for (var i = 0; i < 360 / interval; i++) {
-                            colorArr.push(_.rgba())
-                        }
+                        for (var i = 0; i < 360 / interval; i++) colorArr.push(_.rgba())
                         break;
                     case "gradient":
                         //渐变色
@@ -5718,24 +5669,18 @@
                     y: y,
                     colorArr: colorArr,
                 });
-                this.opt = opt; //_.clone(opt);
+                this.opt = opt;
                 this.setup();
             },
             //图形
             shape: function(optShape) {
-                return this.draw.shape(optShape); //opt.shape
+                return this.draw.shape(optShape);
             },
             color: function(opt) {
                 var colorful = opt.group.colorful;
                 var fill = opt.shape.fill;
                 var opt2 = {};
-                if (colorful) {
-                    if (fill) {
-                        opt2.color = _.rgba();
-                    } else {
-                        opt2.color = _.rgb();
-                    }
-                }
+                if (colorful) opt2.color = fill ? _.rgba() : _.rgb();
                 return opt2;
             },
             setup: function(opt) {
@@ -5788,13 +5733,11 @@
                     }
 
                     //中心相连
-                    if (opt.group.link) { //连接线
-                        for (var j = i; j < len - 1; j++) {
-                            self.draw.link([t, groups[j + 1]], opt.group);
-                        }
+                    if (opt.group.link) {
+                        for (var j = i; j < len - 1; j++) self.draw.link([t, groups[j + 1]], opt.group);
                     }
                     //相邻连线 neighbor
-                    if (opt.group.neighborLink) { //连接线
+                    if (opt.group.neighborLink) {
                         self.draw.link([t, groups[i + 1 === len ? 0 : i + 1]]);
                     }
                     //顶点相连
@@ -5816,18 +5759,16 @@
                             })
                         }
                         vsGroup.push(vs);
-                    }
+                    };
                     //显示圆心编号
-                    if (opt.group.identifierCenter) {
-                        self.draw.point({ x: t.x, y: t.y, text: i })
-                    }
+                    opt.group.identifierCenter && self.draw.point({ x: t.x, y: t.y, text: i });
+
 
                     //锥线
-                    if (opt.group.conic) {
-                        vs.forEach(function(t) {
-                            self.draw.link([po, t], opt.group);
-                        });
-                    }
+                    opt.group.conic && vs.forEach(function(t) {
+                        self.draw.link([po, t], opt.group);
+                    });
+
                     return drawShape;
                 });
             },
@@ -6686,9 +6627,7 @@
                     var o = optCycle.data[k];
                     if (_.isObject(o)) {
                         if (!!~["group", "motion"].indexOf(k)) {
-                            if (o.switch === "off") {
-                                continue;
-                            }
+                            if (o.switch === "off")continue;
                         }
                         opt[k] = {};
                         for (var x in o) {
@@ -8085,37 +8024,37 @@
             },
             //取整 四舍五入
             int: function(val) {
-                return _.isNumber(Number(val)) ? Math.round(Number(val)) : val;
+                return _.isNumber(+val) ? Math.round(+val) : val;
             },
             number: function(val) {
-                return Number(val);
+                return +val;
             },
             wan: function(val) {
-                return Number(val) > 10000 ? (Number(val) / 10000).toFixed(1) + "万" : val;
+                return +val > 10000 ? (+val / 10000).toFixed(1) + "万" : val;
             },
             fixed: function(val) {
-                return Number(val).toFixed(1);
+                return (+val).toFixed(1);
             },
             cent: function(val) {
-                return (Number(val) / 100).toFixed(2);
+                return (+val / 100).toFixed(2);
             },
             percent: function(val) {
                 return Math.ceil(val * 100) + "%";
             },
             yearmonth: function(val) {
-                return (new Date(Number(val))).format("YYYY年MM月");
+                return (new Date(+val)).format("YYYY年MM月");
             },
             monthdaytime: function(val) {
-                return (new Date(Number(val))).format("MM月DD日 HH:mm");
+                return (new Date(+val)).format("MM月DD日 HH:mm");
             },
             datetime: function(val) {
-                return (new Date(Number(val))).format("YYYY-MM-DD HH:mm");
+                return (new Date(+val)).format("YYYY-MM-DD HH:mm");
             },
             date: function(val) {
-                return (new Date(Number(val))).format("YYYY-MM-DD");
+                return (new Date(+val)).format("YYYY-MM-DD");
             },
             time: function(val) {
-                return (new Date(Number(val))).format("HH:mm");
+                return (new Date(+val)).format("HH:mm");
             },
             //默认头像
             avatar: function(val) {
@@ -8137,7 +8076,7 @@
         });
         ['round', 'ceil', 'floor'].forEach(function(t) {
             StandardFilters[t] = function(val) {
-                return _.isNumber(Number(val)) ? Math[t](Number(val)) : val;
+                return _.isNumber(+val) ? Math[t](+val) : val;
             }
         });
         //调用过滤器 
@@ -8240,10 +8179,8 @@
                 data = self.data;
 
             if (_.isEmpty(tpl) && _.isEmpty(groupTpl)) return "";
+            if (tpl) tpl = preModel(tpl);
 
-            tpl && (function() {
-                tpl = preModel(tpl);
-            })();
 
             $index = 1;
             var str = "";
@@ -8262,14 +8199,13 @@
 
                 for (var i = 0; i < $length; i++) {
                     var item = data[i];
-
-                    !_.isUndefined(groupTpl) && (function() { //分组模板
+                    if (!_.isUndefined(groupTpl)) { //分组模板
                         currGroup = parseTag.call(self, groupTpl, item);
                         if (currGroup !== lastGroup) {
                             ps.push(currGroup);
                         }
                         lastGroup = currGroup;
-                    })();
+                    }
 
                     if (i >= loopNumber) {
                         if (!_.isUndefined(moreTpl)) { //更多模板
@@ -8283,33 +8219,23 @@
                             break;
                         }
                     } else {
-                        if (tpl) { //模板
-                            ps.push(parseTag.call(self, tpl, item));
-                        }
+                        if (tpl) ps.push(parseTag.call(self, tpl, item)); //模板
                     }
                 }
                 str = ps.join('');
             } else if (_.isObject(data)) {
                 $length = 1;
-                tpl && (function() {
-                    str = parseTag.call(self, tpl, data)
-                })();
+                if (tpl) str = parseTag.call(self, tpl, data);
             } else {
                 $length = 1;
                 str = tpl;
             }
             var syntax = syntax || customSyntax;
-            switch (syntax) {
-                case "markdown":
-                    str = _.markdown(str);
-                    break;
-                case "pre":
-                    str = _.preHtml(str);
-                    break;
-                default:
-                    break
+            var syntaxMap = {
+                markdown: _.markdown,
+                pre: _.preHtml
             }
-            return str;
+            return syntax in syntaxMap ? syntaxMap[syntax](str) : str;
         };
 
         //根据名称取得tpl
@@ -8328,7 +8254,7 @@
                 if (id === "this" || _.isEmpty(id)) {
                     tpl = _.html(this).trim();
                 } else {
-                    tpl = getTpl(id)
+                    tpl = getTpl(id);
                 }
             }
             return tpl;
@@ -8419,9 +8345,7 @@
                     break;
             }
             //如果tpl不是外部命名，区块dom内的html不需要重置,意味着之前通过dom操作获取的节点，在模板解析后还可以用。
-            if (self.tpl || el.attr(TEMPLATE) || el.attr(GROUP)) {
-                el.html(str);
-            }
+            if (self.tpl || el.attr(TEMPLATE) || el.attr(GROUP)) el.html(str);
             parseDirective.call(self, el, data);
         };
 
@@ -8522,8 +8446,8 @@
             constructor: template,
             init: function(options) {
                 var self = this,
-                    args = Array.prototype.slice.call(arguments),
-                    len = args.length;
+                    // args = Array.prototype.slice.call(arguments),
+                    len = arguments.length;
                 self.methods = {};
 
                 switch (len) {
