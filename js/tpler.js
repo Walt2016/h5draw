@@ -3992,7 +3992,6 @@
                     self.exequeue();
                 }, 0)
             }
-
         }
         _queue.prototype.init.prototype = _queue.prototype;
 
@@ -4105,12 +4104,14 @@
                 var obj = {};
                 for (var key in this._deta) {
                     // var vk = curve[this.type[key]](k);
-                    var v = key in vk ? vk[key] : vk;
+                    // var v = key in vk ? vk[key] : vk;
                     // if (_.isObject(vk)) {
                     //     v = vk[key]
                     // } else {
                     //     v = vk;
                     // }
+
+                    var v = _.isObject(vk) ? vk[key] : vk;
                     obj[key] = v * this._deta[key] + this._start[key];
                 }
                 return obj
@@ -7171,6 +7172,7 @@
             shortName: function(opt) {
                 opt && [{ k: "n", v: "num" },
                     { k: "s", v: "shape" },
+                    { k: "showA", v: "showAngle" },
                     { k: "showR", v: "showRadius" },
                     { k: "showV", v: "showVertices" },
                     { k: "showC", v: "showCenter" },
@@ -7183,26 +7185,11 @@
                 });
                 return opt;
             },
-            //虚线  todo
-            // dashLine: function(p1, p2) {
-
-            //     var k = (p2.y - p1.y) / (p2.x - p1.x) //斜率k     正 负 0  
-            //     var b = p1.y - k * p1.x //常数b 
-
-            //     var step = 10
-            //     // var xi = x1 + i;
-            //     // var yi = k * xi + b;
-
-            //     //      var xj=x1+i+1     //控制步长决定绘制的是虚线还是实线  
-            //     // var yj=k*xj+b;  
-
-
-            // },
             //连线
             link: function(vs, opt) {
-                var self = this;
-                var ctx = this.context;
-                var len = vs.length;
+                var self = this,
+                    ctx = this.context,
+                    len = vs.length;
                 this.beginPath(opt);
                 if (opt && opt.dashed) {
                     //虚线
@@ -7233,7 +7220,7 @@
                     })
                 }
                 //弧线
-                if (opt.arc) {
+                if (opt && opt.arc) {
                     var po = _pointPolar({ o: this.o });
                     vs.forEach(function(t, i) {
                         var t1 = vs[i + 1 === len ? 0 : i + 1],
@@ -7251,10 +7238,6 @@
 
                 self.closePath(opt);
                 self.render(opt);
-
-
-
-
                 if (opt) {
                     //显示外切圆
                     if (opt.showExcircle) this.excircle(opt);
@@ -7283,13 +7266,13 @@
                     len = vs.length;
 
                 function _includedAngle(t, i) {
-                    var t2 = vs[i + 1 === len ? 0 : i + 1],
-                        t3 = vs[i - 1 === -1 ? len - 1 : i - 1],
-                        v1 = t.toV(t2),
-                        v2 = t.toV(t3),
+                    var t1 = vs[i + 1 === len ? 0 : i + 1],
+                        t2 = vs[i - 1 === -1 ? len - 1 : i - 1],
+                        v1 = t.toV(t1),
+                        v2 = t.toV(t2),
                         ia = Math.round(_.deg(v1.ia(v2)));
-                    var p = t.toV().abs(opt.r + 15).toP(t.o);
-                    p = _pointPolar(p);
+                    self.arc(t, 10, v1.rad(), v2.rad());
+                    var p = _pointPolar(t.toV().abs(opt.r + 15).toP(t.o));
                     return self.text({ x: p.x, y: p.y, text: ia + '°' })
                 }
                 if (opt.showAngle === "all") {
@@ -7299,6 +7282,14 @@
                 } else {
                     return _includedAngle(vs[0], 0)
                 }
+            },
+            //画弧
+            arc: function(t, r, sA, eA) {
+                var ctx = this.context;
+                ctx.beginPath();
+                ctx.moveTo(t.x, t.y);
+                ctx.arc(t.x, t.y, r, sA, eA, false);
+                this.render(this.opt);
             },
             // 外切圆
             excircle: function(opt) {
@@ -7356,9 +7347,13 @@
                         t.r = 3;
                     }
                     if (animate) {
-                        setTimeout(function() {
+                        // setTimeout(function() {
+                        //     self.point(t);
+                        // }, animationInterval * i)
+
+                        self.queue.delay(function() {
                             self.point(t);
-                        }, animationInterval * i)
+                        }, animationInterval)
                     } else {
                         self.point(t)
                     }
@@ -7430,9 +7425,12 @@
                     _.extend(opt, { animate: false })
                     var animationInterval = opt.animationInterval || 0;
                     vsGroup.forEach(function(t, i) {
-                        setTimeout(function() {
+                        // setTimeout(function() {
+                        //     self.link(t, opt);
+                        // }, animationInterval * i);
+                        self.queue.delay(function() {
                             self.link(t, opt);
-                        }, animationInterval * i);
+                        }, animationInterval)
                     })
                 } else {
                     vsGroup.forEach(function(t) {
