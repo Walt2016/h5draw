@@ -1,0 +1,384 @@
+html,
+body {
+    margin: 0;
+    padding: 0
+}
+
+canvas {
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+    -khtml-user-select: none;
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    max-width: 680px;
+    margin: 0 auto;
+    height: 100vh;
+    min-width: 300px;
+    position: relative;
+}
+
+.screen {
+    /*background-color: rgb(55, 58, 63);*/
+    font-size: 12px;
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 100vw;
+    max-width: 680px;
+    min-width: 300px;
+    margin: 0 auto;
+}
+
+.rlt {
+    position: relative;
+}
+
+.abs {
+    position: absolute;
+}
+
+.tab-head {
+    background: rgba(100, 100, 100, 1);
+    padding-left: 14px;
+    padding-right: 14px;
+    color: #fff;
+}
+
+.tab-head-item {
+    /*color: #666;*/
+    min-width: 50px;
+    text-align: center;
+    font-size: 16px;
+    cursor: pointer;
+    user-select: none;
+    height: 40px;
+    line-height: 40px;
+    border-bottom: 1px solid #dcdcdc;
+}
+
+.tab-head-item.active {
+    color: #000;
+    background: #cecece
+}
+
+.tab-body-item.hide {
+    display: none;
+}
+
+.tab-body {
+    padding-left: 14px;
+    padding-right: 14px;
+    background: rgba(0, 0, 0, 0.1)
+}
+
+.scroll {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.tab-body-item {
+    font-size: 12px;
+    word-wrap: break-word;
+    margin-bottom: 62px;
+}
+
+.tab-body-item .header {
+    height: 22px;
+    background-color: #cecece;
+    line-height: 22px;
+    padding: 6px;
+}
+
+.tab-body-item .body {
+    border-bottom: 1px solid rgb(220, 220, 220);
+    margin-bottom: 20px;
+    min-height: 30px;
+    padding: 6px;
+}
+
+
+
+
+.mt10 {
+    margin-top: 10px
+}
+
+.mt4 {
+    margin-top: 4px
+}
+
+.ml4 {
+    margin-left: 4px;
+}
+
+.grid {
+    line-height: 40px;
+    font-size: 15px;
+    border: 1px solid #dcdcdc;
+}
+
+.grid .body.off {
+    display: none;
+}
+
+.grid .row {
+    border-bottom: 1px solid #dcdcdc;
+}
+
+.grid .row:last-child {
+    border-bottom: none
+}
+
+.grid .row .hd {
+    width: 100px;
+    height: 40px;
+    padding-left: 4px;
+    border-right: 1px solid #dcdcdc;
+    position: relative;
+    background-color: rgba(248, 248, 248, 0.5);
+    overflow: hidden;
+}
+
+.grid .row .hd:last-child {
+    border-right: none
+}
+
+.grid .row .td {
+    padding-left: 4px;
+    height: 40px;
+    position: relative;
+}
+
+.hide {
+    display: none
+}
+
+.fixedbottom {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 999;
+    max-width: 680px;
+    margin: 0 auto;
+}
+
+.btn-group {
+    border-top: 1px solid #ccc;
+    background-color: #fff;
+}
+
+.btn {
+    font-size: 15px;
+    height: 40px;
+    line-height: 40px;
+    -webkit-user-select: none;
+    -webkit-box-flex: 1;
+    -webkit-flex: 1;
+    -ms-flex: 1;
+    flex: 1;
+    text-align: center;
+    /*background: rgba(0, 0, 0, 0.2)*/
+    margin: 1px;
+    border-right: 1px dashed #dedede;
+    cursor: pointer;
+}
+
+.btn:last-child {
+    border-right: none;
+}
+
+.btn.w100 {
+    width: 100px;
+    max-width: 100px;
+}
+
+.scroll {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.switchBtn {
+    width: 40px;
+    height: 20px;
+    border: 1px solid #666;
+    background-image: -webkit-linear-gradient(right, #dedede, #dedede 50%, #cccccc 50%, #cccccc);
+    position: absolute;
+    top: 10px;
+    right: 10px;
+}
+
+.switchBtn.on {
+    background-image: -webkit-linear-gradient(left, #dedede, #dedede 50%, #ff6414 50%, #ff6414);
+}
+
+.rightArrow {
+    width: 0px;
+    height: 0px;
+    border: 10px solid transparent;
+    border-left-color: #cecece;
+}
+
+.leftArrow {
+    width: 0px;
+    height: 0px;
+    border: 10px solid transparent;
+    border-right-color: #cecece;
+}
+
+.upArrow {
+    width: 0px;
+    height: 0px;
+    border: 8px solid transparent;
+    border-bottom-color: #cecece;
+    margin-bottom: 8px;
+}
+
+.downArrow {
+    width: 0px;
+    height: 0px;
+    border: 8px solid transparent;
+    border-top-color: #cecece;
+    margin-top: 8px;
+}
+
+.colorblock {
+    width: 20px;
+    height: 10px;
+    position: absolute;
+    right: 25px;
+    top: 15px;
+}
+
+.switchBody.off {
+    display: none;
+}
+
+.switchBtn.none {
+    display: none;
+}
+
+#startBtn {
+    background-color: #ccc
+}
+
+#configPanel.hide {
+    display: none;
+}
+
+#configPanel {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: rgba(255, 255, 255, 0.9);
+}
+
+#configPanel.center {
+    position: fixed;
+    z-index: 2000;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 95%
+}
+
+.slider {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 14px;
+}
+
+.slider.hide {
+    display: none
+}
+
+.slider .btn-sub,
+.slider .btn-add {
+    width: 20px;
+    height: 20px;
+    background-position: center center;
+    background-repeat: no-repeat;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: 1px solid #ccc;
+}
+
+.slider .output {
+    margin-left: 14px;
+}
+
+
+input[type="range"] {
+    /*设置滑块下面那条线的样式*/
+    outline: none;
+    /*去掉点击时出现的外边框*/
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    /*这三个是去掉那条线原有的默认样式，划重点！！*/
+    /*width: 100%;
+     height: 1px;*/
+    /*background: orange;*/
+    background: #000000;
+
+    /*这三个是设置滑块下面那条线的样式*/
+    /*border-radius: 10px;*/
+    /*这个属性设置使填充进度条时的图形为圆角*/
+    /*background: -webkit-linear-gradient(#059CFA, #059CFA) no-repeat;*/
+    /*background:  -webkit-linear-gradient(red, black) no-repeat; */
+    /*background-size: 0% 100%;*/
+    /*        background: linear-gradient(45deg,#1a6adf 25%,#578cdf 25%,#578cdf 50%,#1a6adf 50%,#1a6adf 75%,#578cdf 75%,#578cdf 100%);
+    background-size: 28px 28px;*/
+}
+
+input.slider {
+    height: 3px;
+    width: 80%;
+    margin-left: 14px;
+}
+
+input.toggle,
+input.switch {
+    width: 50px;
+    border-radius: 50px;
+    height: 20px;
+}
+
+input.switch {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+}
+
+
+/*滑块*/
+
+input[type="range"]::-webkit-slider-thumb {
+    /*::-webkit-slider-thumb是代表给滑块的样式进行变更*/
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+
+    width: 18px;
+    height: 18px;
+    /*margin-top: -5px;*/
+    /*使滑块超出轨道部分的偏移量相等*/
+    background: #fff;
+    border-radius: 50%;
+    /*外观设置为圆形*/
+    border: solid 0.125em rgba(205, 224, 230, 0.5);
+
+    /*设置边框*/
+    box-shadow: 0 .125em .125em #3b4547;
+    /*添加底部阴影*/
+}
