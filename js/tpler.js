@@ -388,15 +388,15 @@
             //随机id
             random: function(possible, len, prefix) {
                 if (_.isArray(possible)) {
-                    return possible[Math.floor(Math.random() * possible.length)];
+                    return possible[Math.random() * possible.length << 0];
                 } else if (_.isNumber(possible)) {
-                    return Math.floor(Math.random() * possible);
+                    return Math.random() * possible << 0;
                 } else {
                     var str = prefix || "_",
                         len = len || 6,
                         possible = possible || "abcdefghijklmnopqrstuvwxyz"; //ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789
                     for (var i = 0; i < len; i++) {
-                        str += possible.charAt(Math.floor(Math.random() * possible.length));
+                        str += possible.charAt(Math.random() * possible.length << 0);
                     }
                     return str;
                 }
@@ -670,17 +670,16 @@
                 return '#' + ('00000' + (Math.random() * 0x1000000 << 0).toString(16)).slice(-6);
             },
             hsl: function() { //微信小程序不支持hsl
-                return "hsl(" + Math.ceil(Math.random() * 360) + ",50%,50%)";
+                return "hsl(" + Math.random() * 360 << 0 + ",50%,50%)";
             },
             hsla: function() {
-                return "hsla(" + Math.ceil(Math.random() * 360) + ",50%,50%,0.5)";
+                return "hsla(" + Math.random() * 360 << 0 + ",50%,50%,0.5)";
             },
             //深色 rgb 有一位小于80
             deepColor: function() {
                 var n = Math.random() * 3 << 0;
                 var c = [255, 255, 255].map(function(t, i) {
                     return i === n ? Math.random() * 80 << 0 : t * Math.random() << 0;
-                    // return i == 3 ? t * Math.random().toFixed(1) : Math.round(t * Math.random())
                 });
                 return "rgb(" + c.join(",") + ")";
             },
@@ -693,35 +692,31 @@
             //全彩 111
             //黑白灰 000
             rgba: function(r, g, b, a) {
-                var args = Array.prototype.slice.call(arguments),
-                    len = args.length;
+                // var args = Array.prototype.slice.call(arguments),
+                var len = arguments.length;
                 if (len < 4) {
                     var min = 0.1,
                         max = 0.7;
-                    var a = (min + (max - min) * Math.random()).toFixed(1);
+                    a = (min + (max - min) * Math.random()).toFixed(1);
                 }
-                if (len < 3) {
-                    var b = 1;
-                }
-                if (len < 2) {
-                    var g = 1;
-                }
-                if (len < 1) {
-                    var g = 1;
-                }
+                if (len < 3) b = 1;
+                if (len < 2) g = 1;
+                if (len < 1) r = 1;
                 var arr = [r, g, b];
-                if (r * g * b === 1) {
+                if (r * g * b === 1 || r + g + b === 0) {
                     arr = arr.map(function(t) {
-                        return Math.floor(Math.random() * 255);
+                        return Math.random() * 255 << 0;
                     });
-                } else if (r + g + b === 0) {
-                    var t = Math.floor(Math.random() * 255);
-                    arr = [t, t, t];
-                } else {
+                }
+                // else if (r + g + b === 0) {
+                //     var t = Math.random() * 255 << 0;
+                //     arr = [t, t, t];
+                // } 
+                else {
                     var rgb = 155;
-                    var c = Math.floor(Math.random() * (255 - rgb) + rgb);
+                    var c = Math.random() * (255 - rgb) << 0 + rgb;
                     arr = arr.map(function(t) {
-                        return t === 1 ? (Math.floor(Math.random() * (255 - rgb) + rgb)) : (Math.floor(Math.random() * (c / 2)));
+                        return t === 1 ? Math.random() * (255 - rgb) << 0 + rgb : Math.random() * (c / 2) << 0;
                     });
                 }
                 arr.push(a);
@@ -822,7 +817,7 @@
                 var colorArr = [];
                 for (var i = 0; i < step; i++) {
                     //计算每一步的hex值 
-                    var rgba = 'rgba(' + parseInt((sR * i + startR)) + ',' + parseInt((sG * i + startG)) + ',' + parseInt((sB * i + startB)) + ',0.5)';
+                    var rgba = 'rgba(' + (sR * i + startR) << 0 + ',' + (sG * i + startG) << 0 + ',' + (sB * i + startB) << 0 + ',0.5)';
                     colorArr.push(rgba);
                     // var hex = this.colorHex();
                     // colorArr.push(hex);
@@ -1460,36 +1455,18 @@
                 return results;
             },
             max: function(array) {
-                var args = Array.prototype.slice.call(arguments),
-                    len = args.length;
-                if (len > 1) array = args;
-
-                //多维数组转一维
-                var ta = _.isArray(array) ? array.join(",").split(",") : array.split(",");
-                //去非数字
-                for (var i = 0; i < ta.length; i++) {
-                    if (ta[i] === "") {
-                        ta.splice(i, 1);
-                        i--;
-                    }
-                }
-                return ta === [] ? 0 : Math.max.apply(Math, ta);
+                var len = arguments.length;
+                if (len === 0) return 0;
+                var args = new Array(len);
+                while (len--) args[len] = arguments[len];
+                return Math.max.apply(Math, _.flatten(args));
             },
             min: function(array) {
-                var args = Array.prototype.slice.call(arguments),
-                    len = args.length;
-                if (len > 1) array = args;
-
-                //多维数组转一维
-                var ta = _.isArray(array) ? array.join(",").split(",") : array.split(",");
-                //去非数字
-                for (var i = 0; i < ta.length; i++) {
-                    if (ta[i] == "") {
-                        ta.splice(i, 1);
-                        i--;
-                    }
-                }
-                return ta === [] ? 0 : Math.min.apply(Math, ta);
+                var len = arguments.length;
+                if (len === 0) return 0;
+                var args = new Array(len);
+                while (len--) args[len] = arguments[len];
+                return Math.min.apply(Math, _.flatten(args));
             },
 
 
@@ -1519,15 +1496,16 @@
             clone: function(obj) {
                 if (!_.isObject(obj)) return obj;
                 if (_.isArray(obj)) return obj.slice();
-                var args = Array.prototype.slice.call(arguments);
+                var len = arguments.length;
+                var args = new Array(len);
+                while (len--) args[len] = arguments[len];
                 args.unshift({});
                 return _.extend.apply(null, args);
             },
             // {key:value} => {value:key}  ，Invert the keys and values of an object. The values must be serializable.
             invert: function(obj) {
                 var result = {};
-                var keys = _.keys(obj);
-                keys.forEach(function(t) {
+                _.keys(obj).forEach(function(t) {
                     result[obj[t]] = t;
                 });
                 return result;
@@ -1716,18 +1694,27 @@
 
         // Internal implementation of a recursive `flatten` function.
         var flatten = function(input, shallow, output) {
-            if (shallow && _.every(input, _.isArray)) return Array.prototype.concat.apply(output, input);
-            _.each(input, function(value) {
-                if (_.isArray(value) || _.isArguments(value)) {
-                    shallow ? Array.prototype.push.apply(output, value) : flatten(value, shallow, output);
+            // if (shallow && _.every(input, _.isArray)) return Array.prototype.concat.apply(output, input);
+            // _.each(input, function(value) {
+            //     if (_.isArray(value) || _.isArguments(value)) {
+            //         shallow ? Array.prototype.push.apply(output, value) : flatten(value, shallow, output);
+            //     } else {
+            //         output.push(value);
+            //     }
+            // });
+
+            input.forEach(function(t) {
+                if (_.isArray(t)) {
+                    shallow ? output[output.length] = t : flatten(t, shallow, output)
                 } else {
-                    output.push(value);
+                    output[output.length] = t;
                 }
             });
             return output;
         };
 
         // Flatten out an array, either recursively (by default), or just one level.
+        //多维转移一维
         _.flatten = function(array, shallow) {
             return flatten(array, shallow, []);
         };
@@ -2193,11 +2180,11 @@
         _time.durationFormat = function(duration) {
             var self = this;
             if (typeof duration !== 'number' || duration < 0) return "00:00";
-            var hour = parseInt(duration / 3600);
+            var hour = duration / 3600 << 0;
             duration %= 3600;
-            var minute = parseInt(duration / 60);
+            var minute = duration / 60 << 0;
             duration %= 60;
-            var second = parseInt(duration);
+            var second = duration << 0;
             var arr = [minute, second];
             if (hour > 0) arr.unshift(hour);
             return arr.map(function(n) {
@@ -2301,8 +2288,7 @@
                 // 中国的概念是周一是每周的开始, 周日12pm是每周结束.
 
                 this.time = t.getTime();
-                this.quarter = Math.floor((t.getMonth() + 3) / 3); //季度 
-
+                this.quarter = (t.getMonth() + 3) / 3 << 0; // //季度 
             },
 
             // 转化为指定格式的String 
@@ -2913,14 +2899,13 @@
                 return this[this.length - 1];
             },
             random: function() {
-                return this[Math.floor(Math.random() * this.length)];
-                // return _.random.call(this,this);
+                return this[Math.random() * this.length << 0];
             },
             //乱序
             shuffle: function() {
                 var len = this.length;
                 for (var i = 0; i < len - 1; i++) {
-                    var index = parseInt(Math.random() * (len - i));
+                    var index = Math.random() * (len - i) << 0;
                     var temp = this[index];
                     this[index] = this[len - i - 1];
                     this[len - i - 1] = temp;
@@ -4751,6 +4736,16 @@
                 this.vs = vertex.vs;
                 this.po = vertex.po;
             },
+            //计算量 计算量大，会致死锁，设置最大level5
+            calculatedAmount: function(opt) {
+                var num = opt.num
+                var level = 5;
+                var amount = 0;
+                if (opt.fractal) {
+                    while (level--) amount += Math.pow(num, level + 1)
+                }
+                return amount > 10000;
+            },
             //分形 逐级缩小
             fractal: function(opt) {
                 var self = this;
@@ -4784,7 +4779,7 @@
                 if (fractalLevel >= maxLevel) return;
                 var vs = this.vs;
                 if (vs.length < 2) return;
-                var v = vs[0].toVector().add(vs[1].toVector()); //计算上级r a，相连的向量和
+                var v = vs[0].toV().add(vs[1].toV()); //计算上级r a，相连的向量和
                 var opt = _.clone(opt, v.toP(), { fractalLevel: fractalLevel })
                 self.setup(opt);
             },
@@ -5576,7 +5571,6 @@
                     po = vertex.po;
                 if (len < 3) return;
                 var v;
-
                 var vs2 = vs.map(function(t, i) {
                     var t2, t3;
                     if (i + 1 === len) {
@@ -5589,7 +5583,7 @@
                         t2 = vs[i + 1];
                         t3 = vs[i + 2];
                     }
-                    v = t.toVector(t2).add(t.toVector(t3));
+                    v = t.toV(t2).add(t.toV(t3));
                     return t.clone(v.toP());
                 });
                 var vs3 = [];
@@ -6430,10 +6424,10 @@
             },
             //缩放
             zoom: function(opt) {
-                var minR = opt.minR || 1;
-                var maxR = opt.maxR || opt.right / 2;
-                var speed = opt.zoomSpeed || opt.speed || 1;
                 (function(opt) {
+                    var minR = opt.minR || 1;
+                    var maxR = opt.maxR || opt.right / 2;
+                    var speed = opt.zoomSpeed || opt.speed || 1;
                     if (opt.r >= maxR) {
                         opt.zoomState = "out";
                     } else if (opt.r <= minR) {
@@ -6627,7 +6621,7 @@
                     var o = optCycle.data[k];
                     if (_.isObject(o)) {
                         if (!!~["group", "motion"].indexOf(k)) {
-                            if (o.switch === "off")continue;
+                            if (o.switch === "off") continue;
                         }
                         opt[k] = {};
                         for (var x in o) {
@@ -6720,11 +6714,7 @@
 
                 if (canvas) {
                     this.canvas = canvas;
-                    if (inBrowser) {
-                        this.context = this.canvas.getContext("2d");
-                    } else {
-                        this.context = canvas.context;
-                    }
+                    this.context = inBrowser ? this.canvas.getContext("2d") : canvas.context;
                 } else {
                     if (inBrowser) {
                         if (options.el) {
@@ -6756,8 +6746,6 @@
                         } else {
                             this.canvas = document.createElement("canvas");
                         }
-
-
 
                         this.context = this.canvas.getContext("2d");
 
@@ -6832,12 +6820,18 @@
                 if (_.isObject(options)) {
                     this.options = options;
                     if (options.scale) this._scale = options.scale;
-                    //比率
-                    if (options.ratio) this.ratio(options.ratio);
+
+                    //全屏
+                    if (options.fullscreen) {
+                        this.fullscreen();
+                    } else {
+                        //比率
+                        if (options.ratio) this.ratio(options.ratio);
+                    }
 
                     //大小
                     ["width", "height"].forEach(function(t) {
-                        if (options[t]) self.canvas[t] = options[t];
+                        if (t in options) self.canvas[t] = options[t];
                     });
 
 
@@ -6867,7 +6861,7 @@
                             v: "background-repeat"
                         }
                     ].forEach(function(t) {
-                        if (options[t.v]) bg[t.k] = options[t.v]
+                        if (t.v in options) bg[t.k] = options[t.v]
                     });
                     this.background(bg);
                     this.callback = options.callback;
@@ -6916,8 +6910,6 @@
                     repeat = opt.repeat,
                     color = opt.color,
                     callback = opt.callback;
-
-
                 if (color) {
                     self.setFillStyle(color);
                     ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -7171,7 +7163,7 @@
                         x: this.canvas.width / 2,
                         y: this.canvas.height / 2,
                         r: 10,
-                        color: _.color()
+                        // color: _.color()
                     }
                 }
             },
@@ -7217,7 +7209,8 @@
                     vs.forEach(function(t, i) {
                         var t2 = vs[i + 1 === len ? 0 : i + 1];
                         var d = t.dist(t2);
-                        var ps = t.split(t2, Math.floor(d / 5));
+                        // var ps = t.split(t2, Math.floor(d / 5));
+                        var ps = t.split(t2, d / 5 << 0);
                         ps.unshift(t);
                         ps.push(t2);
                         ps.forEach(function(t, i) {
@@ -7261,8 +7254,31 @@
                     if (opt.fillInterval) this.zebra(vs, opt);
                     //顶点镜像
                     if (opt.showMirror) this.mirror(vs, opt);
+                    //夹角
+                    if (opt.showAngle) this.includedAngle(vs, opt);
                 }
                 return this;
+            },
+            //夹角
+            includedAngle: function(vs, opt) {
+                var self = this,
+                    len = vs.length;
+
+                function _includedAngle(t, i) {
+                    var t2 = vs[i + 1 === len ? 0 : i + 1],
+                        t3 = vs[i - 1 === -1 ? len - 1 : i - 1],
+                        v1 = t.toV(t2),
+                        v2 = t.toV(t3),
+                        ia = Math.round(_.deg(v1.ia(v2)));
+                    return self.point({ x: t.x, y: t.y, text: ia + '°' })
+                }
+                if (opt.showAngle === "all") {
+                    return vs.map(function(t, i) {
+                        return _includedAngle(t, i)
+                    })
+                } else {
+                    return _includedAngle(vs[0], 0)
+                }
             },
             // 外切圆
             excircle: function(opt) {
@@ -7303,7 +7319,7 @@
             },
             //顶点
             vertices: function(vs, opt) {
-                var _shape = self.shape();
+                var self = this;
                 var verticesColor = _.rgb();
 
                 var animate = opt.animate,
@@ -7321,36 +7337,33 @@
                     }
                     if (animate) {
                         setTimeout(function() {
-                            _shape.circle(t);
+                            self.point(t);
                         }, animationInterval * i)
                     } else {
-                        _shape.circle(t);
+                        self.point(t)
                     }
                 });
 
             },
             //圆心
             centerPoint: function(opt) {
-                return this.shape().circle({
+                return this.point({
                     r: 3,
                     x: opt.x,
                     y: opt.y,
                     color: _.rgb(), //verticesColor,
                     fill: true
-                });
+                })
             },
             //对角线
             diagonal: function(vs, opt) {
                 var vs = vs || this.vertices(opt);
                 var vsGroup = [];
                 var len = vs.length;
-                for (var i = 0; i < len - 2; i++) {
-                    for (var j = i + 2; j < len; j++) {
-                        if (!(i === 0 && j === len - 1)) {
-                            vsGroup.push([vs[i], vs[j]]);
-                        }
-                    }
-                }
+                for (var i = 0; i < len - 2; i++)
+                    for (var j = i + 2; j < len; j++)
+                        if (!(i === 0 && j === len - 1)) vsGroup.push([vs[i], vs[j]]);
+
                 return this.linkGroup(vsGroup, _.clone(opt, { showVertices: false }));
                 // return this.draw.link(vs, opt);
             },
@@ -7378,17 +7391,12 @@
                 //     vsGroup.push(vs2);
                 // });
                 // this.linkGroup(vsGroup, _.clone(opt, { showMirror: false }));
-
-
-
-                var vertex = _.vertex(opt)
+                var vertex = _.vertex(opt);
                 var po = vertex.po;
                 vs.forEach(function(t, i) {
                     var o = po.mirror(t);
                     self.shape(_.clone(opt, { x: o.x, y: o.y, a: o.a + 180, showMirror: false }));
                 })
-
-
             },
 
             linkGroup: function(vsGroup, opt) {
@@ -7431,6 +7439,7 @@
 
                 opt = self.shortName(opt);
                 opt = self.default(opt);
+                if (opt.color === "random") opt.color = _.color();
                 if (opt.animate && opt.easing) {
                     _tween({
                         start: { x: opt.x, y: 0, a: opt.a - 180 },
@@ -7604,8 +7613,8 @@
                 var imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
                 var cols = 100,
                     rows = 100;
-                var s_width = parseInt(imgData.width / cols);
-                var s_heihgt = parseInt(imgData.height / rows);
+                var s_width = imgData.width / cols << 0;
+                var s_heihgt = imgData.height / rows << 0;
 
                 console.log(imgData.data.length)
                 var ps = []
