@@ -4969,7 +4969,7 @@
                 var ctx = this.context;
                 var x = opt.x,
                     y = opt.y,
-                    r = opt.r;
+                    r = opt.r || 12;
                 var text = opt.text || opt.num;
                 var color = opt.color || "#000";
                 ctx.fillStyle = color;
@@ -7202,14 +7202,13 @@
             link: function(vs, opt) {
                 var self = this;
                 var ctx = this.context;
+                var len = vs.length;
                 this.beginPath(opt);
                 if (opt && opt.dashed) {
                     //虚线
-                    var len = vs.length;
                     vs.forEach(function(t, i) {
                         var t2 = vs[i + 1 === len ? 0 : i + 1];
                         var d = t.dist(t2);
-                        // var ps = t.split(t2, Math.floor(d / 5));
                         var ps = t.split(t2, d / 5 << 0);
                         ps.unshift(t);
                         ps.push(t2);
@@ -7233,9 +7232,28 @@
                         }
                     })
                 }
+                //弧线
+                if (opt.arc) {
+                    var po = _pointPolar({ o: this.o });
+                    vs.forEach(function(t, i) {
+                        var t1 = vs[i + 1 === len ? 0 : i + 1],
+                            v1 = po.toV(t),
+                            v2 = po.toV(t1);
+                        var p = _.pointPolar(v1.add(v2).toP(po));
+
+                        ctx.moveTo(t.x, t.y);
+                        ctx.quadraticCurveTo(
+                            p.x, p.y,
+                            t1.x, t1.y
+                        );
+                    })
+                }
 
                 self.closePath(opt);
                 self.render(opt);
+
+
+
 
                 if (opt) {
                     //显示外切圆
@@ -7270,7 +7288,9 @@
                         v1 = t.toV(t2),
                         v2 = t.toV(t3),
                         ia = Math.round(_.deg(v1.ia(v2)));
-                    return self.point({ x: t.x, y: t.y, text: ia + '°' })
+                    var p = t.toV().abs(opt.r + 15).toP(t.o);
+                    p = _pointPolar(p);
+                    return self.text({ x: p.x, y: p.y, text: ia + '°' })
                 }
                 if (opt.showAngle === "all") {
                     return vs.map(function(t, i) {
@@ -7420,6 +7440,12 @@
                     })
                 }
                 return self;
+            },
+            //文本标注
+            text: function(opt) {
+                return this.shape(_.clone({
+                    s: "text"
+                }, opt))
             },
             //打点
             point: function(opt) {
