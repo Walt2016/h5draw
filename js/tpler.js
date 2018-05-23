@@ -1,6 +1,6 @@
 //一个js开发框架
 //template.event.canvas
-//v0.7.20180521
+//v0.7.20180522
 ;
 (function(root, factory) {
     if (typeof define === "function" && define.amd) {
@@ -4310,14 +4310,19 @@
             toPolar: function(o) {
                 var a = this.deg(),
                     r = this.abs();
-                return o ? {
+                return _pointPolar({
                     a: a,
                     r: r,
-                    o: o
-                } : {
-                    a: a,
-                    r: r,
-                }
+                    o: o || this //{ x: 0, y: 0 }
+                });
+                // return o ? {
+                //     a: a,
+                //     r: r,
+                //     o: o
+                // } : {
+                //     a: a,
+                //     r: r,
+                // }
             },
             toP: function(o) {
                 return this.toPolar(o);
@@ -4387,15 +4392,13 @@
             },
             //中点 middle, 求this和p的中点， p{x,y}
             mid: function(p) { //, ratio
-                var v = this.toV(p).scale(0.5);
-                return this.clone(v.toP());
+                return this.toV(p).scale(0.5).toP(this);
             },
             //均分点meanSplit。分割n次，分割成n+1段
             split: function(p, n) {
                 var ps = [];
                 for (var i = 1; i <= n; i++) {
-                    var v = this.toV(p).scale(i / (n + 1));
-                    ps.push(this.clone(v.toP()));
+                    ps.push(this.toV(p).scale(i / (n + 1)).toP(this));
                 }
                 return ps;
             },
@@ -4403,7 +4406,7 @@
             mirror: function(p, ratio) {
                 var v = this.toV(p);
                 if (ratio) v.scale(ratio);
-                return this.clone(v.toP(p));
+                return v.toP(p);
             },
             //经过点的平行线 parallel lines
             //经过t点的平行线
@@ -4424,8 +4427,7 @@
             //两点确定的直线上 移动距离
             //k=tanθ=sinA/cosA
             translate: function(p, d) {
-                var v = this.toV(p).abs(d);
-                return this.clone(v.toP());
+                return this.toV(p).abs(d).toP(this);
             },
             trans: function(p, d) {
                 return this.translate(p, d);
@@ -4433,8 +4435,7 @@
             //vertical split line  ,垂点，曲率
             //垂直均分线，垂线上的点与垂点距离 
             vertical: function(p, d) {
-                var v = this.toV(p).norm().abs(d);
-                return this.clone(v.toP());
+                return this.toV(p).norm().abs(d).toP(this);
             },
             norm: function(p, d) {
                 return this.vertical(p, d);
@@ -4463,16 +4464,19 @@
             scale: function(e) {
                 return this.clone({ r: this.r * e });
             },
+            add: function(p) {
+                this.x += p.x;
+                this.y += p.y;
+                return this;
+            },
             //投射点
             proj: function(p, pr) {
-                var v = this.toV(p).proj(pr);
-                return this.clone(v.toP());
+                return this.toV(p).proj(pr).toP(this);
             },
             //透视比
             pr: function(p, d) {
-                var v = this.toV(p)
-                return v.pr(d);
-            }
+                return this.toV(p).pr(d);
+             }
         }
         _pointPolar.prototype.init.prototype = _pointPolar.prototype;
 
@@ -4718,15 +4722,19 @@
                 });
                 self.setup(opt);
             },
+
             setup: function(opt) {
                 var opt = opt || this.opt;
                 var shape = opt.shape;
                 if (shape in this) {
+
                     if (opt.fractalMirror) return this.fractalMirror(opt);
                     if (opt.fractal) return this.fractal(opt);
                     if (opt.fractalIn) return this.fractalIn(opt);
                     //重新计算vs
                     this._vertex(opt);
+                    if (opt.vertexRotate) return this.vertexRotate();
+                    if (opt.vertexTransform) return this.vertexTransform();
                     return this[shape].call(this, opt);
                 } else {
                     console.log(+"not support:" + shape)
@@ -4738,7 +4746,7 @@
                 this.po = vertex.po;
             },
             //计算量 计算量大，会致死锁，设置最大level5
-            calculatedAmount: function(opt) {
+            _calculatedAmount: function(opt) {
                 var num = opt.num
                 var level = 5;
                 var amount = 0;
@@ -4779,9 +4787,11 @@
                 fractalLevel++;
                 if (fractalLevel >= maxLevel) return;
                 var vs = this.vs;
+                var po = this.po;
                 if (vs.length < 2) return;
                 var v = vs[0].toV().add(vs[1].toV()); //计算上级r a，相连的向量和
-                var opt = _.clone(opt, v.toP(), { fractalLevel: fractalLevel })
+                // var p = v.toP(po);
+                var opt = _.clone(opt, { r: v.abs(), a: v.deg() }, { fractalLevel: fractalLevel })
                 self.setup(opt);
             },
             //顶点镜像分形
@@ -5502,18 +5512,17 @@
             },
 
             // 顶点变形
-            transform: function() {
+            vertexTransform: function() {
                 var self = this;
                 var speed = 1;
                 var vs = this.vs;
-                vs.forEach(function(t) {
-                    t = _.extend(t, {
+                vs = vs.map(function(t) {
+                    return _.extend(t, {
                         vx: (Math.random() * 2 - 1) * speed,
                         vy: (Math.random() * 2 - 1) * speed,
-
                     })
                 });
-
+                self.timmer && clearTimeout(self.timmer);
                 (function _move() {
                     vs.forEach(function(t) {
                         t.x += t.vx;
@@ -5521,7 +5530,22 @@
                     });
                     // self.draw.clear();
                     self.draw.link(vs);
-                    setTimeout(_move, 100);
+                    self.timmer = setTimeout(_move, 100);
+                })()
+            },
+            //顶点旋转
+            vertexRotate: function() {
+                var self = this;
+                var vs = this.vs;
+                var i = 0;
+                self.timmer && clearTimeout(self.timmer);
+                (function rotate() {
+                    self.draw.clear();
+                    vs = vs.map(function(t) {
+                        return t.rotate(i++)
+                    });
+                    self.draw.link(vs)
+                    self.timmer = setTimeout(rotate, 170);
                 })()
             },
             //一笔画 画饼
@@ -5553,8 +5577,7 @@
 
                 var vs2 = vs.map(function(t, i) {
                     var t2 = vs[i + 1 === len ? 0 : i + 1];
-                    var v = t.toV().add(t2.toV());
-                    return t.clone(v.toP());
+                    return t.toV().add(t2.toV()).toP(po);
                 });
 
                 var vs3 = [];
@@ -5571,7 +5594,6 @@
                     len = vs.length,
                     po = vertex.po;
                 if (len < 3) return;
-                var v;
                 var vs2 = vs.map(function(t, i) {
                     var t2, t3;
                     if (i + 1 === len) {
@@ -5584,8 +5606,7 @@
                         t2 = vs[i + 1];
                         t3 = vs[i + 2];
                     }
-                    v = t.toV(t2).add(t.toV(t3));
-                    return t.clone(v.toP());
+                    return t.toV(t2).add(t.toV(t3)).toP(t);
                 });
                 var vs3 = [];
                 vs.forEach(function(t, i) {
@@ -6039,17 +6060,15 @@
                 var speed = 1;
                 var vs = this.vs;
                 vs.forEach(function(t) {
-                    _.extend(t, {
-                        vx: (Math.random() * 2 - 1) * speed,
-                        vy: (Math.random() * 2 - 1) * speed,
-
-                    })
+                    t.v = {
+                        x: (Math.random() * 2 - 1) * speed,
+                        y: (Math.random() * 2 - 1) * speed,
+                    }
                 });
 
                 (function _move() {
-                    vs.forEach(function(t) {
-                        t.x += t.vx;
-                        t.y += t.vy;
+                    self.vs = vs.map(function(t) {
+                        return t.add(t.v)
                     });
                     self.draw.clear();
                     self.polygon(self.opt)
@@ -7219,14 +7238,14 @@
                         }
                     })
                 }
-                //弧线
-                if (opt && opt.arc) {
+                //曲线
+                if (opt && opt.curve) {
                     var po = _pointPolar({ o: this.o });
                     vs.forEach(function(t, i) {
                         var t1 = vs[i + 1 === len ? 0 : i + 1],
                             v1 = po.toV(t),
                             v2 = po.toV(t1);
-                        var p = _.pointPolar(v1.add(v2).toP(po));
+                        var p = v1.add(v2).toP(po);
 
                         ctx.moveTo(t.x, t.y);
                         ctx.quadraticCurveTo(
@@ -7235,6 +7254,18 @@
                         );
                     })
                 }
+                //半圆弧
+                if (opt && opt.semiarc) {
+                    vs.forEach(function(t, i) {
+                        var t1 = vs[i + 1 === len ? 0 : i + 1],
+                            to = t.mid(t1),
+                            v1 = to.toV(t),
+                            v2 = to.toV(t1);
+                        ctx.moveTo(t.x, t.y);
+                        ctx.arc(to.x, to.y, v1.abs(), v1.rad(), v2.rad(), false);
+                    })
+                }
+
 
                 self.closePath(opt);
                 self.render(opt);
@@ -7255,7 +7286,7 @@
                     if (opt.fillInterval) this.zebra(vs, opt);
                     //顶点镜像
                     if (opt.showMirror) this.mirror(vs, opt);
-                    //夹角
+                    //标注夹角
                     if (opt.showAngle) this.includedAngle(vs, opt);
                 }
                 return this;
@@ -7272,7 +7303,7 @@
                         v2 = t.toV(t2),
                         ia = Math.round(_.deg(v1.ia(v2)));
                     self.arc(t, 10, v1.rad(), v2.rad());
-                    var p = _pointPolar(t.toV().abs(opt.r + 15).toP(t.o));
+                    var p = t.toV().abs(opt.r + 15).toP(t.o);
                     return self.text({ x: p.x, y: p.y, text: ia + '°' })
                 }
                 if (opt.showAngle === "all") {
@@ -7304,7 +7335,7 @@
             escribedcircle: function(opt) {
 
             },
-            //则该三角形内切圆圆心坐标：
+            //三角形内切圆圆心坐标：
             // [ax1+bx2+cx3] / [a+b+c]， [ay1+by2+cy3] / [a+b+c]
             //半径 r=s/p  s=p(p-a)(p-b)([-c])^1/2
             // incircle: function(opt) {
