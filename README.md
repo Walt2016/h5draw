@@ -19,5 +19,34 @@
 
 ![image](https://github.com/Walt2016/h5draw/blob/master/pic/fskp10.gif)
 
-h5版本目前功能比小程序强不少。
+
+```
+   var draw = _.draw({
+        canvasid: "myCanvas",
+        fullscreen: true
+    });
+    var opt={
+        shape:{
+            shape:"polygon",
+            num:3,
+            r:10,
+            fill:true,
+            a:0
+        },
+        group:{
+            group:"polygon",
+            num:7,
+            r:30,
+            colorful:"circle",
+            rotation:true
+        },
+        motion:{
+            motion:"rotate",
+            speed:0.1
+        }
+    }
+    draw.setup(opt)
+
+```
+
 几何画图qq群272831512

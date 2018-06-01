@@ -682,166 +682,7 @@
             toJSONString: function(json) {
                 return _.isObject(json) ? JSON.stringify(json) : json;
             },
-            // //随机颜色
-            // color: function() {
-            //     // return this.hsl();
-            //     return this.rgba();
-            // },
-            // // rgb: function() {
-            // //     //位移0去掉小数 正数取整
-            // //     return '#' + ('00000' + (Math.random() * 0x1000000 << 0).toString(16)).slice(-6);
-            // //     // return '#'+(_.cos(0)*127+128<<16 | _.cos(0+360/3)*127+128<<8 | _.cos(0+360/3*2)*127+128).toString(16);
-            // // },
-            // hsl: function() { //微信小程序不支持hsl
-            //     return "hsl(" + [Math.random() * 360 << 0] + ",50%,50%)";
-            // },
-            // rgbToHex: function(r, g, b) {
-            //     var hex = ((r << 16) | (g << 8) | b).toString(16);
-            //     return "#" + new Array(Math.abs(hex.length - 7)).join("0") + hex;
-            // },
 
-            // hexToRgb: function(hex) {
-
-
-            //     // var hxs = str.match(/../g);
-            //     // for (var i = 0; i < 3; i++) hxs[i] = parseInt(hxs[i], 16);  
-            //     // return hxs;
-
-            //     var rgb = [];
-            //     for (var i = 1; i < 7; i += 2) {
-            //         rgb.push(parseInt("0x" + hex.slice(i, i + 2)));
-            //     }
-            //     return rgb;
-            // },
-
-            // hsla: function() {
-            //     return "hsla(" + [Math.random() * 360 << 0] + ",50%,50%,0.5)";
-            // },
-            // //深色 rgb 有一位小于80
-            // deep: function() {
-            //     var n = Math.random() * 3 << 0;
-            //     var c = [255, 255, 255].map(function(t, i) {
-            //         return i === n ? Math.random() * 80 << 0 : t * Math.random() << 0;
-            //     });
-            //     return "rgb(" + c + ")";
-            // },
-            // //输出rgba颜色格式  
-            // //红 100
-            // //绿 010
-            // //青 001 
-            // //黄 110 
-            // //紫 101
-            // //全彩 111
-            // //黑白灰 000
-            // rgba: function(r, g, b, a) {
-            //     // var args = Array.prototype.slice.call(arguments),
-            //     var len = arguments.length;
-            //     if (len < 4) {
-            //         var min = 0.1,
-            //             max = 0.7;
-            //         a = (min + (max - min) * Math.random()).toFixed(1);
-            //     }
-            //     if (len < 3) b = 1;
-            //     if (len < 2) g = 1;
-            //     if (len < 1) r = 1;
-            //     var arr = [r, g, b];
-            //     if (r * g * b === 1 || r + g + b === 0) {
-            //         arr = arr.map(function(t) {
-            //             return Math.random() * 255 << 0;
-            //         });
-            //     }
-            //     // else if (r + g + b === 0) {
-            //     //     var t = Math.random() * 255 << 0;
-            //     //     arr = [t, t, t];
-            //     // } 
-            //     else {
-            //         var rgb = 155;
-            //         var c = Math.random() * (255 - rgb) << 0 + rgb;
-            //         arr = arr.map(function(t) {
-            //             return t === 1 ? Math.random() * (255 - rgb) << 0 + rgb : Math.random() * (c / 2) << 0;
-            //         });
-            //     }
-            //     arr.push(a);
-            //     return "rgba(" + arr + ")";
-            // },
-
-            // // hex2rgb
-            // rgb: function(color, alpha) {
-            //     if (!color) return _.rgb(_.hex());
-
-            //     var sColor = color.toLowerCase();
-            //     if (sColor && /^#([0-9a-fA-f]{3}|[0-9a-fA-f]{6})$/.test(sColor)) { //#ffffff #fff
-            //         var _rgb;
-            //         if (sColor.length === 4) { //#fff
-            //             _rgb = sColor.replace(/^#([0-9a-fA-f]{1})([0-9a-fA-f]{1})([0-9a-fA-f]{1})$/, function(m, r, g, b) {
-            //                 return [r, g, b].map(function(t) {
-            //                     return '0x' + t + t << 0
-            //                 })
-            //             })
-            //         } else { //#ffffff
-            //             _rgb = sColor.replace(/^#([0-9a-fA-f]{2})([0-9a-fA-f]{2})([0-9a-fA-f]{2})$/, function(m, r, g, b) {
-            //                 return [r, g, b].map(function(t) {
-            //                     return '0x' + t << 0
-            //                 })
-            //             })
-            //         }
-            //         if (alpha) return 'RGBA(' + _rgb + ',' + alpha + ')';
-            //         return 'RGB(' + _rgb + ')'
-            //     } else {
-            //         return sColor;
-            //     }
-
-            // },
-            // // rgb2hex
-            // // RGBToHex = (r, g, b) => ((r << 16) + (g << 8) + b).toString(16).padStart(6, ‘0’);
-            // // var regexp = /^rgb/(([0-9]{0,3})/,/s([0-9]{0,3})/,/s([0-9]{0,3})/)/g; 
-            // hex: function(color) {
-            //     if (!color) return '#' + ('00000' + (Math.random() * 0x1000000 << 0).toString(16)).slice(-6);
-            //     if (/^(rgb[a]?|RGB[A]?)/.test(color)) {
-            //         var aColor = color.replace(/(?:\(|\)|rgb[a]?|RGB[A]?)*/g, "").split(",");
-            //         var strHex = "#";
-            //         aColor.forEach(function(t, i) {
-            //             if (i < 3) strHex += ('0' + (+t).toString(16)).slice(-2);
-            //         })
-            //         if (strHex.length !== 7) strHex = color;
-            //         return strHex;
-            //     } else if (/^#([0-9a-fA-f]{6})$/.test(color)) {
-            //         return color;
-            //     } else if (/^#([0-9a-fA-f]{3})$/.test(color)) {
-            //         return color.replace(/[0-9a-fA-f]/g, function(m) {
-            //             return m + m;
-            //         });
-            //     } else {
-            //         return color;
-            //     }
-            // },
-
-            // //渐变色数组  每两位的颜色小于80是深色
-            // gradient: function(startColor, endColor, step) {
-            //     var startRGB = this.rgb(startColor); //转换为rgb数组模式
-            //     var startR, startG, startB;
-            //     startRGB.replace(/(\d{1,3}),(\d{1,3}),(\d{1,3})/g, function(m, r, g, b) {
-            //         startR = +r;
-            //         startG = +g;
-            //         startB = +b;
-            //     });
-            //     var endRGB = this.rgb(endColor);
-            //     var endR, endG, endB;
-            //     endRGB.replace(/(\d{1,3}),(\d{1,3}),(\d{1,3})/g, function(m, r, g, b) {
-            //         endR = +r;
-            //         endG = +g;
-            //         endB = +b;
-            //     });
-            //     sR = (endR - startR) / step;
-            //     sG = (endG - startG) / step;
-            //     sB = (endB - startB) / step;
-
-            //     var colorArr = [];
-            //     for (var i = 0; i < step; i++) {
-            //         colorArr[colorArr.length] = 'rgba(' + [(sR * i + startR) << 0, (sG * i + startG) << 0, (sB * i + startB) << 0] + ',0.5)';
-            //     }
-            //     return colorArr;
-            // },
             isHtml: function(tpl) {
                 return /<(\S*?) [^>]*>.*?<\/\1>|<.*?\/?>/.test(tpl);
             },
@@ -2458,12 +2299,42 @@
                 }))
 
             },
-            //
-            rgba: function() {
-                var min = 0.1,
-                    max = 0.7,
+            // 显示分类颜色 
+            // //红 100
+            // //绿 010
+            // //青 001 
+            // //黄 110 
+            // //紫 101
+            // //全彩 111
+            // //黑白灰 000
+            rgba: function(r, g, b, a) {
+                var len = arguments.length;
+                if (len < 4) {
+                    var min = 0.1,
+                        max = 0.7;
                     a = (min + (max - min) * Math.random()).toFixed(1);
-                return this.rgb(this.hex(), a);
+                }
+                if (len < 3) b = 1;
+                if (len < 2) g = 1;
+                if (len < 1) r = 1;
+                // if (len === 0) return this.rgb(this.hex(), a);
+                var arr = [r, g, b];
+                if (r & g & b === 1) {
+                    arr = arr.map(function(t) {
+                        return Math.random() * 255 << 0;
+                    });
+                } else if (r | g | b === 0) {
+                    var t = Math.random() * 255 << 0;
+                    arr = [t, t, t];
+                } else {
+                    var rgb = 155;
+                    var c = Math.random() * (255 - rgb) << 0 + rgb;
+                    arr = arr.map(function(t) {
+                        return t === 1 ? Math.random() * (255 - rgb) << 0 + rgb : Math.random() * (c / 2) << 0;
+                    });
+                }
+                arr[arr.length] = a;
+                return this.rgbaWrapper(arr)
             },
             //hex2rgb
             rgb: function(color, alpha) {
@@ -5954,16 +5825,14 @@
                 this.context = draw.context;
                 this.canvas = draw.canvas;
 
-                var r = opt.shape.r,
-                    color = opt.shape.color,
-                    shape = opt.shape.shape || "circle";
+                var r = opt.shape.r;
                 var colorful = opt.group.colorful;
 
                 var x = _.isUndefined(opt.group.x) ? this.canvas.width / 2 : opt.group.x;
                 var y = _.isUndefined(opt.group.y) ? this.canvas.height / 2 : opt.group.y;
 
-                var sr = r;
-                var width = r,
+                var sr = r,
+                    width = r,
                     height = r;
 
                 if (opt.group) {
@@ -5977,7 +5846,7 @@
                 var colorArr = [];
                 var interval = opt.group.interval || 1;
                 var co = _.color();
-                var len = _.max(360 / interval, opt.group.num);
+                var len = opt.group.num || 360 / interval; //_.max(360 / interval, opt.group.num);
 
                 switch (colorful) {
                     case "circle":
@@ -6041,6 +5910,7 @@
                     po = this.po,
                     len = groups.length;
                 var vertex = _.vertex(opt.shape);
+                var a = opt.shape.a || 0; //初始角
                 var vsGroup = [];
                 var seq = opt.group.sequence; //顺时针逆时针
                 switch (seq) {
@@ -6059,6 +5929,9 @@
                     if (opt.group.colorful !== "solid") {
                         var groupColor = opt.group.colorArr[i];
                         opt.shape = _.clone(opt.shape, { color: groupColor, lineColor: groupColor, fillColor: groupColor })
+                    }
+                    if (opt.group.rotation) { //自转
+                        opt.shape = _.clone(opt.shape, { a: (a + i * 360 / len) % 360 })
                     }
                     var drawShape, vs;
                     if (opt.group.animate && opt.group.easing === "none") { //动画
@@ -6440,20 +6313,16 @@
                     bounce = opt.motion.bounce,
                     click = opt.motion.click;
 
-
-                var screenWidth = this.draw.canvas.width,
-                    screenHeight = this.draw.canvas.height;
-
+                var width = this.draw.width,
+                    height = this.draw.height;
 
                 this.groups = [];
                 this.a = 0;
                 this.r = opt.motion.r || 100;
                 //中心点
-                this.centerX = screenWidth / 2;
-                this.centerY = screenHeight / 2;
-
+                this.centerX = width / 2;
+                this.centerY = height / 2;
                 var follow = _.isUndefined(opt.motion.follow) ? true : opt.motion.follow;
-
 
                 //速度随机
                 var _randomV = function(t) {
@@ -6470,8 +6339,8 @@
                         //range
                         top: 0,
                         left: 0,
-                        right: screenWidth,
-                        bottom: screenHeight,
+                        right: width,
+                        bottom: height,
                         animate: false,
                         lightState: 1,
                         zoomSpeed: zoomSpeed
@@ -6483,7 +6352,7 @@
                         t = _randomV(t);
                         var item = draw.shape(t);
                         item.color(colorful)
-                        self.groups.push(item);
+                        this.groups[this.groups.length] = item;
                     })
                 } else {
                     for (var i = 0; i < num; i++) {
@@ -6497,7 +6366,7 @@
                             t = draw.shape(opt.shape);
                             t.color(colorful)
                         }
-                        this.groups.push(t);
+                        this.groups[this.groups.length] = t;
                     };
                 }
                 this.len = this.groups.length;
@@ -6512,9 +6381,10 @@
                 self.shadow ? self.draw.shadow() : self.draw.clear();
 
                 groups.forEach(function(t, i) {
+                    var opt = t.opt.group || t.opt;
                     motion.split("_").forEach(function(m) {
-                        self[m] && self[m](t.opt);
-                        self.follow(t.opt);
+                        self[m] && self[m](opt);
+                        self.follow(opt);
                     });
                     t.setup && t.setup();
 
@@ -6541,263 +6411,221 @@
                 //移动中心点
                 if (!!~["circle", "ellipse"].indexOf(this.motion)) { //"spiral",
                     var self = this;
-                    (function(opt) {
-                        if (opt.follow && mouse) { //移动跟随
-                            var dx = mouse.x - self.centerX;
-                            var dy = mouse.y - self.centerY;
-                            self.centerX += (dx * opt.followSpeed);
-                            self.centerY += (dy * opt.followSpeed);
-                        } else if (opt.click && mouse) { //点击重绘
-                            self.centerX = mouse.x
-                            self.centerY = mouse.y
-                        }
-                    })(opt.group || opt)
-
+                    if (opt.follow && mouse) { //移动跟随
+                        var dx = mouse.x - self.centerX;
+                        var dy = mouse.y - self.centerY;
+                        self.centerX += (dx * opt.followSpeed);
+                        self.centerY += (dy * opt.followSpeed);
+                    } else if (opt.click && mouse) { //点击重绘
+                        self.centerX = mouse.x
+                        self.centerY = mouse.y
+                    }
                 } else {
-                    (function(opt) {
-                        if (opt.follow && mouse) {
-                            var dx = mouse.x - opt.x
-                            var dy = mouse.y - opt.y
-                            opt.x += (dx * opt.followSpeed);
-                            opt.y += (dy * opt.followSpeed);
-                        } else if (opt.click && mouse) {
-                            opt.x = mouse.x
-                            opt.y = mouse.y
-                        }
-                    })(opt.group || opt)
+                    if (opt.follow && mouse) {
+                        var dx = mouse.x - opt.x
+                        var dy = mouse.y - opt.y
+                        opt.x += (dx * opt.followSpeed);
+                        opt.y += (dy * opt.followSpeed);
+                    } else if (opt.click && mouse) {
+                        opt.x = mouse.x
+                        opt.y = mouse.y
+                    }
                 }
             },
             //移动
             move: function(opt) {
-                (function(opt) {
-                    opt.x += opt.vx || 1;
-                    opt.y += opt.vy || 1;
-                })(opt.group || opt);
+                opt.x += opt.vx || 1;
+                opt.y += opt.vy || 1;
                 this.bounce(opt);
             },
             //正弦函数运动公式 y = sin(x)
             sineMove: function(opt) {
                 var self = this;
+                opt.x += opt.vx > 0 ? 1 : -1;
+                opt.y += _.sin(self.a) * self.r * (opt.vy > 0 ? 1 : -1);
+                self.a += opt.speed;
 
-                (function(opt) {
-                    opt.x += opt.vx > 0 ? 1 : -1;
-                    opt.y += _.sin(self.a) * self.r * (opt.vy > 0 ? 1 : -1);
-                    self.a += opt.speed;
-                })(opt.group || opt);
                 this.bounce(opt);
             },
             //反弹
             bounce: function(opt) {
-                (function(opt) {
-                    if (opt.bounce) { //碰壁反射 
-                        if (opt.x < opt.left + opt.width) { //碰到左边的边界
-                            opt.x = opt.width;
-                            opt.vx = -opt.vx;
-                        } else if (opt.y < opt.top + opt.height) {
-                            opt.y = opt.height;
-                            opt.vy = -opt.vy;
-                        } else if (opt.x > opt.right - opt.width) {
-                            opt.x = opt.right - opt.width;
-                            opt.vx = -opt.vx;
-                        } else if (opt.y > opt.bottom - opt.height) {
-                            opt.y = opt.bottom - opt.height;
-                            opt.vy = -opt.vy;
-                        }
-                    } else { //左出右进  左进右出
-                        if (opt.vx < 0 && opt.x < opt.left - opt.width) { //碰到左边的边界
-                            opt.x = opt.right + opt.r;
-                        } else if (opt.vy < 0 && opt.y < opt.top - opt.height) {
-                            opt.y = opt.bottom + opt.r;
-                        } else if (opt.vx > 0 && opt.x > opt.right + opt.width) {
-                            opt.x = opt.left - opt.r;
-                        } else if (opt.vy > 0 && opt.y > opt.bottom + opt.height) {
-                            opt.y = opt.top - opt.r;
-                        }
+                if (opt.bounce) { //碰壁反射 
+                    if (opt.x < opt.left + opt.width) { //碰到左边的边界
+                        opt.x = opt.width;
+                        opt.vx = -opt.vx;
+                    } else if (opt.y < opt.top + opt.height) {
+                        opt.y = opt.height;
+                        opt.vy = -opt.vy;
+                    } else if (opt.x > opt.right - opt.width) {
+                        opt.x = opt.right - opt.width;
+                        opt.vx = -opt.vx;
+                    } else if (opt.y > opt.bottom - opt.height) {
+                        opt.y = opt.bottom - opt.height;
+                        opt.vy = -opt.vy;
                     }
-                })(opt.group || opt);
+                } else { //左出右进  左进右出
+                    if (opt.vx < 0 && opt.x < opt.left - opt.width) { //碰到左边的边界
+                        opt.x = opt.right + opt.r;
+                    } else if (opt.vy < 0 && opt.y < opt.top - opt.height) {
+                        opt.y = opt.bottom + opt.r;
+                    } else if (opt.vx > 0 && opt.x > opt.right + opt.width) {
+                        opt.x = opt.left - opt.r;
+                    } else if (opt.vy > 0 && opt.y > opt.bottom + opt.height) {
+                        opt.y = opt.top - opt.r;
+                    }
+                }
+
             },
             //碰撞
             collide: function(opt1, opt2) {
+                var dx = opt1.x - opt2.x,
+                    dy = opt1.y - opt2.y,
+                    dist = Math.sqrt(dx * dx + dy * dy);
 
-                (function(opt1, opt2) {
-                    var dx = opt1.x - opt2.x,
-                        dy = opt1.y - opt2.y,
-                        dist = Math.sqrt(dx * dx + dy * dy);
+                if (dist < opt2.r + opt1.r) {
+                    //calculate angle, sine, and cosine
+                    var angle = Math.atan2(dy, dx),
+                        sin = Math.sin(angle),
+                        cos = Math.cos(angle),
+                        //rotate opt2's position
+                        x0 = 0,
+                        y0 = 0,
+                        //rotate opt1's position
+                        x1 = dx * cos + dy * sin,
+                        y1 = dy * cos - dx * sin,
+                        //rotate opt2's velocity
+                        vx0 = opt2.vx * cos + opt2.vy * sin,
+                        vy0 = opt2.vy * cos - opt2.vx * sin,
+                        //rotate opt1's velocity
+                        vx1 = opt1.vx * cos + opt1.vy * sin,
+                        vy1 = opt1.vy * cos - opt1.vx * sin,
+                        //collision reaction
+                        vxTotal = vx0 - vx1;
 
-                    if (dist < opt2.r + opt1.r) {
-                        //calculate angle, sine, and cosine
-                        var angle = Math.atan2(dy, dx),
-                            sin = Math.sin(angle),
-                            cos = Math.cos(angle),
-                            //rotate opt2's position
-                            x0 = 0,
-                            y0 = 0,
-                            //rotate opt1's position
-                            x1 = dx * cos + dy * sin,
-                            y1 = dy * cos - dx * sin,
-                            //rotate opt2's velocity
-                            vx0 = opt2.vx * cos + opt2.vy * sin,
-                            vy0 = opt2.vy * cos - opt2.vx * sin,
-                            //rotate opt1's velocity
-                            vx1 = opt1.vx * cos + opt1.vy * sin,
-                            vy1 = opt1.vy * cos - opt1.vx * sin,
-                            //collision reaction
-                            vxTotal = vx0 - vx1;
-
-                        vx0 = ((opt2.mass - opt1.mass) * vx0 + 2 * opt1.mass * vx1) /
-                            (opt2.mass + opt1.mass);
-                        vx1 = vxTotal + vx0;
-                        x0 += vx0;
-                        x1 += vx1;
-                        //rotate positions back
-                        var x0Final = x0 * cos - y0 * sin,
-                            y0Final = y0 * cos + x0 * sin,
-                            x1Final = x1 * cos - y1 * sin,
-                            y1Final = y1 * cos + x1 * sin;
-                        //adjust positions to actual screen positions
-                        opt1.x = opt2.x + x1Final;
-                        opt1.y = opt2.y + y1Final;
-                        opt2.x = opt2.x + x0Final;
-                        opt2.y = opt2.y + y0Final;
-                        //rotate velocities back
-                        opt2.vx = vx0 * cos - vy0 * sin;
-                        opt2.vy = vy0 * cos + vx0 * sin;
-                        opt1.vx = vx1 * cos - vy1 * sin;
-                        opt1.vy = vy1 * cos + vx1 * sin;
-                    }
-
-                })(opt1.group || opt1, opt2.group || opt2)
-
+                    vx0 = ((opt2.mass - opt1.mass) * vx0 + 2 * opt1.mass * vx1) /
+                        (opt2.mass + opt1.mass);
+                    vx1 = vxTotal + vx0;
+                    x0 += vx0;
+                    x1 += vx1;
+                    //rotate positions back
+                    var x0Final = x0 * cos - y0 * sin,
+                        y0Final = y0 * cos + x0 * sin,
+                        x1Final = x1 * cos - y1 * sin,
+                        y1Final = y1 * cos + x1 * sin;
+                    //adjust positions to actual screen positions
+                    opt1.x = opt2.x + x1Final;
+                    opt1.y = opt2.y + y1Final;
+                    opt2.x = opt2.x + x0Final;
+                    opt2.y = opt2.y + y0Final;
+                    //rotate velocities back
+                    opt2.vx = vx0 * cos - vy0 * sin;
+                    opt2.vy = vy0 * cos + vx0 * sin;
+                    opt1.vx = vx1 * cos - vy1 * sin;
+                    opt1.vy = vy1 * cos + vx1 * sin;
+                }
 
             },
             //变形
             transform: function(opt) {
-                (function(opt) {
-                    opt.num += opt.speed;
-                })(opt.group || opt)
+                opt.num += opt.speed;
             },
             //旋转
             rotate: function(opt) {
-                (function(opt) {
-                    opt.a += opt.speed;
-                })(opt.group || opt)
+                opt.a += opt.speed;
+
             },
             //飘忽不定
             jiggle: function(opt) {
-                (function(opt) {
-                    opt.x += Math.random() * 2 - 1;
-                    opt.y += Math.random() * 2 - 1;
-                })(opt.group || opt)
+                opt.x += Math.random() * 2 - 1;
+                opt.y += Math.random() * 2 - 1;
                 this.bounce(opt)
             },
             //漂浮
             float: function(opt) {
                 // 负相关
                 var deta = Math.random() * 2 - 1;
-                (function(opt) {
-                    opt.vx += deta;
-                    opt.vy -= deta;
-                    opt.x += opt.vx || 1;
-                    opt.y += opt.vy || 1;
-
-                })(opt.group || opt);
+                opt.vx += deta;
+                opt.vy -= deta;
+                opt.x += opt.vx || 1;
+                opt.y += opt.vy || 1;
                 this.bounce(opt)
             },
             //曲线
             curve: function(opt) {
-                (function(opt) {
-                    opt.x += opt.vx || 1;
-                    opt.y += opt.vy || 1;
-                    opt.vy += 0.01 * opt.vx * opt.vx;
-                })(opt.group || opt)
+                opt.x += opt.vx || 1;
+                opt.y += opt.vy || 1;
+                opt.vy += 0.01 * opt.vx * opt.vx;
                 this.bounce(opt)
             },
             //重力运动 
             gravitate: function(opt) {
-                (function(opt) {
-                    opt.vy += 0.22; //加速下落
-                    opt.vx *= 0.998; //地面摩擦
-                    if (opt.y > opt.bottom - opt.height) {
-                        opt.vy *= 0.96; //地面反弹减速
-                    }
-                    opt.bounce = true;
-                })(opt.group || opt);
+                opt.vy += 0.22; //加速下落
+                opt.vx *= 0.998; //地面摩擦
+                if (opt.y > opt.bottom - opt.height) {
+                    opt.vy *= 0.96; //地面反弹减速
+                }
+                opt.bounce = true;
                 this.move(opt)
             },
             //缩放
             zoom: function(opt) {
-                (function(opt) {
-                    var minR = opt.minR || 1;
-                    var maxR = opt.maxR || opt.right / 2;
-                    var speed = opt.zoomSpeed || opt.speed || 1;
-                    if (opt.r >= maxR) {
-                        opt.zoomState = "out";
-                    } else if (opt.r <= minR) {
-                        opt.zoomState = "in";
-                    }
-                    if (opt.zoomState === "in") {
-                        opt.r += speed
-                    } else {
-                        opt.r -= speed
-                    }
-                })(opt.group || opt);
+                var minR = opt.minR || 1;
+                var maxR = opt.maxR || opt.right / 2;
+                var speed = opt.zoomSpeed || opt.speed || 1;
+                if (opt.r >= maxR) {
+                    opt.zoomState = "out";
+                } else if (opt.r <= minR) {
+                    opt.zoomState = "in";
+                }
+                if (opt.zoomState === "in") {
+                    opt.r += speed
+                } else {
+                    opt.r -= speed
+                }
             },
             //放大
             zoomin: function(opt) {
-                (function(opt) {
-                    opt.r += opt.speed || 1
-                })(opt.group || opt)
+                opt.r += opt.speed || 1
             },
             //放大
             zoomout: function(opt) {
-                (function(opt) {
-                    opt.r -= opt.speed || 1
-                })(opt.group || opt)
+                opt.r -= opt.speed || 1
+
             },
             //绕圈
             circle: function(opt) {
                 var self = this;
-                (function(opt) {
-                    opt.x = self.centerX + _.sin(self.a) * self.r;
-                    opt.y = self.centerY + _.cos(self.a) * (self.r);
-                    self.a += opt.speed * 0.1;
-                })(opt.group || opt)
+                opt.x = self.centerX + _.sin(self.a) * self.r;
+                opt.y = self.centerY + _.cos(self.a) * (self.r);
+                self.a += opt.speed * 0.1;
             },
             //螺旋
             spiral: function(opt) {
                 var self = this;
                 this.circle(opt);
                 self.r += self.swell || 1;
-                (function(opt) {
-                    if (opt.x + opt.r > opt.right || opt.y + opt.r > opt.bottom) {
-                        self.swell = -1;
-                    } else if (self.r < 1) {
-                        self.swell = 1;
-                    }
-                })(opt.group || opt)
+                if (opt.x + opt.r > opt.right || opt.y + opt.r > opt.bottom) {
+                    self.swell = -1;
+                } else if (self.r < 1) {
+                    self.swell = 1;
+                }
             },
             //椭圆
             ellipse: function(opt) {
                 var self = this;
-                (function(opt) {
-                    opt.x = self.centerX + Math.sin(self.a) * self.r;
-                    opt.y = self.centerY + Math.cos(self.a) * (self.r) * 2;
-                    self.a += opt.speed;
-                })(opt.group || opt)
+                opt.x = self.centerX + Math.sin(self.a) * self.r;
+                opt.y = self.centerY + Math.cos(self.a) * (self.r) * 2;
+                self.a += opt.speed;
             },
 
             //发光
             light: function(opt) {
-                (function(opt) {
-                    if (opt.shadowBlur >= 20) {
-                        self.lightState = -1
-
-                    } else if (opt.shadowBlur <= 0) {
-                        self.lightState = 1
-                    }
-
-                    opt.shadowBlur += opt.speed * self.lightState;
-                })(opt.group || opt)
+                if (opt.shadowBlur >= 20) {
+                    self.lightState = -1
+                } else if (opt.shadowBlur <= 0) {
+                    self.lightState = 1
+                }
+                opt.shadowBlur += opt.speed * self.lightState;
             },
             //跳动发光
             throbLight: function(opt) {
@@ -6807,22 +6635,20 @@
                 var minShadowBlur = opt.minShadowBlur || 0;
                 var speed = opt.speed || 1;
                 var blurSpeed = speed * (maxShadowBlur - minShadowBlur) / (maxR - minR);
-                (function(opt) {
-                    if (opt.r >= maxR) {
-                        opt.zoomState = "out";
-                        opt.shadowBlur = maxShadowBlur
-                    } else if (opt.r <= minR) {
-                        opt.zoomState = "in";
-                        opt.shadowBlur = minShadowBlur
-                    }
-                    if (opt.zoomState === "in") {
-                        opt.r += speed;
-                        opt.shadowBlur += blurSpeed
-                    } else {
-                        opt.r -= speed;
-                        opt.shadowBlur -= blurSpeed
-                    }
-                })(opt.group || opt);
+                if (opt.r >= maxR) {
+                    opt.zoomState = "out";
+                    opt.shadowBlur = maxShadowBlur
+                } else if (opt.r <= minR) {
+                    opt.zoomState = "in";
+                    opt.shadowBlur = minShadowBlur
+                }
+                if (opt.zoomState === "in") {
+                    opt.r += speed;
+                    opt.shadowBlur += blurSpeed
+                } else {
+                    opt.r -= speed;
+                    opt.shadowBlur -= blurSpeed
+                }
             }
         }
         _motion.prototype.init.prototype = _motion.prototype;
@@ -7360,7 +7186,7 @@
                 if (opt) {
                     var ctx = this.context;
                     if (opt.randomColor) opt.color = _.color().rgba();
-                    this.setLineJoin(opt.lineJoin);
+                    this.setLineJoin(ctx, opt.lineJoin);
                     this.setLineWidth(ctx, opt.lineWidth);
                     this.setStrokeStyle(ctx, opt.lineColor || opt.color);
                     opt.shadowBlur && this.setShadowBlur(ctx, opt.shadowBlur);
@@ -7837,7 +7663,7 @@
             },
             //全局
             global: function(opt) {
-                if (!(opt && opt.global)) return;
+                if (!(opt && opt.global)) return this;
                 //画布尺寸
                 opt.global.backgroundSize && this.size({ ratio: opt.global.backgroundSize });
                 var ctx = this.context;
