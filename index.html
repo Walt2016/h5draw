@@ -212,10 +212,14 @@
                         "key": "windmill",
                         "text": "风车"
                     },
-                    // {
-                    //     "key": "fractalMirror",
-                    //     "text": "顶点镜像分形"
-                    // },
+                    {
+                        "key": "cornercurve",
+                        "text": "转角曲线"
+                    },
+                    {
+                        "key": "heart",
+                        "text": "心形"
+                    },
 
                 ],
 
@@ -398,7 +402,7 @@
                 "length": 15,
                 "text": "线条颜色"
             },
-            
+
             "dashed": {
                 "value": false,
                 "text": "虚线"
@@ -427,14 +431,7 @@
                 "value": false,
                 "text": "间隔填色"
             },
-            "alpha": {
-                "type": "slider",
-                "min": 0.1,
-                "max": 1,
-                "step": 0.1,
-                "value": 1,
-                "text": "透明度"
-            },
+
             "color": {
                 "type": "color_rgba",
                 "length": 15,
@@ -509,14 +506,16 @@
                 "index": 0,
                 "text": "动画效果"
             },
-             "vertexTransform": {
+            "vertexTransform": {
                 "value": false,
                 "text": "顶点变形"
             },
-             "vertexRotate": {
+            "vertexRotate": {
                 "value": false,
                 "text": "顶点旋转"
             },
+
+
         },
         "group": {
             "text": "组合",
@@ -671,7 +670,7 @@
                 "index": 0,
                 "text": "时序"
             },
-            
+
             "showRadius": {
                 "value": false,
                 "text": "显示半径"
@@ -872,11 +871,7 @@
                 "value": false,
                 "text": "光影效果"
             },
-            "background": {
-                "type": "color_rgb",
-                "length": 15,
-                "text": "光影背景"
-            },
+
             "click": {
                 "value": false,
                 "text": "点击重绘"
@@ -897,6 +892,102 @@
                 "value": 1,
                 "text": "点击频率"
             },
+        },
+        "global": {
+            "text": "全局",
+            "compositeOperation": {
+                "type": "picker",
+                "values": [{
+                        "key": "source-over",
+                        "text": "覆盖"
+                    }, {
+                        "key": "lighter",
+                        "text": "重叠变亮"
+                    },
+                    {
+                        "key": "xor",
+                        "text": "重叠透明"
+                    },
+                    {
+                        "key": "source-in",
+                        "text": "重叠部分"
+                    },
+                    {
+                        "key": "source-out",
+                        "text": "非重叠部分"
+                    },
+                    {
+                        "key": "destination-over",
+                        "text": "插入背景"
+                    },
+                    {
+                        "key": "difference",
+                        "text": "不同"
+                    }
+                ],
+                "index": 0,
+                "text": "图像合成"
+            },
+            "alpha": {
+                "type": "slider",
+                "min": 0.1,
+                "max": 1,
+                "step": 0.1,
+                "value": 1,
+                "text": "透明度"
+            },
+            "showBackground": {
+                "value": false,
+                "text": "显示背景"
+            },
+            "background": {
+                "type": "color_rgb",
+                "length": 15,
+                "text": "背景颜色"
+            },
+            "backgroundSize": {
+                "type": "picker",
+                "values": [{
+                        "key": "fullscreen",
+                        "text": "全屏"
+                    }, {
+                        "key": "1:1",
+                        "text": "1:1"
+                    },
+                    {
+                        "key": "4:3",
+                        "text": "4:3"
+                    },
+                    {
+                        "key": "16:9",
+                        "text": "16:9"
+                    },
+                    {
+                        "key": "5:2",
+                        "text": "5:2"
+                    }
+                ],
+                "index": 0,
+                "text": "背景尺寸"
+            },
+            "showGrid": {
+                "value": false,
+                "text": "网格背景"
+            },
+            "grid": {
+                "type": "picker",
+                "values": [{
+                    "key": "normal",
+                    "text": "普通"
+                }, {
+                    "key": "ecgGrid",
+                    "text": "心电图网格"
+                }],
+                "index": 0,
+                "text": "网格类型"
+
+            }
+
         }
     };
 

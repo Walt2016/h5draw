@@ -1,6 +1,6 @@
 //一个js开发框架
 //template.event.canvas
-//v0.7.20180530
+//v0.7.20180601
 ;
 (function(root, factory) {
     if (typeof define === "function" && define.amd) {
@@ -160,10 +160,25 @@
                 return t === 'number' ? isNaN(o) ? 'nan' : !isFinite(o) ? 'infinity' : t : t;
             },
             isElement: function(o) {
-                return o && (o.nodeType === 1 || o.nodeType === 9);
+                return /html.*?element/i.test(this.type(o)); // htmlxxxElement
+                //Illegal invocation:Element.prototype.nodeName
+                // return o && (o.nodeType === 1 || o.nodeType === 9);
+                //  1-ELEMENT 
+                // 2-ATTRIBUTE 
+                // 3-TEXT 
+                // 4-CDATA 
+                // 5-ENTITY REFERENCE 
+                // 6-ENTITY 
+                // 7-PI (processing instruction) 
+                // 8-COMMENT 
+                // 9-DOCUMENT 
+                // 10-DOCUMENT TYPE 
+                // 11-DOCUMENT FRAGMENT 
+                // 12-NOTATION 
             },
             isDocument: function(o) {
-                return o && o.nodeName && o.nodeType === 9;
+                return /document/i.test(this.type(o));
+                // return o && o.nodeName && o.nodeType === 9;
             },
             //对象类名
             objectName: function(obj) {
@@ -2379,10 +2394,10 @@
 
         //颜色
         var _color = _.color = function(options) {
-            if (!(this instanceof _color)) return new _color(options);
-            this.init(options);
+            return new _color.prototype.init(options);
         }
         _color.prototype = {
+            constructor: _color,
             init: function(options) {
                 // this.id = 0;
                 this.a = 0
@@ -2573,6 +2588,7 @@
                 return this.hex(this.rgbaWrapper(color));
             }
         }
+        _color.prototype.init.prototype = _color.prototype;
 
 
         var _prototype = {};
@@ -3207,22 +3223,27 @@
         };
 
         //原型扩展 
-        // if (inBrowser) {
-        //     _.extproto(Element.prototype, _prototype.ele);
-        // };
+        if (inBrowser) { //, Element 小程序中不允许扩展dom
+            _.extproto(Element.prototype, _prototype.ele);
+        };
+        //Date,
+        _.extproto(Date.prototype, _prototype.dat);
 
         ////原型扩展 
-        [Object, Number, String, Date, Array, Boolean, Element].forEach(function(t, i) {
-            var name = t.prototype.constructor.name.toLowerCase().slice(0, 3);
+        [Object, Number, String, Array, Boolean].forEach(function(t, i) {
+            // var name = t.prototype.constructor.name.toLowerCase().slice(0, 3);
+            var name = _.type(t.prototype).slice(0, 3);
             _prototype[name] = _prototype[name] || {};
             _prototype[name].log = function() {
                 console.log(_.stringify(this)); //.valueOf()//原始值
             }
-            if (6 === 0) { //小程序中不允许扩展dom
-                inBrowser && _.extproto(t.prototype.constructor.prototype, _prototype[name]);
-            } else {
-                _.extproto(t.prototype.constructor.prototype, _prototype[name]);
-            }
+            _.extproto(t.prototype, _prototype[name]);
+            // _.extproto(t.prototype.constructor.prototype, _prototype[name]);
+            // if (name==="ele") { //6 === 0小程序中不允许扩展dom
+            //     inBrowser && _.extproto(t.prototype.constructor.prototype, _prototype[name]);
+            // } else {
+            //     _.extproto(t.prototype.constructor.prototype, _prototype[name]);
+            // }
         });
 
 
@@ -4160,11 +4181,13 @@
 
 
         //延迟队列
-        var _queue = _.queue = function(fn) {
-            return new _queue.prototype.init(fn)
+        var _queue = _.queue = function(options) {
+            // return new _queue.prototype.init(fn)
+            if (!(this instanceof _queue)) return new _queue(options);
+            this.init(options);
         }
         _queue.prototype = {
-            constructor: _queue,
+            // constructor: _queue,
             init: function(fn) {
                 this.dataStore = [];
                 this.speeds = {
@@ -4199,7 +4222,7 @@
                 }, 0)
             }
         }
-        _queue.prototype.init.prototype = _queue.prototype;
+        // _queue.prototype.init.prototype = _queue.prototype;
 
         var Easing = _.Easing = {
             //定义域和值域均为[0, 1], 传入自变量x返回对应值y
@@ -4265,7 +4288,7 @@
 
         // 补间动画     直线运动 匀速 非匀速   曲线运动  路径动画
         _tween.prototype = {
-            constructor: _tween,
+            // constructor: _tween,
             init: function(options) {
                 this._start = options.start;
                 this._end = options.to;
@@ -4343,8 +4366,8 @@
 
 
         //向量  空间计算工具
-        var _vector = _.vector = function(opt) {
-            return new _vector.prototype.init(opt)
+        var _vector = _.vector = function(options) {
+            return new _vector.prototype.init(options)
         }
         _vector.prototype = {
             constructor: _vector,
@@ -4550,8 +4573,8 @@
         // 极坐标点
         //输入：r,a ,o(x,y)
         //输出：x y  
-        var _pointPolar = _.pointPolar = function(opt) {
-            return new _pointPolar.prototype.init(opt)
+        var _pointPolar = _.pointPolar = function(options) {
+            return new _pointPolar.prototype.init(options)
         }
         _pointPolar.prototype = {
             constructor: _pointPolar,
@@ -4712,8 +4735,8 @@
 
         //点
         //直角坐标 xy Coordinate
-        var _point = _.point = function(opt) {
-            return new _point.prototype.init(opt);
+        var _point = _.point = function(options) {
+            return new _point.prototype.init(options);
         }
         _point.prototype = {
             constructor: _point,
@@ -4770,8 +4793,8 @@
             //圆心
             centerPoint: function(opt) {
                 var o = {
-                    x: opt.x,
-                    y: opt.y
+                    x: opt.x || 0,
+                    y: opt.y || 0
                 }
                 return _pointPolar({ o: o });
             },
@@ -4830,7 +4853,7 @@
                     // }
                     an = i * 360 / num + a;
                     var p = po.clone({ a: an, r: rn });
-                    vs.push(p);
+                    vs[vs.length] = p;
                 }
                 return vs;
             },
@@ -4927,6 +4950,7 @@
         //基础图形
         var _shape = _.shape = function(draw, opt) {
             return new _shape.prototype.init(draw, opt);
+
         };
 
         _shape.prototype = {
@@ -5240,11 +5264,10 @@
                     r = opt.r;
                 var sa = opt.sa || 0,
                     ea = opt.ea || Math.PI * 2;
-
                 ctx.beginPath();
                 ctx.arc(x, y, r, sa, ea, true);
                 ctx.closePath();
-                this.draw.render(opt);
+                this.draw.fillstroke(opt);
                 var text = opt.text;
                 if (!_.isUndefined(text)) {
                     ctx.fillStyle = "#000";
@@ -5270,7 +5293,7 @@
                 ctx.beginPath();
                 ctx.arc(x, y, r, 0, Math.PI * 2);
                 ctx.closePath();
-                this.draw.render(opt);
+                this.draw.fillstroke(opt);
             },
             //椭圆
             ellipse: function(opt) {
@@ -5280,7 +5303,6 @@
                     r = opt.r,
                     a = opt.a || 2 * r,
                     b = opt.b || r;
-                ctx.save();
                 //选择a、b中的较大者作为arc方法的半径参数
                 var r = (a > b) ? a : b;
                 var ratioX = a / r; //横轴缩放比率
@@ -5291,8 +5313,7 @@
                 ctx.moveTo((x + a) / ratioX, y / ratioY);
                 ctx.arc(x / ratioX, y / ratioY, r, 0, 2 * Math.PI);
                 ctx.closePath();
-                this.draw.render(opt);
-                ctx.restore();
+                this.draw.fillstroke(opt);
                 return this;
             },
             //sector扇形
@@ -5312,7 +5333,7 @@
                 ctx.beginPath();
                 ctx.arc(x, y, r, startAngle, endAngle, anticlockwise)
                 ctx.closePath();
-                this.draw.render(opt);
+                this.draw.fillstroke(opt);
                 return this;
             },
             //环形
@@ -5327,7 +5348,7 @@
                 ctx.moveTo(x + r2, y);
                 ctx.arc(x, y, r2, PIx2, 0, true);
                 this.draw.closePath(opt)
-                this.draw.render(opt);
+                this.draw.fillstroke(opt);
 
                 // if (_.isObject(opt.group) && opt.group.group == "ring") {
                 //     var shape = opt.shape.shape;
@@ -5351,6 +5372,35 @@
             },
             //心形
             heart: function(opt) {
+                var ctx = this.context;
+
+                function heartPath(ctx) {
+                    ctx.beginPath();
+                    ctx.arc(-1, 0, 1, Math.PI, 0, false);
+                    ctx.arc(1, 0, 1, Math.PI, 0, false);
+                    ctx.bezierCurveTo(1.9, 1.2, 0.6, 1.6, 0, 3.0);
+                    ctx.bezierCurveTo(-0.6, 1.6, -1.9, 1.2, -2, 0);
+                    ctx.closePath();
+                }
+                var r = opt.r,
+                    a = opt.a,
+                    x = opt.x,
+                    y = opt.y;
+                // ctx.save();
+                ctx.translate(x, y);
+                ctx.rotate(_.rad(a));
+                ctx.scale(r, r);
+                heartPath(ctx);
+                /*ctx.strokeStyle = "red"; ctx.lineWidth = "3px";*/
+                // ctx.fillStyle = "red";
+                // ctx.shadowColor = "gray";
+                // ctx.shadowOffsetX = 5;
+                // ctx.shadowOffsetY = 5;
+                // ctx.shadowBlur = 5;
+                // ctx.fill();
+                this.draw.fillstroke(opt)
+                // ctx.restore();
+                return this;
 
             },
             //马蹄形 u形
@@ -5376,7 +5426,7 @@
                 this.draw.beginPath(opt);
                 ctx.rect(x, y, w, h)
                 this.draw.closePath(opt);
-                this.draw.render(opt);
+                this.draw.fillstroke(opt);
             },
             //菱形
             diamond: function(opt) {
@@ -5802,14 +5852,14 @@
                 ctx.beginPath();
                 var n = 2;
                 vs.forEach(function(t, i) {
-                    if (opt.showVertices)
-                        ctx.fillText('' + i, t.x, t.y); //+':'+parseInt(t.a)
+                    // if (opt.showVertices)
+                    //     ctx.fillText('' + i, t.x, t.y); //+':'+parseInt(t.a)
                     var t1 = vs[i + n - 1 >= len ? i + n - 1 - len : i + n - 1];
                     if (i % n === 0)
                         ctx.arc(po.x, po.y, opt.r, _.rad(t1.a), _.rad(t.a), true);
                 });
                 ctx.closePath();
-                this.draw.render(opt);
+                this.draw.render(opt, vs);
             },
             //太阳
             sun: function(opt) {
@@ -5864,6 +5914,34 @@
                 // if (opt.level > 5) return;
                 // this.setup(_.clone(opt, v.toP()))
             },
+            //曲线转角
+            cornercurve: function(opt) {
+                var self = this;
+                var vertex = this.vertex,
+                    vs = vertex.vs,
+                    len = vs.length;
+                var ctx = this.context;
+                ctx.beginPath();
+                var ms = vs.map(function(t, i) {
+                    // opt.showVertices && self.draw.point({ x: t.x, y: t.y, text: i })
+                    // //显示顶点
+                    // if (opt.showVertices || opt.identifierVertices) self.draw.vertices(vs, opt);
+                    var t1 = vs[i + 1 === len ? 0 : i + 1];
+                    return t.mid(t1);
+                });
+                ms.forEach(function(t, i) {
+                    var t1 = ms[i + 1 === len ? 0 : i + 1];
+                    var p = vs[i + 1 === len ? 0 : i + 1];
+                    ctx.moveTo(t.x, t.y)
+                    ctx.quadraticCurveTo(
+                        p.x, p.y,
+                        t1.x, t1.y
+                    );
+                });
+                this.draw.render(opt, vs)
+
+
+            }
 
 
 
@@ -5910,7 +5988,6 @@
                     case "circle":
                         //色相环
                         colorArr = co.circle(len)
-
                         break;
                     case "gradient":
                         //渐变色
@@ -6933,11 +7010,11 @@
 
         //画图 
         //基础图形组合，加动画
-        var draw = _.draw = function(options, canvas) {
-            return new draw.prototype.init(options, canvas);
+        var _draw = _.draw = function(options, canvas) {
+            return new _draw.prototype.init(options, canvas);
         }
-        draw.prototype = {
-            constructor: draw,
+        _draw.prototype = {
+            constructor: _draw,
             init: function(options, canvas) { // componentInstance
                 var self = this;
 
@@ -7233,66 +7310,69 @@
             },
             save: function() {
                 this.context.save();
+                return this;
             },
             restore: function() {
                 this.context.restore();
+                return this;
             },
             //样式   小程序写法 setXXX
-            setFillStyle: function(color) {
-                var color = _.isUndefined(color) ? "#000000" : color;
-                var ctx = this.context;
+            setFillStyle: function(ctx, color) {
+                color = color || "#000000";
                 ctx.fillStyle = color;
                 ctx.setFillStyle && ctx.setFillStyle(color);
             },
-            setStrokeStyle: function(color) {
-                var color = _.isUndefined(color) ? "#000000" : color;
-                var ctx = this.context;
+            setStrokeStyle: function(ctx, color) {
+                color = color || "#000000";
                 ctx.strokeStyle = color;
                 ctx.setStrokeStyle && ctx.setStrokeStyle(color);
             },
-            setLineWidth: function(lineWidth) {
-                var ctx = this.context;
+            setLineWidth: function(ctx, lineWidth) {
                 var lineWidth = _.isUndefined(lineWidth) ? 0.5 : lineWidth;
                 ctx.lineWidth = lineWidth;
                 ctx.setLineWidth && ctx.setLineWidth(lineWidth);
             },
-            setShadowBlur: function(shadowBlur) {
-                var ctx = this.context;
+            setShadowBlur: function(ctx, shadowBlur) {
                 var shadowBlur = _.isUndefined(shadowBlur) ? 10 : shadowBlur;
                 ctx.shadowBlur = shadowBlur;
                 ctx.setShadowBlur && ctx.setShadowBlur(shadowBlur);
-
                 ctx.shadowColor = "black";
             },
-            setShadowColor: function(shadowColor) {
-                var ctx = this.context;
+            setShadowColor: function(ctx, shadowColor) {
                 var shadowColor = _.isUndefined(shadowColor) ? 10 : shadowColor;
                 ctx.shadowColor = shadowColor;
                 ctx.setShadowColor && ctx.setShadowColor(shadowColor);
             },
             // miter (默认) round (圆形) bevel (斜角)
-            setLineJoin: function(lineJoin) {
-                var ctx = this.context;
-                var lineJoin = _.isUndefined(lineJoin) ? "miter" : lineJoin;
+            setLineJoin: function(ctx, lineJoin) {
+                lineJoin = lineJoin || 'miter';
                 ctx.lineJoin = lineJoin;
                 ctx.setLineJoin && ctx.setLineJoin(lineJoin);
             },
-            setGlobalAlpha: function(alpha) {
-                var ctx = this.context;
+            //透明
+            setGlobalAlpha: function(ctx, alpha) {
                 alpha = alpha || 1;
                 ctx.globalAlpha = alpha;
                 ctx.setGlobalAlpha && ctx.setGlobalAlpha(alpha);
             },
+            //图像合成方式
+            setGlobalCompositeOperation: function(ctx, compositeOperation) {
+                compositeOperation = compositeOperation || 'source-over';
+                ctx.globalCompositeOperation = compositeOperation;
+                ctx.setGlobalCompositeOperation && ctx.setGlobalCompositeOperation(compositeOperation);
+            },
             set: function(opt) {
                 if (opt) {
+                    var ctx = this.context;
                     if (opt.randomColor) opt.color = _.color().rgba();
                     this.setLineJoin(opt.lineJoin);
-                    this.setLineWidth(opt.lineWidth);
-                    this.setStrokeStyle(opt.lineColor || opt.color);
-                    this.setGlobalAlpha(opt.alpha);
-                    opt.shadowBlur && this.setShadowBlur(opt.shadowBlur);
-                    opt.shadowColor && this.setShadowColor(opt.shadowColor);
-                    this.setFillStyle(opt.color);
+                    this.setLineWidth(ctx, opt.lineWidth);
+                    this.setStrokeStyle(ctx, opt.lineColor || opt.color);
+                    // this.setGlobalAlpha(ctx, opt.alpha);
+                    // this.setGlobalCompositeOperation(ctx, opt.compositeOperation);
+                    opt.shadowBlur && this.setShadowBlur(ctx, opt.shadowBlur);
+                    opt.shadowColor && this.setShadowColor(ctx, opt.shadowColor);
+                    this.setFillStyle(ctx, opt.color);
                 }
                 return this;
             },
@@ -7305,9 +7385,32 @@
                 this.context.stroke();
                 return this;
             },
-            render: function(opt) {
-                //.set(opt)
+            fillstroke: function(opt) {
                 return this.fill(opt).stroke(opt);
+            },
+            render: function(opt, vs) {
+                this.fillstroke(opt);
+                if (opt) {
+                    //显示外切圆
+                    if (opt.showExcircle) this.excircle(opt);
+                    //显示内切圆
+                    if (opt.showIncircle) this.incircle(opt);
+                    //显示半径
+                    if (opt.showRadius) this.radius(vs, opt);
+                    //显示顶点
+                    if (opt.showVertices || opt.identifierVertices) this.vertices(vs, opt);
+                    //显示圆心
+                    if (opt.showCenter) this.centerPoint(opt)
+                    //对角线
+                    if (opt.showDiagonal) this.diagonal(vs, opt)
+                    //间隔填色
+                    if (opt.fillInterval) this.zebra(vs, opt);
+                    //顶点镜像
+                    if (opt.showMirror) this.mirror(vs, opt);
+                    //标注夹角
+                    if (opt.showAngle) this.includedAngle(vs, opt);
+                }
+                return this;
             },
             //图形闭合
             closePath: function(opt) {
@@ -7334,12 +7437,10 @@
             shadow: function() {
                 var canvas = this.canvas,
                     ctx = this.context,
-                    bg = this.opt.motion.background,
-                    color = 'rgba(0,0,0,0.05)';
-                if (bg) color = _.color().rgb(bg, 0.05);
+                    color = this.opt.global ? _.color().rgb(this.opt.global.background, 0.05) : 'rgba(0,0,0,0.05)';
 
                 //光影效果
-                this.setFillStyle(color);
+                this.setFillStyle(ctx, color);
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
                 return this;
             },
@@ -7348,7 +7449,7 @@
                     ctx = this.context;
                 if (color) {
                     //ctx.fillStyle = 'rgba(0,0,0,0.05)'; //光影效果
-                    this.setFillStyle(color || this.options.background || "#ffffff");
+                    this.setFillStyle(ctx, color || this.options.background || "#ffffff");
                     ctx.fillRect(0, 0, canvas.width, canvas.height);
                 } else {
                     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -7409,7 +7510,6 @@
                     ctx = this.context,
                     len = vs.length;
 
-                //     ctx.save();
                 // ctx.translate(this.x, this.y); //将坐标移到this.x 和 this.y
                 // ctx.rotate(this.rotation); //设置旋转角度
                 this.beginPath(opt);
@@ -7473,28 +7573,8 @@
 
 
                 self.closePath(opt);
-                self.render(opt);
-                // ctx.restore();
-                if (opt) {
-                    //显示外切圆
-                    if (opt.showExcircle) this.excircle(opt);
-                    //显示内切圆
-                    if (opt.showIncircle) this.incircle(opt);
-                    //显示半径
-                    if (opt.showRadius) this.radius(vs, opt);
-                    //显示顶点
-                    if (opt.showVertices || opt.identifierVertices) this.vertices(vs, opt);
-                    //显示圆心
-                    if (opt.showCenter) this.centerPoint(opt)
-                    //对角线
-                    if (opt.showDiagonal) this.diagonal(vs, opt)
-                    //间隔填色
-                    if (opt.fillInterval) this.zebra(vs, opt);
-                    //顶点镜像
-                    if (opt.showMirror) this.mirror(vs, opt);
-                    //标注夹角
-                    if (opt.showAngle) this.includedAngle(vs, opt);
-                }
+                self.render(opt, vs);
+
                 return this;
             },
             //夹角
@@ -7523,7 +7603,7 @@
                 ctx.beginPath();
                 ctx.moveTo(t.x, t.y);
                 ctx.arc(t.x, t.y, r, sA, eA, false);
-                this.render(this.opt);
+                this.fillstroke(this.opt);
             },
             // 外切圆
             excircle: function(opt) {
@@ -7560,7 +7640,7 @@
                     ctx.moveTo(x, y);
                     ctx.lineTo(t.x, t.y)
                 })
-                this.render(opt);
+                this.fillstroke(opt);
             },
             //顶点
             vertices: function(vs, opt) {
@@ -7690,7 +7770,7 @@
                 opt = self.shortName(opt);
                 opt = self.default(opt);
                 if (opt.color === "random") opt.color = _.color().rgb();
-                self.set(opt);
+                self.save().set(opt);
                 if (opt.animate && opt.easing) {
                     _tween({
                         start: { x: opt.x, y: 0, a: opt.a - 180 },
@@ -7712,6 +7792,7 @@
                 if (opt.disappear) {
                     this.disappear(opt);
                 }
+                self.restore();
                 return s;
             },
             //图形组合
@@ -7720,6 +7801,7 @@
                 if (opt.group) {
                     opt.group = this.shortName(opt.group);
                     opt.group = this.default(opt.group);
+                    // opt.group.compositeOperation && this.setGlobalCompositeOperation(opt.group.compositeOperation);
 
                     if (opt.group.animate && opt.group.easing && opt.group.easing !== "none") {
                         _tween({
@@ -7760,8 +7842,31 @@
                 opt.motion.simulate && _randomMouse();
                 return _motion(this, opt);
             },
+            //全局
+            global: function(opt) {
+                if (!(opt && opt.global)) return;
+                //画布尺寸
+                opt.global.backgroundSize && this.size({ ratio: opt.global.backgroundSize });
+                var ctx = this.context;
+                //透明
+                this.setGlobalAlpha(ctx,opt.global.alpha);
+                //图像混合方式
+                opt.global.compositeOperation && this.setGlobalCompositeOperation(ctx,opt.global.compositeOperation);
+                //背景色
+                if (opt.global.showBackground && opt.global.background) {
+                    this.setFillStyle(ctx, opt.global.background);
+                    ctx.fillRect(0, 0, this.width, this.height);
+                }
+                //网格
+                if (opt.global.showGrid) {
+                    if (opt.global.grid === "ecgGrid") this.ecgGrid(opt.global);
+                    else this.grid(opt.global);
+                }
+                return this;
+            },
+            //执行入口
             setup: function(opt) {
-                self = this;
+                var self = this;
                 if (_.isArray(opt)) return opt.map(function(t) {
                     return self.setup.call(self, t);
                 });
@@ -7769,7 +7874,8 @@
                 this.opt = opt;
                 this.motionCache && this.motionCache.stop();
                 if (opt.motion) return this.motionCache = this.motion(opt);
-                return this.group(opt);
+
+                return this.global(opt).group(opt);
             },
             stop: function() {
                 this.motionCache && this.motionCache.stop();
@@ -7831,28 +7937,43 @@
             //     //context.scale(scalewidth,scaleheight);
 
             // },
+            _grid: function(color, interval) {
+                var ctx = this.context;
+                var w = this.width,
+                    h = this.height;
+                ctx.strokeStyle = color;
+                ctx.strokeWidth = 1;
+                ctx.beginPath();
+                for (var x = 0.5; x < w; x += interval) {
+                    ctx.moveTo(x, 0);
+                    ctx.lineTo(x, h);
+                };
+                for (var y = 0.5; y < h; y += interval) {
+                    ctx.moveTo(0, y);
+                    ctx.lineTo(w, y);
+                };
+                ctx.stroke();
+            },
 
             //格子
             grid: function(opt) {
-                var canvas = this.canvas;
-                var opt = this.default(opt);
-                var interval = opt.interval || 10;
-                var vsGroup = [];
-                for (var i = interval + 0.5; i < canvas.width; i += interval) {
-                    var vs = [];
-                    vs.push({ x: i, y: 0 })
-                    vs.push({ x: i, y: canvas.height });
-                    vsGroup.push(vs);
-                }
-                for (var i = interval + 0.5; i < canvas.height; i += interval) {
-                    var vs = [];
-                    vs.push({ x: 0, y: i })
-                    vs.push({ x: canvas.width, y: i });
-                    vsGroup.push(vs);
-                }
-                return this.linkGroup(vsGroup, opt);
+                var color = opt.background || opt.color || _.color().rgb();
+                self._grid(color, 10)
             },
+            //心电图网格
+            ecgGrid: function(opt) {
+                var self = this;
+                var color = _.color();
+                var a = opt.background || opt.color || color.rgb(),
+                    b = color.light(a, 0.5),
+                    c = color.light(b, 0.5);
 
+                // ctx.save();
+                [c, b, a].forEach(function(t, i) {
+                    self._grid.call(self, t, 3 * Math.pow(5, i))
+                })
+                // ctx.restore();
+            },
             // 反转颜色
             reverse: function() {
                 var canvas = this.canvas;
@@ -7924,7 +8045,7 @@
                 }, time + 10000);
             }
         }
-        draw.prototype.init.prototype = draw.prototype;
+        _draw.prototype.init.prototype = _draw.prototype;
 
 
 
