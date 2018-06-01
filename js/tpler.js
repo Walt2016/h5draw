@@ -2339,6 +2339,7 @@
             //hex2rgb
             rgb: function(color, alpha) {
                 if (!color) return this.rgb(this.hex());
+                color=this.hex(color);
                 if (!this.isHex(color)) return color;
 
                 var _rgb;
