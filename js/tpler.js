@@ -5939,12 +5939,7 @@
                     );
                 });
                 this.draw.render(opt, vs)
-
-
             }
-
-
-
         }
         _shape.prototype.init.prototype = _shape.prototype;
 
@@ -7368,8 +7363,6 @@
                     this.setLineJoin(opt.lineJoin);
                     this.setLineWidth(ctx, opt.lineWidth);
                     this.setStrokeStyle(ctx, opt.lineColor || opt.color);
-                    // this.setGlobalAlpha(ctx, opt.alpha);
-                    // this.setGlobalCompositeOperation(ctx, opt.compositeOperation);
                     opt.shadowBlur && this.setShadowBlur(ctx, opt.shadowBlur);
                     opt.shadowColor && this.setShadowColor(ctx, opt.shadowColor);
                     this.setFillStyle(ctx, opt.color);
@@ -7849,9 +7842,9 @@
                 opt.global.backgroundSize && this.size({ ratio: opt.global.backgroundSize });
                 var ctx = this.context;
                 //透明
-                this.setGlobalAlpha(ctx,opt.global.alpha);
+                this.setGlobalAlpha(ctx, opt.global.alpha);
                 //图像混合方式
-                opt.global.compositeOperation && this.setGlobalCompositeOperation(ctx,opt.global.compositeOperation);
+                opt.global.compositeOperation && this.setGlobalCompositeOperation(ctx, opt.global.compositeOperation);
                 //背景色
                 if (opt.global.showBackground && opt.global.background) {
                     this.setFillStyle(ctx, opt.global.background);
