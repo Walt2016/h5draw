@@ -1,6 +1,6 @@
 //一个js开发框架
 //template.event.canvas
-//v0.7.20180601
+//v0.7.20180604
 ;
 (function(root, factory) {
     if (typeof define === "function" && define.amd) {
@@ -96,8 +96,8 @@
                 isWxMiniProgram = /miniprogram/i.test(window.__wxjs_environment);
 
             var env = (function() {
-                var os = {};
-                var android = ua.match(/(Android)[\s\/]+([\d\.]+)/),
+                var os = {},
+                    android = ua.match(/(Android)[\s\/]+([\d\.]+)/),
                     ios = ua.match(/(iPad|iPhone|iPod)\s+OS\s([\d_\.]+)/),
                     wp = ua.match(/(Windows\s+Phone)\s([\d\.]+)/),
                     isWebkit = /WebKit\/[\d.]+/i.test(ua),
@@ -151,7 +151,6 @@
             extendOwn: extendOwn,
             screen: screen,
 
-
             //类型
             type: function(o) {
                 if (o === null) return 'null';
@@ -187,8 +186,8 @@
             //has(obj,"z.b.c")  key in obj
             has: function(obj, key) {
                 if (_.isObject(obj)) {
-                    var ks = key.split(".");
-                    var o = obj;
+                    var ks = key.split("."),
+                        o = obj;
                     while (key = ks.shift()) { //trim
                         if (o && o.hasOwnProperty(key)) { //Object.prototype.hasOwnProperty.call(this, k)
                             o = o[key];
@@ -198,7 +197,7 @@
                     }
                     return true;
                 } else if (_.isArray(obj) || _.isString(obj)) {
-                    return !!~obj.indexOf(key); // !== -1;  >= 0
+                    return !!~obj.indexOf(key); // >= 0
                 }
                 return false;
             },
@@ -208,10 +207,10 @@
             keys: function(obj) {
                 if (!_.isObject(obj)) return [];
                 if (Object.keys) return Object.keys(obj);
-                var keys = [];
+                var arr = [];
                 for (var key in obj)
-                    if (_.has(obj, key)) keys.push(key);
-                return keys;
+                    if (obj.hasOwnProperty(key)) arr[arr.length] = key;
+                return arr;
             },
             //对象  数组 相等
             equal: function(a, b) {
@@ -275,12 +274,6 @@
                     this.left = x;
                     this.right = x + this.width;
                     this.bottom = y + this.height;
-                    // this.rang = {
-                    //     top: y,
-                    //     left: x,
-                    //     right: x + this.width,
-                    //     bottom: y + this.height
-                    // }
                 }
                 var offsetPos;
                 if (_.isElement(offset) || _.isTouchEvent(e) || _.isMouseEvent(e)) {
@@ -349,10 +342,9 @@
             parseUrl: function(url) {
                 var params = {},
                     hash = location.hash,
-                    route = hash;
-                var url = url || window.location.href;
-
-                var domain, host, port;
+                    route = hash,
+                    url = url || window.location.href,
+                    domain, host, port;
                 url.replace(/http[s]?:\/\/([^:]*?)(?::(\d+))?\//, function(d, h, p) {
                     domain = d.substring(0, d.length - 1);
                     host = h;
@@ -448,9 +440,9 @@
                     var result = [];
                     selector.each(function(i, t) {
                         if (callback) {
-                            result.push(callback(t));
+                            result[result.length] = callback(t);
                         } else {
-                            result.push(t);
+                            result[result.length] = t;
                         }
                     });
                     return result.length === 1 ? result[0] : result;
@@ -682,23 +674,15 @@
             toJSONString: function(json) {
                 return _.isObject(json) ? JSON.stringify(json) : json;
             },
-
             isHtml: function(tpl) {
                 return /<(\S*?) [^>]*>.*?<\/\1>|<.*?\/?>/.test(tpl);
-            },
-            enHtml: function(tpl) {
-                return tpl.replace(/</g, "&lt;").replace(/>/g, "&gt;");
-            },
-            deHtml: function(tpl) {
-                return tpl.replace(/&lt;/g, "<").replace(/&gt;/g, ">");
             },
             preHtml: function(tpl) {
                 // return tpl.replace(/\r\n?/g, "<br>");
                 return tpl.replace(/\n/g, "<br>").replace(/\r/g, "<br>");
             },
             getBody: function(content) {
-                var REG_BODY = /<body[^>]*>([\s\S]*)<\/body>/i;
-                var matcher = content.match(REG_BODY);
+                var matcher = content.match(/<body[^>]*>([\s\S]*)<\/body>/i);
                 return matcher && matcher.length > 1 ? matcher[1] : content;
             },
             // todo
@@ -810,20 +794,20 @@
                     return text ? _start(tag, options) + text + _end(tag) : _start(tag, options);
                 }
 
-                var escape = {
-                    '&': '&amp;',
-                    '<': '&lt;',
-                    '>': '&gt;',
-                    '"': '&quot;',
-                    "'": '&#x27;'
-                }
-                var _escape = function() {
-                    var keys = _.keys(escape)
-                    var reg = new RegExp('[' + keys.join('') + ']', 'g');
-                    return this.replace(reg, function(macth) {
-                        return escape[macth]
-                    })
-                }
+                // var escape = {
+                //     '&': '&amp;',
+                //     '<': '&lt;',
+                //     '>': '&gt;',
+                //     '"': '&quot;',
+                //     "'": '&#x27;'
+                // }
+                // var _escape = function() {
+                //     var keys = _.keys(escape)
+                //     var reg = new RegExp('[' + keys.join('') + ']', 'g');
+                //     return this.replace(reg, function(macth) {
+                //         return escape[macth]
+                //     })
+                // }
 
                 var _replace = function(tag, reg) {
                     var self = this;
@@ -853,7 +837,7 @@
                                 return _wrap(tag);
                                 break;
                             case "blockquote":
-                                match = _escape.call(match);
+                                match = _.escape.call(match);
                                 return _wrap(tag, match);
                                 break;
                             case 'ul':
@@ -900,7 +884,7 @@
                                 return _wrap(tag, text);
                                 break;
                             case "code":
-                                text = _escape.call(text);
+                                text = _.escape.call(text);
                                 return _wrap(tag, text);
                                 break;
 
@@ -1627,6 +1611,7 @@
         };
 
         //定义函数 'escape', 'unescape'
+        //encodeHtml  decodeHtml 
         ['escape', 'unescape'].forEach(function(t) {
             _[t] = function(str) {
                 return str == null ? '' : ('' + str).replace(entityRegexes[t], function(match) {
@@ -1634,6 +1619,7 @@
                 });
             };
         })
+
 
         /**
          * 。。。。
@@ -2215,11 +2201,11 @@
             //此处按7天一周计算 
             week: function(dateStr) {
                 var day_of_year = 0;
-                var d = dateStr ? this.constructor.toDate(dateStr) : this.date;
+                var d = dateStr ? this.constructor(dateStr) : this;
                 if (!d) return "";
-                var years = this.year,
-                    month = this.month - 1,
-                    day = this.day,
+                var years = d.year,
+                    month = d.month - 1,
+                    day = d.day,
                     days = [31, 28, 30, 31, 30, 31, 31, 30, 31, 30, 31];
                 //4年1闰
                 if (Math.round(years / 4) === years / 4) days[1] = 29;
@@ -2270,7 +2256,7 @@
                 })
             },
             rgbaWrapper: function(rgbaArr) {
-                return (rgbaArr.length == 4 ? 'rgba(' : 'rgb(') + rgbaArr + ')'
+                return (rgbaArr.length === 4 ? 'rgba(' : 'rgb(') + rgbaArr + ')'
             },
             //深色  随机深色(rgb两位小于 80)，指定颜色加深
             dark: function(color, level) {
@@ -2339,7 +2325,7 @@
             //hex2rgb
             rgb: function(color, alpha) {
                 if (!color) return this.rgb(this.hex());
-                color=this.hex(color);
+                color = this.hex(color);
                 if (!this.isHex(color)) return color;
 
                 var _rgb;
@@ -2390,18 +2376,17 @@
             },
             //互补色
             complementary: function(color) {
-                var rgb = this.rgb(color)
-                var rgbaArr = this.rgbaArr(rgb),
+                var rgb = this.rgb(color),
+                    rgbaArr = this.rgbaArr(rgb),
                     r = rgbaArr[0],
                     g = rgbaArr[1],
-                    b = rgbaArr[2];
-
-                var max = Math.max(r, Math.max(g, b));
-                var min = Math.min(r, Math.min(g, b));
-                var sum = max + min;
-                var R = sum - r;
-                var G = sum - g;
-                var B = sum - b;
+                    b = rgbaArr[2],
+                    max = Math.max(r, Math.max(g, b)),
+                    min = Math.min(r, Math.min(g, b)),
+                    sum = max + min,
+                    R = sum - r,
+                    G = sum - g,
+                    B = sum - b;
                 return this.rgbaWrapper([R, G, B]);
             },
             //颜色过渡  gradient
@@ -3098,10 +3083,9 @@
         if (inBrowser) { //, Element 小程序中不允许扩展dom
             _.extproto(Element.prototype, _prototype.ele);
         };
-        //Date,
+        //Date, _.type(t.prototype) ==function
         _.extproto(Date.prototype, _prototype.dat);
-
-        ////原型扩展 
+        //原型扩展 
         [Object, Number, String, Array, Boolean].forEach(function(t, i) {
             // var name = t.prototype.constructor.name.toLowerCase().slice(0, 3);
             var name = _.type(t.prototype).slice(0, 3);
@@ -3110,12 +3094,6 @@
                 console.log(_.stringify(this)); //.valueOf()//原始值
             }
             _.extproto(t.prototype, _prototype[name]);
-            // _.extproto(t.prototype.constructor.prototype, _prototype[name]);
-            // if (name==="ele") { //6 === 0小程序中不允许扩展dom
-            //     inBrowser && _.extproto(t.prototype.constructor.prototype, _prototype[name]);
-            // } else {
-            //     _.extproto(t.prototype.constructor.prototype, _prototype[name]);
-            // }
         });
 
 
@@ -3321,9 +3299,7 @@
                                             t.call(el, endPos.el, ev);
                                         });
                                     }
-                                    if (once) {
-                                        self.off(type, el);
-                                    }
+                                    if (once) self.off(type, el);
                                 }
                             }
                             addEvent(_touchstart, el, startHandler);
@@ -3340,9 +3316,7 @@
                                             t.call(el, el, ev);
                                         });
                                     }
-                                    if (once) {
-                                        self.off(type, el);
-                                    }
+                                    if (once) self.off(type, el);
                                 }, 1000)
                             }
                             var endHandler = function(ev) {
@@ -3407,9 +3381,8 @@
                                 isDragging = false;
                                 //允许整屏移动
                                 removeEvent(_touchmove, document, preventDefault);
-                                if (_.isFunction(listener)) {
-                                    listener.call(el, endPos.el, ev);
-                                }
+                                _.isFunction(listener) && listener.call(el, endPos.el, ev);
+
                             }
 
 
@@ -3432,9 +3405,7 @@
                                         t.call(el, el, ev);
                                     });
                                 }
-                                if (once) {
-                                    self.off(type, el);
-                                }
+                                if (once) self.off(type, el);
                             }
                             addEvent(type, el, _handler);
                             break;
@@ -3602,7 +3573,7 @@
                 this.pos = 0;
                 this.ch = this.peek();
 
-                // return this;
+
             },
             parseTable: function() {
                 this.table = [];
@@ -4051,15 +4022,12 @@
             return arr;
         }
 
-
         //延迟队列
         var _queue = _.queue = function(options) {
-            // return new _queue.prototype.init(fn)
-            if (!(this instanceof _queue)) return new _queue(options);
-            this.init(options);
+            return new _queue.prototype.init(options)
         }
         _queue.prototype = {
-            // constructor: _queue,
+            constructor: _queue,
             init: function(fn) {
                 this.dataStore = [];
                 this.speeds = {
@@ -4094,7 +4062,7 @@
                 }, 0)
             }
         }
-        // _queue.prototype.init.prototype = _queue.prototype;
+        _queue.prototype.init.prototype = _queue.prototype;
 
         var Easing = _.Easing = {
             //定义域和值域均为[0, 1], 传入自变量x返回对应值y
@@ -4660,7 +4628,7 @@
                     this.po = this.centerPoint(options);
                     this.vs = this.vertices(options);
                 }
-                // return this;
+
             },
             //圆心
             centerPoint: function(opt) {
@@ -4997,7 +4965,7 @@
                 var num = opt.num;
                 var fb = _.fibonacci(num);
                 var sequence = opt.group.sequence;
-                var clockwise = sequence === "clockwise" ? true : false;
+                var clockwise = sequence === "clockwise";
 
                 // var clockwise = opt.clockwise;
                 var ctx = this.context;
@@ -6074,7 +6042,7 @@
                 }
                 // var clockwise = opt.group.clockwise; //顺时针逆时针
                 var sequence = opt.group.sequence;
-                var clockwise = sequence === "clockwise" ? true : false;
+                var clockwise = sequence === "clockwise";
                 var sAngle, eAngle;
 
                 var sa = opt.group.a || 0;
@@ -6176,7 +6144,7 @@
                 var animate = opt.group.animate;
                 var animationInterval = opt.group.animationInterval || 5;
                 var sequence = opt.group.sequence;
-                var clockwise = sequence === "clockwise" ? true : false;
+                var clockwise = sequence === "clockwise";
                 // var clockwise = opt.group.clockwise;
                 var rotation = opt.group.rotation; //自转
                 var sa = opt.group.a || 0;
@@ -6445,7 +6413,6 @@
                 opt.x += opt.vx > 0 ? 1 : -1;
                 opt.y += _.sin(self.a) * self.r * (opt.vy > 0 ? 1 : -1);
                 self.a += opt.speed;
-
                 this.bounce(opt);
             },
             //反弹
@@ -6655,180 +6622,7 @@
         _motion.prototype.init.prototype = _motion.prototype;
 
 
-        // 解析draw.opt 文件
-        var createOptCycle = _.createOptCycle = function(optJson) {
-            var optCycle = {
-                data: {},
-                methods: {
-                    autoNext: function(item, ev) {
-                        if (inBrowser) {
-                            var k = item.closest(".tab-body-item").attr("name");
-                            var x = item.name;
-                            var checked = item.checked;
-                            optCycle.data[k][x].auto = checked;
-                            console.log(x, checked)
-                        }
-                    }
-                },
-                filters: {
-                    toggle: function(val) {
-                        return val === true ? "是" : "否"
-                    },
-                    color: function(val) {
-                        if (inBrowser)
-                            return val + '<div class="colorblock" style="background-color:' + val + '"></div>';
-                        return val;
-                    }
-                }
-            };
-            for (var k in optJson) {
-                var o = optJson[k];
-                if (_.isObject(o)) {
-                    optCycle.data[k] = {};
-                    for (var x in o) {
-                        var val = o[x];
-                        if (x === "switch") {
-                            optCycle.data[k][x] = val;
-                        } else {
-                            var type = val.type;
-                            var c = null;
-                            switch (type) {
-                                case "picker":
-                                    c = _.cycle(val.values, val.index || 0);
-                                    break;
-                                case "slider":
-                                    c = _.sliderCycle(val);
-                                    break;
-                                case "color":
-                                case "color_rgba":
-                                case "color_rgb":
-                                    var len = val.length || 15;
-                                    var colorArr = _color().circle(len);
-                                    // while (len--) {
-                                    // if (type === "color_rgba") {
-                                    //     colorArr.push(co.rgba());
-                                    // } else if (type === "color_rgb") {
-                                    //     colorArr.push(co.rgb());
-                                    // } else {
-                                    //     colorArr.push(co.rgba());
-                                    // }
-                                    // }
-                                    c = _.cycle(colorArr, 0);
-                                    break;
-                                case undefined:
-                                    if (_.isBoolean(val)) {
-                                        c = _.cycle([{ key: true, text: "是" }, { key: false, text: "否" }], val ? 0 : 1);
-                                        c.type = "toggle";
-                                        c.value = val;
-                                    } else if (_.isObject(val)) {
-                                        if (_.isBoolean(val.value)) {
-                                            c = _.cycle([{ key: true, text: "是" }, { key: false, text: "否" }], val.value ? 0 : 1)
-                                            c.type = "toggle";
-                                            c.value = val.value;
-                                        }
-                                    } else if (_.isString(val)) {
-                                        optCycle.data[k][x] = val;
-                                    }
-                                    break;
-                            }
-                            if (c) {
-                                if (val.text) c.text = val.text;
-                                if (val.auto) c.auto = val.auto;
-                                if (val.type) c.type = val.type;
-                                optCycle.data[k][x] = c;
-                            }
-                        }
-                    }
-                }
-            }
 
-            //init opt
-            optCycle.init = function() {
-                var opt = {};
-                for (var k in optCycle.data) {
-                    var o = optCycle.data[k];
-                    if (_.isObject(o)) {
-                        if (!!~["group", "motion"].indexOf(k)) {
-                            if (o.switch === "off") continue;
-                        }
-                        opt[k] = {};
-                        for (var x in o) {
-                            var val = o[x];
-                            if (_.isBoolean(val)) {
-                                opt[k][x] = val;
-                            } else if (_.isObject(val)) {
-                                if (_.isBoolean(val.value)) {
-                                    opt[k][x] = val.value;
-                                    if (val.auto) { //自动变值下一个
-                                        val.value = !val.value;
-                                    }
-                                } else {
-                                    opt[k][x] = _.isObject(val.val()) ? val.val().key : val.val();
-                                    if (val.auto) { //自动变值下一个
-                                        val.next && val.next();
-                                    }
-                                }
-                            } else if (_.isString(val)) {
-                                opt[k][x] = val;
-                            }
-                        }
-                    }
-                }
-                return opt;
-            }
-
-            //view data
-            optCycle.viewData = function() {
-                var data = optCycle.data;
-                var _viewData = { tabs: [] };
-                for (var k in data) {
-                    var tab = { key: k, items: [], switch: "none", active: false }; //random: [],
-                    _viewData.tabs.push(tab);
-                    var o = data[k];
-                    if (_.isObject(o)) {
-                        for (var x in o) {
-                            var val = o[x];
-                            if (x === "text") {
-                                tab[x] = val;
-                            } else if (x === "switch") {
-                                tab[x] = val;
-                                tab[x + "Method"] = _.camelCase("next", k, x);
-                            } else if (x === "active") {
-                                tab[x] = val;
-                            } else {
-                                var item = { key: x, value: val, text: x, id: k + "_" + x }; //method: _.camelCase("next", k, x),
-                                if (_.isBoolean(val)) {
-                                    item.filter = "toggle";
-                                    item.value = optCycle.filters.toggle(val);
-                                } else if (_.isNumber(val)) {
-                                    item.filter = "string";
-                                } else if (_.isObject(val)) {
-                                    item = _.extendOwn(item, val);
-                                    if (_.isBoolean(val.value)) {
-                                        item.value = optCycle.filters.toggle(val.value);
-                                    } else {
-                                        if (_.isObject(val.val())) {
-                                            item.value = 'text' in val.val() ? val.val().text : val.val();
-                                        } else {
-                                            if (!!~["color", "lineColor", "background", "shadowColor"].indexOf(item.key)) {
-                                                item.value = optCycle.filters.color(val.val());
-                                            } else {
-                                                item.value = val.val();
-                                            }
-                                        }
-                                    }
-                                } else {
-                                    item.filter = x;
-                                }
-                                tab.items.push(item);
-                            }
-                        }
-                    }
-                }
-                return _viewData
-            }
-            return optCycle;
-        };
 
         //画图 
         //基础图形组合，加动画
@@ -6982,7 +6776,7 @@
                     this.callback = options.callback;
                     this.queue = _queue();
                 }
-                // return this;
+
             },
 
             size: function(opt) {
@@ -7869,6 +7663,182 @@
 
 
 
+        // 解析draw.opt 文件
+        var createOptCycle = _.createOptCycle = function(optJson) {
+            var optCycle = {
+                data: {},
+                methods: {
+                    autoNext: function(item, ev) {
+                        if (inBrowser) {
+                            var k = item.closest(".tab-body-item").attr("name");
+                            var x = item.name;
+                            var checked = item.checked;
+                            optCycle.data[k][x].auto = checked;
+                            console.log(x, checked)
+                        }
+                    }
+                },
+                filters: {
+                    toggle: function(val) {
+                        return val === true ? "是" : "否"
+                    },
+                    color: function(val) {
+                        if (inBrowser)
+                            return val + '<div class="colorblock" style="background-color:' + val + '"></div>';
+                        return val;
+                    }
+                }
+            };
+            for (var k in optJson) {
+                var o = optJson[k];
+                if (_.isObject(o)) {
+                    optCycle.data[k] = {};
+                    for (var x in o) {
+                        var val = o[x];
+                        if (x === "switch") {
+                            optCycle.data[k][x] = val;
+                        } else {
+                            var type = val.type;
+                            var c = null;
+                            switch (type) {
+                                case "picker":
+                                    c = _.cycle(val.values, val.index || 0);
+                                    break;
+                                case "slider":
+                                    c = _.sliderCycle(val);
+                                    break;
+                                case "color":
+                                case "color_rgba":
+                                case "color_rgb":
+                                    var len = val.length || 15;
+                                    var colorArr = _color().circle(len);
+                                    // while (len--) {
+                                    // if (type === "color_rgba") {
+                                    //     colorArr.push(co.rgba());
+                                    // } else if (type === "color_rgb") {
+                                    //     colorArr.push(co.rgb());
+                                    // } else {
+                                    //     colorArr.push(co.rgba());
+                                    // }
+                                    // }
+                                    c = _.cycle(colorArr, 0);
+                                    break;
+                                case undefined:
+                                    if (_.isBoolean(val)) {
+                                        c = _.cycle([{ key: true, text: "是" }, { key: false, text: "否" }], val ? 0 : 1);
+                                        c.type = "toggle";
+                                        c.value = val;
+                                    } else if (_.isObject(val)) {
+                                        if (_.isBoolean(val.value)) {
+                                            c = _.cycle([{ key: true, text: "是" }, { key: false, text: "否" }], val.value ? 0 : 1)
+                                            c.type = "toggle";
+                                            c.value = val.value;
+                                        }
+                                    } else if (_.isString(val)) {
+                                        optCycle.data[k][x] = val;
+                                    }
+                                    break;
+                            }
+                            if (c) {
+                                if (val.text) c.text = val.text;
+                                if (val.auto) c.auto = val.auto;
+                                if (val.type) c.type = val.type;
+                                optCycle.data[k][x] = c;
+                            }
+                        }
+                    }
+                }
+            }
+
+            //init opt
+            optCycle.init = function() {
+                var opt = {};
+                for (var k in optCycle.data) {
+                    var o = optCycle.data[k];
+                    if (_.isObject(o)) {
+                        if (!!~["group", "motion"].indexOf(k)) {
+                            if (o.switch === "off") continue;
+                        }
+                        opt[k] = {};
+                        for (var x in o) {
+                            var val = o[x];
+                            if (_.isBoolean(val)) {
+                                opt[k][x] = val;
+                            } else if (_.isObject(val)) {
+                                if (_.isBoolean(val.value)) {
+                                    opt[k][x] = val.value;
+                                    if (val.auto) { //自动变值下一个
+                                        val.value = !val.value;
+                                    }
+                                } else {
+                                    opt[k][x] = _.isObject(val.val()) ? val.val().key : val.val();
+                                    if (val.auto) { //自动变值下一个
+                                        val.next && val.next();
+                                    }
+                                }
+                            } else if (_.isString(val)) {
+                                opt[k][x] = val;
+                            }
+                        }
+                    }
+                }
+                return opt;
+            }
+
+            //view data
+            optCycle.viewData = function() {
+                var data = optCycle.data;
+                var _viewData = { tabs: [] };
+                for (var k in data) {
+                    var tab = { key: k, items: [], switch: "none", active: false }; //random: [],
+                    _viewData.tabs.push(tab);
+                    var o = data[k];
+                    if (_.isObject(o)) {
+                        for (var x in o) {
+                            var val = o[x];
+                            if (x === "text") {
+                                tab[x] = val;
+                            } else if (x === "switch") {
+                                tab[x] = val;
+                                tab[x + "Method"] = _.camelCase("next", k, x);
+                            } else if (x === "active") {
+                                tab[x] = val;
+                            } else {
+                                var item = { key: x, value: val, text: x, id: k + "_" + x }; //method: _.camelCase("next", k, x),
+                                if (_.isBoolean(val)) {
+                                    item.filter = "toggle";
+                                    item.value = optCycle.filters.toggle(val);
+                                } else if (_.isNumber(val)) {
+                                    item.filter = "string";
+                                } else if (_.isObject(val)) {
+                                    item = _.extendOwn(item, val);
+                                    if (_.isBoolean(val.value)) {
+                                        item.value = optCycle.filters.toggle(val.value);
+                                    } else {
+                                        if (_.isObject(val.val())) {
+                                            item.value = 'text' in val.val() ? val.val().text : val.val();
+                                        } else {
+                                            if (!!~["color", "lineColor", "background", "shadowColor"].indexOf(item.key)) {
+                                                item.value = optCycle.filters.color(val.val());
+                                            } else {
+                                                item.value = val.val();
+                                            }
+                                        }
+                                    }
+                                } else {
+                                    item.filter = x;
+                                }
+                                tab.items.push(item);
+                            }
+                        }
+                    }
+                }
+                return _viewData
+            }
+            return optCycle;
+        };
+
+
         //多线程 任务
         var tasker = _.tasker = function(options) {
             return new tasker.prototype.init(options);
@@ -7890,7 +7860,7 @@
                         callback && callback(event.data);
                     });
                 }
-                // return this;
+
             },
             open: function(name, cfg) {
                 this.w.postMessage({ name: name, act: "open", cfg: _.clone(this.data, cfg) });
@@ -8067,7 +8037,6 @@
                 var url = location.hash.indexOf('#') === 0 ? location.hash : '#';
                 var page = self._find('url', url) || self.defaultPage;
                 this._go(page);
-                // return this;
 
             },
             getAction: function(route) {

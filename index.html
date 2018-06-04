@@ -8,8 +8,7 @@
     <link rel="shortcut icon" type="image/x-icon" href="data:image/gif;base64,YQ==">
     <link rel="stylesheet" href="css/layout.css">
     <link rel="stylesheet" href="css/console.css">
-    <link rel="stylesheet" href="css/pickout.css">
-    <link rel="stylesheet" href="css/draw.min.css">
+    <link rel="stylesheet" href="css/draw.min.css?v=3">
 </head>
 
 <body>
@@ -28,13 +27,13 @@
         <div class="btn-group row fixedbottom" template="_btn_tpl">
         </div>
     </div>
-    <div class="pk-overlay"></div>
-    <div class="pk-modal">
-        <div class="head">title</div>
-        <div class="pk-search">
-            <input type="text">
-        </div><span class="close">×</span>
-        <ul class="main"></ul>
+    <div class="overlay hide"></div>
+    <div class="modal hide">
+        <div class="header"></div>
+        <div class="main"></div>
+        <div class="footer">
+            <div class="btn confirm">确认</div>
+        </div>
     </div>
     <script type="text/template" id="_btn_tpl">
         <div class="btn row center w100" on="configHandler" id="configBtn">设置
@@ -996,15 +995,17 @@
     console.log(c)
     console.log(c.init())
     console.log(c.viewData())
-    var color = ["#059CFA", "#ccc"];
 
+    var updateSlider = function(item, value, max) {
+        var ps = 100 * value / max << 0;
+        var color = ["#059CFA", "#ccc"];
+        item.css({ 'background': '-webkit-linear-gradient(0deg, ' + color[0] + ' ' + ps + '%, ' + color[1] + ' ' + ps + '%)' })
+    }
 
     var draw = _.draw({
         canvasid: "myCanvas",
-        ratio: "fullscreen",
+        fullscreen: true
     })
-
-    var motion;
 
     tpler({
         el: "#container",
@@ -1032,12 +1033,10 @@
                 range.attr("type", "range");
                 range.className = val.type;
 
-                ["min", "max", "step", "value"].forEach(function(t) { //, "id"
+                ["min", "max", "step", "value"].forEach(function(t) {
                     range.attr(t, val[t]);
                 });
-                var ps = parseInt(100 * val.value / val.max);
-                var color = ["#059CFA", "#ccc"];
-                range.css({ 'background': '-webkit-linear-gradient(0deg, ' + color[0] + ' ' + ps + '%, ' + color[1] + ' ' + ps + '%)' })
+                updateSlider(range, val.value, val.max)
 
 
                 if (val.type == "slider") {
@@ -1063,7 +1062,7 @@
                     if (val.max) {
                         slider.addClass('hide')
                         var arrow = document.createElement("span");
-                        arrow.className = "pk-arrow -clean"
+                        arrow.className = "arrow -clean"
                         return slider.outerHTML + arrow.outerHTML
                     }
                     return slider.outerHTML
@@ -1116,73 +1115,61 @@
                     sel.options.add(option)
                 });
                 var arrow = document.createElement("span");
-                arrow.className = "pk-arrow -clean"
+                arrow.className = "arrow -clean"
                 return sel.outerHTML + arrow.outerHTML;
             }
         },
         methods: _.extend({
             pickerHandler: function(item, ev) {
                 // console.log(item);
-                var overlay = _.$(".pk-overlay");
-                var modal = _.$(".pk-modal");
+                var overlay = _.$(".overlay");
+                var modal = _.$(".modal");
                 var main = modal.$('.main');
 
                 var select = item.$("select");
-                var slider = item.$("div.slider"); //input
-                if (select.length == 0 && slider.length == 0) {
-                    return;
-                }
-
+                var slider = item.$("div.slider");
+                if (select.length == 0 && slider.length == 0) return;
 
                 var close = document.createElement('span');
-                close.setAttribute('class', 'close');
+                close.className = "close"
                 close.innerHTML = '&times;';
                 modal.appendChild(close);
 
-
                 var closeModal = function() {
-                    overlay.removeClass("-show");
-                    modal.removeClass("-show");
-                    setTimeout(function() {
-                        if (slider.length > 0) {
-                            item.appendChild(slider.hide())
-                        }
-                        main.innerHTML = '';
-                    }, 500);
+                    _.hide(overlay, modal);
+                    if (slider.length > 0) item.appendChild(slider.hide())
+                    main.innerHTML = '';
+                    main.removeClass("slider", "select")
                 }
 
                 function showModal() {
-                    overlay.addClass("-show");
-                    modal.addClass("-show");
-
+                    _.show(overlay, modal);
                 }
-                var head = modal.$('.head');
+                var header = modal.$('.header');
+                var confirm = modal.$(".confirm");
 
 
                 //slider
                 if (slider.length > 0) {
-                    var title = slider.hasAttribute('placeholder') ? slider.getAttribute('placeholder') : 'Select to option';
-                    head.innerHTML = title;
+                    header.innerHTML = slider.hasAttribute('placeholder') ? slider.getAttribute('placeholder') : 'Select to option';
                     _.show(slider)
                     main.appendChild(slider);
+                    main.addClass("slider");
 
                     var range = slider.$("input[type='range']")
                     var id = slider.id;
                     var ids = id.split("_");
                     var cdata = c.data[ids[0]][ids[1]];
                     var output = item.$(".value");
-                    var color = ["#059CFA", "#ccc"];
 
                     var update = function(value, max) {
-                        var value = Number(range.value);
-                        var max = Number(range.max);
+                        var value = +range.value,
+                            max = +range.max;
                         output.innerHTML = value;
                         slider.$(".output").innerHTML = value;
-                        cdata.value = Number(value);
+                        cdata.value = +value;
                         cdata.index = cdata.values.indexOf(cdata.value);
-                        var ps = parseInt(100 * value / max);
-                        range.css({ 'background': '-webkit-linear-gradient(0deg, ' + color[0] + ' ' + ps + '%, ' + color[1] + ' ' + ps + '%)' })
-
+                        updateSlider(range, value, max)
                     }
 
                     toucher([{
@@ -1210,24 +1197,33 @@
 
                 //select
                 if (select.length > 0) {
-
-                    var title = select.hasAttribute('placeholder') ? select.getAttribute('placeholder') : 'Select to option';
-                    head.innerHTML = title;
+                    header.innerHTML = select.hasAttribute('placeholder') ? select.getAttribute('placeholder') : 'Select to option';
                     var type = select.className;
-
-
                     var options = Array.prototype.slice.call(select);
-
-                    options.map(function(option, key) {
+                    var ul = document.createElement("ul");
+                    main.appendChild(ul);
+                    main.addClass("select");
+                    options.forEach(function(option, key) {
                         var li = document.createElement('li');
-                        li.addClass("pk-option");
-                        var selected = option.hasAttribute('selected') ? '-selected' : '';
-                        selected && li.addClass(selected);
+                        li.addClass("option");
+                        ul.appendChild(li);
+                        var selected = option.hasAttribute('selected') ? 'selected' : '';
+                        // selected && li.addClass(selected);
                         var txt = document.createElement('span');
-                        txt.setAttribute('class', 'txt');
+                        txt.className = "txt";
                         txt.innerHTML = option.innerHTML;
-                        main.appendChild(li);
+                        var checkbox = document.createElement('input');
+                        checkbox.type = "checkbox";
+
+                        if (selected){
+                            li.addClass(selected);
+                            checkbox.checked = true;
+                        }
+                         
+
+
                         li.appendChild(txt);
+                        li.appendChild(checkbox);
                         if (["color_rgba", "color_rgb", "color"].indexOf(type) >= 0) {
                             li.style.backgroundColor = option.innerHTML;
                         }
@@ -1239,6 +1235,19 @@
                                 } else {
                                     item.$(".value").text(txt.innerHTML);
                                 }
+
+                                ul.$("li").removeClass('selected');
+                                this.addClass('selected');
+
+                                //单选
+                                ul.$("[type='checkbox']").forEach(function(t) {
+                                    t.checked = false;
+                                })
+
+                                var checkbox = this.$("[type='checkbox']");
+                                checkbox.checked = !checkbox.checked;
+
+
 
                                 var id = select.id;
                                 var ids = id.split("_");
@@ -1261,7 +1270,7 @@
                                     }
                                 })
                                 option.setAttribute('selected', 'selected');
-                                closeModal();
+                                // closeModal();
                             }
                         })
                     });
@@ -1274,14 +1283,24 @@
                 ev.preventDefault();
                 ev.stopPropagation();
 
-                toucher({
-                    el: [overlay, close],
+                toucher([{
+                    el: close, //overlay,
                     callback: function(item, ev) {
                         ev.preventDefault();
                         ev.stopPropagation();
                         closeModal();
                     }
-                })
+                }, {
+                    el: confirm,
+                    callback: function(item, ev) {
+
+
+
+                        ev.preventDefault();
+                        ev.stopPropagation();
+                        closeModal();
+                    }
+                }])
             },
             tabHandler: function(item, ev) {
                 var target = item.attr("target");
@@ -1342,21 +1361,16 @@
                 type: "input",
                 callback: function(item, ev) { //
                     item.parent().$(".value").innerHTML = this.value == 1 ? "是" : "否"
-                    // output.innerHTML = this.value;
 
                     var id = item.id;
                     var ids = id.split("_");
                     var cdata = c.data[ids[0]][ids[1]];
 
-                    cdata.value = this.value == 1 ? "是" : "否"; //Number(this.value);
+                    cdata.value = this.value == 1 ? "是" : "否";
                     cdata.index = this.value == 1 ? 0 : 1;
-                    //Number(this.value);
-                    //cdata.values.indexOf(cdata.value);
-                    // console.log(cdata);
-                    var ps = parseInt(100 * this.value / this.max);
-                    var color = ["#059CFA", "#ccc"];
-                    item.css({ 'background': '-webkit-linear-gradient(0deg, ' + color[0] + ' ' + ps + '%, ' + color[1] + ' ' + ps + '%)' })
-                    // cdata.index = i;
+
+                    updateSlider(item, this.value, this.max)
+
                 }
             }, {
                 el: "input.switch",
@@ -1367,33 +1381,13 @@
                     var bd = item.closest(".tab-body-item").$(".switchBody")
 
                     if (item.value == "1") {
-                        // val = "off";
-                        // item.value=="0"
                         bd.removeClass("off").addClass("on");
-
                     } else {
-                        // val = "on";
-                        // item.value=="1"
                         bd.removeClass("on").addClass("off");
-
                     }
-                    var ps = parseInt(100 * this.value / this.max);
-                    var color = ["#059CFA", "#ccc"];
-                    item.css({ 'background': '-webkit-linear-gradient(0deg, ' + color[0] + ' ' + ps + '%, ' + color[1] + ' ' + ps + '%)' })
-
-                    // var cdata = c.data[key]["switch"];
-                    c.data[key]["switch"] = this.value == "1" ? "on" : "off"; //Number(this.value);
-                    // cdata.index = cdata.values.indexOf(cdata.value);
-                    // if (k == "motion") {
-                    //     if (val == "on") {
-                    //         _.show("#stopBtn");
-                    //     } else {
-                    //         _.hide("#stopBtn");
-                    //     }
-                    // }
+                    updateSlider(item, this.value, this.max)
+                    c.data[key]["switch"] = this.value == "1" ? "on" : "off";
                 }
-
-
             }])
 
 
