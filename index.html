@@ -745,7 +745,7 @@
             "text": "运动",
             "switch": "off",
             "motion": {
-                "type": "picker",
+                "type": "picker_multi",
                 "values": [{
                         "key": "move",
                         "text": "自由移动"
@@ -758,30 +758,30 @@
                         "key": "zoom",
                         "text": "缩放"
                     },
-                    {
-                        "key": "rotate_zoom",
-                        "text": "旋转+缩放"
-                    },
-                    {
-                        "key": "move_zoom",
-                        "text": "移动+缩放"
-                    },
-                    {
-                        "key": "move_rotate",
-                        "text": "移动+旋转"
-                    },
-                    {
-                        "key": "move_rotate_zoom",
-                        "text": "移动+旋转+缩放"
-                    },
+                    // {
+                    //     "key": "rotate_zoom",
+                    //     "text": "旋转+缩放"
+                    // },
+                    // {
+                    //     "key": "move_zoom",
+                    //     "text": "移动+缩放"
+                    // },
+                    // {
+                    //     "key": "move_rotate",
+                    //     "text": "移动+旋转"
+                    // },
+                    // {
+                    //     "key": "move_rotate_zoom",
+                    //     "text": "移动+旋转+缩放"
+                    // },
                     {
                         "key": "gravitate",
                         "text": "跳一跳"
                     },
-                    {
-                        "key": "rotate_gravitate",
-                        "text": "旋转+跳一跳"
-                    },
+                    // {
+                    //     "key": "rotate_gravitate",
+                    //     "text": "旋转+跳一跳"
+                    // },
                     {
                         "key": "curve",
                         "text": "曲线运动"
@@ -810,18 +810,18 @@
                         "key": "spiral",
                         "text": "螺旋"
                     },
-                    {
-                        "key": "rotate_spiral",
-                        "text": "旋转+螺旋"
-                    },
+                    // {
+                    //     "key": "rotate_spiral",
+                    //     "text": "旋转+螺旋"
+                    // },
                     {
                         "key": "light",
                         "text": "发光"
                     },
-                    {
-                        "key": "light_rotate",
-                        "text": "发光+旋转"
-                    },
+                    // {
+                    //     "key": "light_rotate",
+                    //     "text": "发光+旋转"
+                    // },
                     {
                         "key": "sineMove",
                         "text": "正弦函数运动"
@@ -985,8 +985,24 @@
                 "index": 0,
                 "text": "网格类型"
 
+            },
+            "movie": {
+                "type": "picker",
+                "values": [{
+                        "key": "none",
+                        "text": "无"
+                    },
+                    {
+                        "key": "firework",
+                        "text": "烟花"
+                    }, {
+                        "key": "starrySky",
+                        "text": "星空"
+                    }
+                ],
+                "index": 0,
+                "text": "电影"
             }
-
         }
     };
 
@@ -1028,7 +1044,6 @@
                 return val ? "" : "hide"
             },
             slider: function(val) {
-
                 var range = document.createElement("input");
                 range.attr("type", "range");
                 range.className = val.type;
@@ -1062,7 +1077,7 @@
                     if (val.max) {
                         slider.addClass('hide')
                         var arrow = document.createElement("span");
-                        arrow.className = "arrow -clean"
+                        arrow.className = "arrow"
                         return slider.outerHTML + arrow.outerHTML
                     }
                     return slider.outerHTML
@@ -1103,7 +1118,7 @@
                 var option;
                 sel.attr("placeholder", val.text);
                 sel.id = val.id;
-                sel.className = val.type; //"pickout" 
+                sel.className = val.type; //"picker" picker_multi
                 sel.style.display = "none"
                 val.values && val.values.forEach && val.values.forEach(function(t, i) {
                     var selected = i == val.index ? true : false;
@@ -1115,242 +1130,249 @@
                     sel.options.add(option)
                 });
                 var arrow = document.createElement("span");
-                arrow.className = "arrow -clean"
+                arrow.className = "arrow"
                 return sel.outerHTML + arrow.outerHTML;
+            },
+            picker_multi: function(val) {
+                return this.filters.picker(val)
             }
         },
         methods: _.extend({
-            pickerHandler: function(item, ev) {
-                // console.log(item);
-                var overlay = _.$(".overlay");
-                var modal = _.$(".modal");
-                var main = modal.$('.main');
+                pickerHandler: function(item, ev) {
 
-                var select = item.$("select");
-                var slider = item.$("div.slider");
-                if (select.length == 0 && slider.length == 0) return;
-
-                var close = document.createElement('span');
-                close.className = "close"
-                close.innerHTML = '&times;';
-                modal.appendChild(close);
-
-                var closeModal = function() {
-                    _.hide(overlay, modal);
-                    if (slider.length > 0) item.appendChild(slider.hide())
-                    main.innerHTML = '';
-                    main.removeClass("slider", "select")
-                }
-
-                function showModal() {
-                    _.show(overlay, modal);
-                }
-                var header = modal.$('.header');
-                var confirm = modal.$(".confirm");
-
-
-                //slider
-                if (slider.length > 0) {
-                    header.innerHTML = slider.hasAttribute('placeholder') ? slider.getAttribute('placeholder') : 'Select to option';
-                    _.show(slider)
-                    main.appendChild(slider);
-                    main.addClass("slider");
-
-                    var range = slider.$("input[type='range']")
-                    var id = slider.id;
-                    var ids = id.split("_");
-                    var cdata = c.data[ids[0]][ids[1]];
+                    var overlay = _.$(".overlay");
+                    var modal = _.$(".modal");
+                    var main = modal.$('.main');
                     var output = item.$(".value");
 
-                    var update = function(value, max) {
-                        var value = +range.value,
-                            max = +range.max;
-                        output.innerHTML = value;
-                        slider.$(".output").innerHTML = value;
-                        cdata.value = +value;
-                        cdata.index = cdata.values.indexOf(cdata.value);
-                        updateSlider(range, value, max)
+                    var select = item.$("select");
+                    var slider = item.$("div.slider");
+                    if (select.length == 0 && slider.length == 0) return;
+
+                    var close = document.createElement('span');
+                    close.className = "close"
+                    close.innerHTML = '&times;';
+                    modal.appendChild(close);
+
+                    var closeModal = function() {
+                        _.hide(overlay, modal);
+                        if (slider.length > 0) item.appendChild(slider.hide())
+                        main.innerHTML = '';
+                        main.removeClass("slider", "select")
                     }
+
+                    function showModal() {
+                        _.show(overlay, modal);
+                    }
+                    var header = modal.$('.header');
+                    var confirm = modal.$(".confirm");
+
+
+                    //slider
+                    if (slider.length > 0) {
+                        header.innerHTML = slider.hasAttribute('placeholder') ? slider.getAttribute('placeholder') : 'Select to option';
+                        _.show(slider)
+                        main.appendChild(slider);
+                        main.addClass("slider");
+
+                        var range = slider.$("input[type='range']")
+                        var id = slider.id;
+                        var ids = id.split("_");
+
+                        var update = function(value, max) {
+                            var value = +range.value,
+                                max = +range.max;
+                            output.innerHTML = value;
+                            slider.$(".output").innerHTML = value;
+                            c.setVal(ids.concat(["value"]), +value);
+
+                            var index = c.getVal(ids.concat(["values"])).indexOf(+value);
+                            c.setVal(ids.concat(["index"]), index);
+                            updateSlider(range, value, max)
+                        }
+
+                        toucher([{
+                            el: range,
+                            type: "input",
+                            callback: function(item, ev) {
+                                update();
+                            }
+                        }, {
+                            el: slider.$(".btn-sub"),
+                            callback: function(item, ev) {
+                                range.value = Number(range.value) - Number(range.step);
+                                update();
+                            }
+                        }, {
+                            el: slider.$(".btn-add"),
+                            callback: function(item, ev) {
+                                range.value = Number(range.value) + Number(range.step);;
+                                update();
+                            }
+                        }])
+                        showModal();
+                    }
+
+                    //select
+                    if (select.length > 0) {
+                        header.innerHTML = select.hasAttribute('placeholder') ? select.getAttribute('placeholder') : 'Select to option';
+                        var type = select.className;
+                        var options = Array.prototype.slice.call(select);
+                        var ul = document.createElement("ul");
+                        main.appendChild(ul);
+                        main.addClass("select");
+                        options.forEach(function(option, key) {
+                            var li = document.createElement('li');
+                            li.addClass("option");
+                            ul.appendChild(li);
+
+                            var txt = document.createElement('span');
+                            txt.className = "txt";
+                            txt.innerHTML = option.innerHTML;
+                            var checkbox = document.createElement('input');
+                            checkbox.name = "checkbox";
+                            checkbox.type = "checkbox";
+                            checkbox.value = option.innerHTML;
+
+                            //选中
+                            if (option.hasAttribute('selected')) {
+                                li.addClass('selected');
+                                checkbox.checked = true;
+                            }
+
+
+                            li.appendChild(txt);
+                            li.appendChild(checkbox);
+                            if (["color_rgba", "color_rgb", "color"].indexOf(type) >= 0) {
+                                li.style.backgroundColor = option.innerHTML;
+                            }
+                            toucher({
+                                el: li,
+                                callback: function() {
+                                    if (["color_rgba", "color_rgb", "color"].indexOf(type) >= 0) {
+                                        item.$(".value").innerHTML = txt.innerHTML + '<div class="colorblock" style="background-color:' + option.innerHTML + '"></div>';
+                                    } else {
+                                        item.$(".value").text(txt.innerHTML);
+                                    }
+
+
+
+                                    //单选
+                                    if (type !== "picker_multi") {
+                                        ul.$("li").removeClass('selected');
+                                        ul.$("[type='checkbox']").forEach(function(t) {
+                                            t.checked = false;
+                                        })
+                                    }
+                                    this.addClass('selected');
+                                    var checkbox = this.$("[type='checkbox']");
+                                    checkbox.checked = !checkbox.checked;
+
+                                    var id = select.id;
+                                    var ids = id.split("_");
+
+                                    //单选
+                                    options.forEach(function(t, i) {
+                                        t.removeAttr('selected')
+                                        var type = _.getVal(c.data, ids.concat(["type"])); //cdata.type
+                                        if (t == option) {
+                                            if (type == "picker") {} else if (type == "slider") {
+                                                c.setVal(ids.concat(["value"]), +txt.innerHTML)
+                                            } else if (type == "toggle") {
+                                                c.setVal(ids.concat(["value"]), txt.innerHTML === "是")
+                                            }
+                                            c.setVal(ids.concat(["index"]), i)
+                                        }
+                                    })
+                                    option.setAttribute('selected', 'selected');
+                                    // closeModal();
+                                }
+                            })
+                        });
+                        showModal();
+
+                    }
+
+                    ev.preventDefault();
+                    ev.stopPropagation();
 
                     toucher([{
-                        el: range,
-                        type: "input",
+                        el: close, //overlay,
                         callback: function(item, ev) {
-                            update();
+                            ev.preventDefault();
+                            ev.stopPropagation();
+                            closeModal();
                         }
                     }, {
-                        el: slider.$(".btn-sub"),
+                        el: confirm,
                         callback: function(item, ev) {
-                            range.value = Number(range.value) - Number(range.step);
-                            update();
-                        }
-                    }, {
-                        el: slider.$(".btn-add"),
-                        callback: function(item, ev) {
-                            range.value = Number(range.value) + Number(range.step);;
-                            update();
+
+                            var result = [];
+                            ul.$("[type='checkbox']").forEach(function(t) {
+                                if (t.checked) {
+                                    result[result.length] = t.value
+                                }
+                            })
+                            output.text(result);
+
+                            //c.setVal  todo
+
+
+                            ev.preventDefault();
+                            ev.stopPropagation();
+                            closeModal();
                         }
                     }])
-                    showModal();
+                },
+                tabHandler: function(item, ev) {
+                    var target = item.attr("target");
+                    item.addClass("active").siblings().removeClass("active");
 
-                }
-
-                //select
-                if (select.length > 0) {
-                    header.innerHTML = select.hasAttribute('placeholder') ? select.getAttribute('placeholder') : 'Select to option';
-                    var type = select.className;
-                    var options = Array.prototype.slice.call(select);
-                    var ul = document.createElement("ul");
-                    main.appendChild(ul);
-                    main.addClass("select");
-                    options.forEach(function(option, key) {
-                        var li = document.createElement('li');
-                        li.addClass("option");
-                        ul.appendChild(li);
-                        var selected = option.hasAttribute('selected') ? 'selected' : '';
-                        // selected && li.addClass(selected);
-                        var txt = document.createElement('span');
-                        txt.className = "txt";
-                        txt.innerHTML = option.innerHTML;
-                        var checkbox = document.createElement('input');
-                        checkbox.type = "checkbox";
-
-                        if (selected){
-                            li.addClass(selected);
-                            checkbox.checked = true;
+                    _.$(".tab-body-item").forEach(function(t) {
+                        if (t.attr("name") == target) {
+                            t.show();
+                        } else {
+                            t.hide()
                         }
-                         
+                    })
 
-
-                        li.appendChild(txt);
-                        li.appendChild(checkbox);
-                        if (["color_rgba", "color_rgb", "color"].indexOf(type) >= 0) {
-                            li.style.backgroundColor = option.innerHTML;
+                    for (var key in c.data) {
+                        if (key == target) {
+                            c.setVal([key, "active"], true)
+                        } else {
+                            c.setVal([key, "active"], false)
                         }
-                        toucher({
-                            el: li,
-                            callback: function() {
-                                if (["color_rgba", "color_rgb", "color"].indexOf(type) >= 0) {
-                                    item.$(".value").innerHTML = txt.innerHTML + '<div class="colorblock" style="background-color:' + option.innerHTML + '"></div>';
-                                } else {
-                                    item.$(".value").text(txt.innerHTML);
-                                }
-
-                                ul.$("li").removeClass('selected');
-                                this.addClass('selected');
-
-                                //单选
-                                ul.$("[type='checkbox']").forEach(function(t) {
-                                    t.checked = false;
-                                })
-
-                                var checkbox = this.$("[type='checkbox']");
-                                checkbox.checked = !checkbox.checked;
-
-
-
-                                var id = select.id;
-                                var ids = id.split("_");
-                                var cdata = c.data[ids[0]][ids[1]];
-
-                                options.forEach(function(t, i) {
-                                    t.removeAttr('selected')
-                                    if (t == option) {
-                                        if (cdata.type == "picker") {
-                                            cdata.index = i
-                                        } else if (cdata.type == "slider") {
-                                            cdata.value = Number(txt.innerHTML);
-                                            cdata.index = i;
-                                        } else if (cdata.type == "toggle") {
-                                            cdata.index = i;
-                                            cdata.value = txt.innerHTML == "是" ? true : false;
-                                        } else {
-                                            cdata.index = i;
-                                        }
-                                    }
-                                })
-                                option.setAttribute('selected', 'selected');
-                                // closeModal();
-                            }
-                        })
-                    });
-                    showModal();
-
-                }
-
-
-
-                ev.preventDefault();
-                ev.stopPropagation();
-
-                toucher([{
-                    el: close, //overlay,
-                    callback: function(item, ev) {
-                        ev.preventDefault();
-                        ev.stopPropagation();
-                        closeModal();
                     }
-                }, {
-                    el: confirm,
-                    callback: function(item, ev) {
-
-
-
-                        ev.preventDefault();
-                        ev.stopPropagation();
-                        closeModal();
-                    }
-                }])
-            },
-            tabHandler: function(item, ev) {
-                var target = item.attr("target");
-                item.addClass("active").siblings().removeClass("active");
-
-                _.$(".tab-body-item").forEach(function(t) {
-                    if (t.attr("name") == target) {
-                        t.show();
+                },
+                configHandler: function(item, ev) {
+                    var configPanel = _.$("#configPanel");
+                    configPanel.$(".scroll").css({ height: (_.screen.y - 85) + "px" })
+                    var icon = item.$(".icon");
+                    if (configPanel.hasClass("hide")) {
+                        configPanel.removeClass("hide");
+                        icon.removeClass("upArrow").addClass("downArrow");
+                        var cfg = _.extend({}, this, { data: c.viewData(), el: "#configPanel" });
+                        // console.log(cfg);
+                        tpler(cfg);
                     } else {
-                        t.hide()
+                        configPanel.addClass("hide");
+                        icon.removeClass("downArrow").addClass("upArrow")
                     }
-                })
-
-                for (var key in c.data) {
-                    if (key == target) {
-                        c.data[key].active = true;
-                    } else {
-                        c.data[key].active = false;
-                    }
-                }
-
-            },
-            configHandler: function(item, ev) {
-                var configPanel = _.$("#configPanel");
-                configPanel.$(".scroll").css({ height: (_.screen.y - 85) + "px" })
-                var icon = item.$(".icon");
-                if (configPanel.hasClass("hide")) {
-                    configPanel.removeClass("hide");
-                    icon.removeClass("upArrow").addClass("downArrow");
-                    var cfg = _.extend({}, this, { data: c.viewData(), el: "#configPanel" });
-                    // console.log(cfg);
-                    tpler(cfg);
-                } else {
-                    configPanel.addClass("hide");
+                },
+                stopHandler: function(item, ev) {
+                    draw.stop();
+                },
+                startHandler: function(item, ev) {
+                    _.hide("#configPanel");
+                    var icon = _.$("#configBtn .icon");
                     icon.removeClass("downArrow").addClass("upArrow")
+                    draw.clear();
+                    var opt = c.init()
+                    console.log(opt)
+                    draw.setup(opt);
                 }
             },
-            stopHandler: function(item, ev) {
-                draw.stop();
-            },
-            startHandler: function(item, ev) {
-                _.hide("#configPanel");
-                var icon = _.$("#configBtn .icon");
-                icon.removeClass("downArrow").addClass("upArrow")
-                draw.clear();
-                var opt = c.init()
-                console.log(opt)
-                draw.setup(opt);
-            }
-        }, c.methods),
+            c.methods),
         callback: function() {
             _.$(".tab").css({ height: (_.screen.y - 30) + "px" })
             _.$(".screen").appendChild(draw.canvas)
@@ -1364,10 +1386,9 @@
 
                     var id = item.id;
                     var ids = id.split("_");
-                    var cdata = c.data[ids[0]][ids[1]];
 
-                    cdata.value = this.value == 1 ? "是" : "否";
-                    cdata.index = this.value == 1 ? 0 : 1;
+                    c.setVal(ids.concat(["value"]), this.value == 1 ? "是" : "否");
+                    c.setVal(ids.concat(["index"]), this.value == 1 ? 0 : 1);
 
                     updateSlider(item, this.value, this.max)
 
@@ -1386,7 +1407,8 @@
                         bd.removeClass("on").addClass("off");
                     }
                     updateSlider(item, this.value, this.max)
-                    c.data[key]["switch"] = this.value == "1" ? "on" : "off";
+
+                    c.setVal([key, "switch"], this.value == "1" ? "on" : "off")
                 }
             }])
 
