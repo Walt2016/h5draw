@@ -23,6 +23,8 @@
 
 ![image](https://github.com/Walt2016/h5draw/blob/master/pic/fw.gif)
 
+![image](https://github.com/Walt2016/h5draw/blob/master/pic/sky.gif)
+
 
 ```
    var draw = _.draw({
