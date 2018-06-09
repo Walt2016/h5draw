@@ -19,6 +19,8 @@
 
 ![image](https://github.com/Walt2016/h5draw/blob/master/pic/fskp10.gif)
 
+![image](https://github.com/Walt2016/h5draw/blob/master/pic/zb.gif)
+
 
 ```
    var draw = _.draw({
