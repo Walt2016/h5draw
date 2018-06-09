@@ -505,14 +505,7 @@
                 "index": 0,
                 "text": "动画效果"
             },
-            "vertexTransform": {
-                "value": false,
-                "text": "顶点变形"
-            },
-            "vertexRotate": {
-                "value": false,
-                "text": "顶点旋转"
-            },
+            
 
 
         },
@@ -998,10 +991,22 @@
                     }, {
                         "key": "starrySky",
                         "text": "星空"
-                    }
+                    },
+                    {
+                        "key": "rain",
+                        "text": "下雨"
+                    },
+                    {
+                        "key": "vertexTransform",
+                        "text": "随变"
+                    },
+                    {
+                        "key": "vertexRotate",
+                        "text": "转变"
+                    },
                 ],
                 "index": 0,
-                "text": "电影"
+                "text": "小电影"
             }
         }
     };
@@ -1307,13 +1312,13 @@
                         el: confirm,
                         callback: function(item, ev) {
 
-                            var result = [];
-                            ul.$("[type='checkbox']").forEach(function(t) {
-                                if (t.checked) {
-                                    result[result.length] = t.value
-                                }
-                            })
-                            output.text(result);
+                            // var result = [];
+                            // _.$("[type='checkbox']").forEach(function(t) {
+                            //     if (t.checked) {
+                            //         result[result.length] = t.value
+                            //     }
+                            // })
+                            // output.text(result);
 
                             //c.setVal  todo
 

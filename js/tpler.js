@@ -1,6 +1,6 @@
 //一个js开发框架
 //template.event.canvas
-//v0.7.20180606
+//v0.7.20180609
 ;
 (function(root, factory) {
     if (typeof define === "function" && define.amd) {
@@ -84,7 +84,10 @@
             return obj;
         };
 
-        var screen = { x: 100, y: 100 },
+        var screen = {
+                x: 100,
+                y: 100
+            },
             envt;
         if (inBrowser) {
             var ua = window.navigator.userAgent.toLowerCase(),
@@ -709,35 +712,75 @@
                 //注意先后顺序
                 var regs = [
                     // 区块引用 >
-                    { tag: "blockquote", reg: /(>\s.+\r?\n)+/g },
+                    {
+                        tag: "blockquote",
+                        reg: /(>\s.+\r?\n)+/g
+                    },
                     //表格 
-                    { tag: "table", reg: /(\|.+\|\r?\n)+/g },
+                    {
+                        tag: "table",
+                        reg: /(\|.+\|\r?\n)+/g
+                    },
                     //标题 #
-                    { tag: "h6", reg: /#{6}\s(.+)/g },
-                    { tag: "h5", reg: /#{5}\s(.+)/g },
-                    { tag: "h4", reg: /#{4}\s(.+)/g },
-                    { tag: "h3", reg: /#{3}\s(.+)/g },
-                    { tag: "h2", reg: /#{2}\s(.+)/g },
-                    { tag: "h1", reg: /#{1}\s(.+)/g },
+                    {
+                        tag: "h6",
+                        reg: /#{6}\s(.+)/g
+                    }, {
+                        tag: "h5",
+                        reg: /#{5}\s(.+)/g
+                    }, {
+                        tag: "h4",
+                        reg: /#{4}\s(.+)/g
+                    }, {
+                        tag: "h3",
+                        reg: /#{3}\s(.+)/g
+                    }, {
+                        tag: "h2",
+                        reg: /#{2}\s(.+)/g
+                    }, {
+                        tag: "h1",
+                        reg: /#{1}\s(.+)/g
+                    },
                     //连接
                     // { tag: "img", reg: /\[img\]\((.*?)\)/g },
-                    { tag: "img", reg: /!\[(.*?)\]\((.*?)\)/g },
-                    { tag: "marklink", reg: /\[(.*?)\]\[(.*?)\]/ },
+                    {
+                        tag: "img",
+                        reg: /!\[(.*?)\]\((.*?)\)/g
+                    }, {
+                        tag: "marklink",
+                        reg: /\[(.*?)\]\[(.*?)\]/
+                    },
 
                     //[Philipp A]: https://github.com/flying-sheep
-                    { tag: "ref", tag: /\[.*?\]:\s+(https?:\/\/.+)/ },
-                    { tag: "a", reg: /\[(.*?)\]\((.*?)\)|(https?:\/\/.+)/g },
+                    {
+                        tag: "ref",
+                        tag: /\[.*?\]:\s+(https?:\/\/.+)/
+                    }, {
+                        tag: "a",
+                        reg: /\[(.*?)\]\((.*?)\)|(https?:\/\/.+)/g
+                    },
 
                     // { tag: "a", reg: /\[(.*?)\]\((.*?)\)/g },
                     // { tag: "a", reg: /(https?:\/\/.+)/g },
 
                     //分隔
-                    { tag: "hr", reg: /[\*|\-|_]{3,}/g },
+                    {
+                        tag: "hr",
+                        reg: /[\*|\-|_]{3,}/g
+                    },
                     //强调
-                    { tag: "strong", reg: /\*\*(.*?)\*\*/g },
-                    { tag: "em", reg: /\*(.*?)\*/g },
+                    {
+                        tag: "strong",
+                        reg: /\*\*(.*?)\*\*/g
+                    }, {
+                        tag: "em",
+                        reg: /\*(.*?)\*/g
+                    },
                     //斜体
-                    { tag: "i", reg: /[\s\n]_(.*?)_[\s|\n]/g },
+                    {
+                        tag: "i",
+                        reg: /[\s\n]_(.*?)_[\s|\n]/g
+                    },
                     //列表
                     // { tag: "ul", reg: /(\s+[\*-]\s.+\r?\n)+/g },
                     // { tag: "ul", reg: /([\*-]\s.+(\r?\n|$))+/g }, //[\n]
@@ -748,8 +791,13 @@
 
 
 
-                    { tag: "ul", reg: /(?:-\s[\s\S]*)?-\s.*(\r?\n|$)/g },
-                    { tag: "ul", reg: /(?:\*\s[\s\S]*)?\*\s.*(\r?\n|$)/g },
+                    {
+                        tag: "ul",
+                        reg: /(?:-\s[\s\S]*)?-\s.*(\r?\n|$)/g
+                    }, {
+                        tag: "ul",
+                        reg: /(?:\*\s[\s\S]*)?\*\s.*(\r?\n|$)/g
+                    },
                     // { tag: "ul", reg: /(\s*?-\s[\s\S]+(?:\r?\n|$))+/g },
                     // { tag: "ul", reg: /(\s*?-\s.+[\r?\n|$])+|(\s*?\*\s.+[\r?\n|$])+/g },
                     // { tag: "ul", reg: /(\s*?-\s.+[\r?\n|$])+/g },
@@ -764,16 +812,25 @@
                     // { tag: "ul", reg: /(\-\s.+[\n]){1,}/g },
                     // { tag: "ul", reg: /(-\s.+\r?\n){1,}/g },
 
-                    { tag: "ol", reg: /(\+\s.+\r?\n)+|(\d\.\s.+\r?\n)+/g },
+                    {
+                        tag: "ol",
+                        reg: /(\+\s.+\r?\n)+|(\d\.\s.+\r?\n)+/g
+                    },
                     // { tag: "ol", reg: /(\+\s.+\r?\n)+/g },
                     // { tag: "ol2", reg: /(\d\.\s.+\r?\n)+/g },
 
                     // { tag: "ol", reg: /([\+|\d\.]\s.+\r?\n){1,}/g },
 
-                    { tag: "code", reg: /`([\s\S]+)`/g },
+                    {
+                        tag: "code",
+                        reg: /`([\s\S]+)`/g
+                    },
 
                     //换行
-                    { tag: "br", reg: /\r?\n/g },
+                    {
+                        tag: "br",
+                        reg: /\r?\n/g
+                    },
                 ]
                 //var reg = new RegExp('(\\s|^)' + cls + '(\\s|$)');
 
@@ -810,10 +867,15 @@
                                 return _wrap("a", text, link2);
                                 break
                             case 'img':
-                                return _wrap(tag, null, { alt: text, src: link })
+                                return _wrap(tag, null, {
+                                    alt: text,
+                                    src: link
+                                })
                                 break;
                             case 'a':
-                                return _wrap(tag, text || match, { href: link || link2 })
+                                return _wrap(tag, text || match, {
+                                    href: link || link2
+                                })
                                 break;
                                 // case 'link':
                                 //     return _wrap("a", text, { href: text })
@@ -889,7 +951,9 @@
                     tag = regs[i].tag;
                     tpl = _replace.call(tpl, tag, reg);
                 }
-                return _wrap("article", tpl, { class: "markdown-body entry-content" });
+                return _wrap("article", tpl, {
+                    class: "markdown-body entry-content"
+                });
             },
             // html: function(str) { //htmlspecialchars
             //     // var reg_http=/(((https?):\/\/)?)(((www\.)?([a-zA-Z0-9\-\.\_]+(\.[a-zA-Z]{2,4})))/;
@@ -1350,15 +1414,36 @@
 
         //show hide
 
-        [{ "key": "hide", "reverse": "show" },
-            { "key": "active", "reverse": "passive" },
-            { "key": "disabled", "reverse": "available" },
-            { "key": "fadeout", "reverse": "fadein", "type": "animate" },
-            { "key": "fadeoutup", "reverse": "fadeindown", "type": "animate" },
-            { "key": "fadeinup", "reverse": "fadeoutdown", "type": "animate" },
-            { "key": "fadeoutleft", "reverse": "fadeinright", "type": "animate" },
-            { "key": "fadeinleft", "reverse": "fadeoutright", "type": "animate" }
-        ].forEach(function(t) {
+        [{
+            "key": "hide",
+            "reverse": "show"
+        }, {
+            "key": "active",
+            "reverse": "passive"
+        }, {
+            "key": "disabled",
+            "reverse": "available"
+        }, {
+            "key": "fadeout",
+            "reverse": "fadein",
+            "type": "animate"
+        }, {
+            "key": "fadeoutup",
+            "reverse": "fadeindown",
+            "type": "animate"
+        }, {
+            "key": "fadeinup",
+            "reverse": "fadeoutdown",
+            "type": "animate"
+        }, {
+            "key": "fadeoutleft",
+            "reverse": "fadeinright",
+            "type": "animate"
+        }, {
+            "key": "fadeinleft",
+            "reverse": "fadeoutright",
+            "type": "animate"
+        }].forEach(function(t) {
             _[t.key] = function() {
                 var len = arguments.length,
                     args;
@@ -1903,7 +1988,9 @@
         _.selectorMatches = function(el, selector) {
             var p = Element.prototype;
             var f = p.matches || p.webkitMatchesSelector || p.mozMatchesSelector || p.msMatchesSelector ||
-                function(s) { return !!~Array.prototype.slice.call(document.querySelectorAll(s)).indexOf(this); };
+                function(s) {
+                    return !!~Array.prototype.slice.call(document.querySelectorAll(s)).indexOf(this);
+                };
             return f.call(el, selector);
         }
 
@@ -2561,7 +2648,9 @@
                 }
                 try {
                     m += s2.split(".")[1].length
-                } catch (e) { console.log(e); }
+                } catch (e) {
+                    console.log(e);
+                }
                 return Number(s1.replace(".", "")) * Number(s2.replace(".", "")) / Math.pow(10, m);
             },
 
@@ -2573,10 +2662,14 @@
                     r1, r2, result, m;
                 try {
                     t1 = this.toString().split(".")[1].length
-                } catch (e) { console.log(e); }
+                } catch (e) {
+                    console.log(e);
+                }
                 try {
                     t2 = arg.toString().split(".")[1].length
-                } catch (e) { console.log(e); }
+                } catch (e) {
+                    console.log(e);
+                }
                 // with(Math) {
                 //整数相除
                 if (t2 === 0 && t1 === 0) {
@@ -2805,7 +2898,9 @@
                 var args = Array.prototype.slice.call(arguments),
                     len = args.length;
                 if (len === 1) {
-                    this.css({ width: args[0] })
+                    this.css({
+                        width: args[0]
+                    })
                 }
                 return this.offsetWidth;
             },
@@ -2813,7 +2908,9 @@
                 var args = Array.prototype.slice.call(arguments),
                     len = args.length;
                 if (len === 1) {
-                    this.css({ height: args[0] })
+                    this.css({
+                        height: args[0]
+                    })
                 }
                 return this.offsetHeight;
             },
@@ -3354,7 +3451,10 @@
                             var startHandler = function(ev) {
                                 startPos = _.pos(ev);
                                 offset = _.pos(el);
-                                el.css({ position: "absolute", cursor: "move" });
+                                el.css({
+                                    position: "absolute",
+                                    cursor: "move"
+                                });
                                 isDragging = true;
                                 //不准整屏移动
                                 addEvent(_touchmove, document, preventDefault);
@@ -3369,8 +3469,12 @@
                                         left = _.max(0, left);
                                         top = _.min(top, maxTop);
                                         top = _.max(0, top);
-                                        if (type !== "drag-y") el.css({ left: left + "px" });
-                                        if (type !== "drag-x") el.css({ top: top + "px" });
+                                        if (type !== "drag-y") el.css({
+                                            left: left + "px"
+                                        });
+                                        if (type !== "drag-x") el.css({
+                                            top: top + "px"
+                                        });
                                     })()
                             }
                             var endHandler = function(ev) {
@@ -3385,10 +3489,14 @@
 
 
                             addEvent("mouseover", el, function(ev) {
-                                el.css({ cursor: "move" })
+                                el.css({
+                                    cursor: "move"
+                                })
                             });
                             addEvent("mouseout", el, function(ev) {
-                                el.css({ cursor: "normal" })
+                                el.css({
+                                    cursor: "normal"
+                                })
                             });
                             addEvent(_touchstart, el, startHandler);
                             addEvent(_touchmove, document, moveHandler);
@@ -3453,7 +3561,9 @@
                         })
                     } else if (_.isArray(el)) {
                         el.forEach(function(t) {
-                            _option(_.clone(opt, { el: t }));
+                            _option(_.clone(opt, {
+                                el: t
+                            }));
                         });
                         // el.forEach(function(t) {
                         //     clear && self.clear({
@@ -3846,7 +3956,9 @@
                             result: arg.length === 1 ? arg[0] : arg
                         },
                         callback: function() {
-                            this.el.query("._item").removeAttr("style").last().css({ color: 'red' }).scrollIntoView();
+                            this.el.query("._item").removeAttr("style").last().css({
+                                color: 'red'
+                            }).scrollIntoView();
                         }
                     })
                 }
@@ -4429,7 +4541,10 @@
             init: function(opt) {
                 var a = this.a = opt.a || 0,
                     r = this.r = opt.r || 0,
-                    o = this.o = opt.o || { x: 0, y: 0 };
+                    o = this.o = opt.o || {
+                        x: 0,
+                        y: 0
+                    };
                 var p = this.xy(r, a, o);
                 this.x = p.x;
                 this.y = p.y;
@@ -4545,7 +4660,9 @@
             // },
             //旋转 =rotateZ
             rotate: function(a) {
-                return this.clone({ a: (this.a + a) % 360 });
+                return this.clone({
+                    a: (this.a + a) % 360
+                });
             },
             rotateX: function(a) {
                 return this.rotateXY(a, 0);
@@ -4557,7 +4674,9 @@
                 return this.toV().rotateXY(a, b).proj().toP(this);
             },
             scale: function(e) {
-                return this.clone({ r: this.r * e });
+                return this.clone({
+                    r: this.r * e
+                });
             },
             add: function(p) {
                 this.x += p.x;
@@ -4620,8 +4739,6 @@
 
 
 
-
-
         //顶点  极坐标,等角切分
         //当r相同时  半径变化比率rRation=1  为正多边形
         //1 ,.05，两个数循环。形成星形  ，凹多边形
@@ -4645,7 +4762,9 @@
                     x: opt.x || 0,
                     y: opt.y || 0
                 }
-                return _pointPolar({ o: o });
+                return _pointPolar({
+                    o: o
+                });
             },
             //顶点 polygon 多边形
             vertices: function(opt) {
@@ -4701,7 +4820,10 @@
                     //         break;
                     // }
                     an = i * 360 / num + a;
-                    var p = po.clone({ a: an, r: rn });
+                    var p = po.clone({
+                        a: an,
+                        r: rn
+                    });
                     vs[vs.length] = p;
                 }
                 return vs;
@@ -4814,7 +4936,16 @@
                 }
                 if (!opt) return;
                 //图形合并
-                [{ k: "line", num: 2 }, { k: "triangle", num: 3 }, { k: "square", num: 4 }].forEach(function(t) {
+                [{
+                    k: "line",
+                    num: 2
+                }, {
+                    k: "triangle",
+                    num: 3
+                }, {
+                    k: "square",
+                    num: 4
+                }].forEach(function(t) {
                     if (t.k === opt.shape) {
                         opt.shape = "polygon";
                         opt.num = t.num;
@@ -4874,7 +5005,9 @@
             //分形 逐级缩小
             fractal: function(opt) {
                 var self = this;
-                this.setup(_.clone(opt, { fractal: false }));
+                this.setup(_.clone(opt, {
+                    fractal: false
+                }));
                 var fractalRatio = opt.fractalRatio || 0.618;
                 var r = opt.r * fractalRatio; //ratio增大，计算量大，会致死锁，设置最大level5
                 var minR = opt.minR || 5;
@@ -4883,14 +5016,22 @@
                 fractalLevel++;
                 var fractal = !(fractalLevel >= maxLevel || r < minR); // ? false : true;
                 this.vs.forEach(function(t) {
-                    var opt2 = _.clone(opt, { x: t.x, y: t.y, r: r, fractal: fractal, fractalLevel: fractalLevel });
+                    var opt2 = _.clone(opt, {
+                        x: t.x,
+                        y: t.y,
+                        r: r,
+                        fractal: fractal,
+                        fractalLevel: fractalLevel
+                    });
                     self.setup(opt2);
                 });
             },
             //分形  逐级放大
             fractalIn: function(opt) {
                 var self = this;
-                this.setup(_.clone(opt, { fractalIn: false }));
+                this.setup(_.clone(opt, {
+                    fractalIn: false
+                }));
                 var fractalLevel = opt.fractalLevel || 0;
                 var maxLevel = _.isUndefined(opt.maxLevel) ? 5 : opt.maxLevel;
                 fractalLevel++;
@@ -4900,12 +5041,19 @@
                 if (vs.length < 2) return;
                 var v = vs[0].toV().add(vs[1].toV()); //计算上级r a，相连的向量和
                 // var p = v.toP(po);
-                var opt = _.clone(opt, { r: v.abs(), a: v.deg() }, { fractalLevel: fractalLevel })
+                var opt = _.clone(opt, {
+                    r: v.abs(),
+                    a: v.deg()
+                }, {
+                    fractalLevel: fractalLevel
+                })
                 self.setup(opt);
             },
             //顶点镜像分形
             fractalMirror: function(opt) {
-                this.setup(_.clone(opt, { fractalMirror: false }));
+                this.setup(_.clone(opt, {
+                    fractalMirror: false
+                }));
                 var fractalLevel = opt.fractalLevel || 0;
                 var maxLevel = _.isUndefined(opt.maxLevel) ? 5 : opt.maxLevel;
                 fractalLevel++;
@@ -4918,7 +5066,13 @@
                 vs.forEach(function(t, i) {
                     var o = po.mirror(t, fractalRatio);
                     if (o.r < minR) return;
-                    var opt2 = _.clone(opt, { r: o.r, x: o.x, y: o.y, a: o.a + 180, fractalLevel: fractalLevel }); //,showMirror: showMirror
+                    var opt2 = _.clone(opt, {
+                        r: o.r,
+                        x: o.x,
+                        y: o.y,
+                        a: o.a + 180,
+                        fractalLevel: fractalLevel
+                    }); //,showMirror: showMirror
                     self.shape(opt2);
                 })
             },
@@ -5052,7 +5206,9 @@
                     }
                 }
 
-                this.draw.render(_.clone(opt, { closed: false }))
+                this.draw.render(_.clone(opt, {
+                    closed: false
+                }))
                 return this;
             },
             //螺旋
@@ -5076,7 +5232,12 @@
                 var self = this;
                 var vs = this.vs; //|| _.vertex(opt).vs;
                 vs.forEach(function(t) {
-                    self.circle(_.clone(opt, { x: t.x, y: t.y, r: 3, text: "" }))
+                    self.circle(_.clone(opt, {
+                        x: t.x,
+                        y: t.y,
+                        r: 3,
+                        text: ""
+                    }))
                 })
 
                 //方法二
@@ -5313,7 +5474,9 @@
                 var num = opt.num;
                 var vsGroup = [];
                 var vertex = this.vertex;
-                var opt = _.clone(opt, { num: opt.num * 2 });
+                var opt = _.clone(opt, {
+                    num: opt.num * 2
+                });
                 // var vs = _.vertex(opt).vs; //改变num 需要重新计算
                 var vs = vertex.vertices(opt)
                 for (var i = 0; i < opt.num; i++) vsGroup.push([vs[i], vs[i + num]]);
@@ -5331,7 +5494,9 @@
                 (function _rose(vs) {
                     if (level >= turns) return;
                     var r = opt.r / Math.pow(2, ++level);
-                    var vs2 = vertex.clone({ r: r });
+                    var vs2 = vertex.clone({
+                        r: r
+                    });
                     vsGroup.push(vs2);
                     //断线
                     vs.map(function(t, i) {
@@ -5391,10 +5556,14 @@
                     if (r < 5) return;
                     var vertex = _.vertex(opt);
                     var r2 = r / 3;
-                    var vs2 = vertex.clone({ r: r2 });
+                    var vs2 = vertex.clone({
+                        r: r2
+                    });
                     vsGroup.push(vs2)
                     var r3 = r * 2 / 3;
-                    var vs3 = vertex.clone({ r: r3 });
+                    var vs3 = vertex.clone({
+                        r: r3
+                    });
                     var vs4 = [],
                         len = vs3.length;
                     vs3.forEach(function(t, i) {
@@ -5402,7 +5571,11 @@
                         vs4.push(t.mid(vs3[i + 1 === len ? 0 : i + 1]));
                     })
                     vs4.forEach(function(t) {
-                        var opt2 = _.clone(opt, { r: r2, x: t.x, y: t.y })
+                        var opt2 = _.clone(opt, {
+                            r: r2,
+                            x: t.x,
+                            y: t.y
+                        })
                         _carpet(opt2)
                     })
 
@@ -5531,7 +5704,12 @@
                 //边长
                 var r = 2 * opt.r * _.sin(180 / opt.num);
                 vs.forEach(function(t) {
-                    self.circle(_.clone(opt, { x: t.x, y: t.y, r: r, text: "" }))
+                    self.circle(_.clone(opt, {
+                        x: t.x,
+                        y: t.y,
+                        r: r,
+                        text: ""
+                    }))
                 });
             },
             //佛珠
@@ -5542,7 +5720,12 @@
                 var r = opt.r * _.sin(180 / opt.num);
                 vs.forEach(function(t, i) {
                     var p = t.mid(vs[i + 1 < len ? i + 1 : 0]);
-                    self.circle(_.clone(opt, { x: p.x, y: p.y, r: r, text: "" }));
+                    self.circle(_.clone(opt, {
+                        x: p.x,
+                        y: p.y,
+                        r: r,
+                        text: ""
+                    }));
                 })
                 this.draw.link(vs, opt);
             },
@@ -5643,47 +5826,50 @@
                     self.draw.linkGroup(vsGroup, opt);
                 }
                 vs.forEach(function(t) {
-                    _ray(_.clone(opt, { x: t.x, y: t.y }))
+                    _ray(_.clone(opt, {
+                        x: t.x,
+                        y: t.y
+                    }))
                 })
             },
 
-            // 顶点变形
-            vertexTransform: function() {
-                var self = this;
-                var speed = 1;
-                var vs = this.vs;
-                vs = vs.map(function(t) {
-                    return _.extend(t, {
-                        vx: (Math.random() * 2 - 1) * speed,
-                        vy: (Math.random() * 2 - 1) * speed,
-                    })
-                });
-                self.timmer && clearTimeout(self.timmer);
-                (function _move() {
-                    vs.forEach(function(t) {
-                        t.x += t.vx;
-                        t.y += t.vy;
-                    });
-                    // self.draw.clear();
-                    self.draw.link(vs);
-                    self.timmer = setTimeout(_move, 100);
-                })()
-            },
-            //顶点旋转
-            vertexRotate: function() {
-                var self = this;
-                var vs = this.vs;
-                var i = 0;
-                self.timmer && clearTimeout(self.timmer);
-                (function rotate() {
-                    self.draw.clear();
-                    vs = vs.map(function(t) {
-                        return t.rotate(i++)
-                    });
-                    self.draw.link(vs)
-                    self.timmer = setTimeout(rotate, 170);
-                })()
-            },
+            // // 顶点变形
+            // vertexTransform: function() {
+            //     var self = this;
+            //     var speed = 1;
+            //     var vs = this.vs;
+            //     vs = vs.map(function(t) {
+            //         return _.extend(t, {
+            //             vx: (Math.random() * 2 - 1) * speed,
+            //             vy: (Math.random() * 2 - 1) * speed,
+            //         })
+            //     });
+            //     self.timmer && clearTimeout(self.timmer);
+            //     (function _move() {
+            //         vs.forEach(function(t) {
+            //             t.x += t.vx;
+            //             t.y += t.vy;
+            //         });
+            //         // self.draw.clear();
+            //         self.draw.link(vs);
+            //         self.timmer = setTimeout(_move, 100);
+            //     })()
+            // },
+            // //顶点旋转
+            // vertexRotate: function() {
+            //     var self = this;
+            //     var vs = this.vs;
+            //     var i = 0;
+            //     self.timmer && clearTimeout(self.timmer);
+            //     (function rotate() {
+            //         self.draw.clear();
+            //         vs = vs.map(function(t) {
+            //             return t.rotate(i++)
+            //         });
+            //         self.draw.link(vs)
+            //         self.timmer = setTimeout(rotate, 170);
+            //     })()
+            // },
             //一笔画 画饼
             pie: function(opt) {
                 var vertex = this.vertex,
@@ -5896,19 +6082,34 @@
                 }
                 return groups.map(function(t, i) {
 
-                    opt.shape = _.clone(opt.shape, { x: t.x, y: t.y, easing: false })
+                    opt.shape = _.clone(opt.shape, {
+                        x: t.x,
+                        y: t.y,
+                        easing: false
+                    })
                     if (opt.group.colorful !== "solid") {
                         var groupColor = opt.group.colorArr[i];
-                        opt.shape = _.clone(opt.shape, { color: groupColor, lineColor: groupColor, fillColor: groupColor })
+                        opt.shape = _.clone(opt.shape, {
+                            color: groupColor,
+                            lineColor: groupColor,
+                            fillColor: groupColor
+                        })
                     }
                     if (opt.group.rotation) { //自转
-                        opt.shape = _.clone(opt.shape, { a: (a + i * 360 / len) % 360 })
+                        opt.shape = _.clone(opt.shape, {
+                            a: (a + i * 360 / len) % 360
+                        })
                     }
                     var drawShape, vs;
                     if (opt.group.animate && opt.group.easing === "none") { //动画
                         opt.shape.delay = i === 0 ? false : opt.group.animationInterval; //true
                         drawShape = self.shape(opt.shape);
-                        vs = vertex.clone({ o: { x: t.x, y: t.y } });
+                        vs = vertex.clone({
+                            o: {
+                                x: t.x,
+                                y: t.y
+                            }
+                        });
                     } else {
                         drawShape = self.shape(opt.shape);
                         vs = drawShape.vs;
@@ -5945,7 +6146,11 @@
                         vsGroup.push(vs);
                     };
                     //显示圆心编号
-                    opt.group.identifierCenter && self.draw.point({ x: t.x, y: t.y, text: i });
+                    opt.group.identifierCenter && self.draw.point({
+                        x: t.x,
+                        y: t.y,
+                        text: i
+                    });
 
 
                     //锥线
@@ -5959,11 +6164,17 @@
             //分形
             fractal: function(opt) {
                 var self = this;
-                var po = { x: opt.group.x, y: opt.group.y };
+                var po = {
+                    x: opt.group.x,
+                    y: opt.group.y
+                };
                 var vertex = _.vertex(_.clone(opt.shape, po));
                 var vs = vertex.vs; //组合顶点
                 vs.forEach(function(t) {
-                    opt.shape = _.clone(opt.shape, { x: t.x, y: t.y })
+                    opt.shape = _.clone(opt.shape, {
+                        x: t.x,
+                        y: t.y
+                    })
                     self.shape(opt.shape);
                 });
             },
@@ -5977,7 +6188,10 @@
 
                 var vsGroup = [];
                 groups.forEach(function(t) {
-                    opt.shape = _.clone(opt.shape, { x: t.x, y: t.y })
+                    opt.shape = _.clone(opt.shape, {
+                        x: t.x,
+                        y: t.y
+                    })
                     var drawShape = self.shape(opt.shape);
                     var vs = drawShape.vs;
                     vs.forEach(function(s) {
@@ -6000,7 +6214,9 @@
                 this.shape(opt.shape);
                 var r2 = opt.shape.r * 0.618; //opt.shape.rRatio;
                 // opt.shape = _.clone(opt.shape, { r: r2 });
-                this.shape(_.clone(opt.shape, { r: r2 }));
+                this.shape(_.clone(opt.shape, {
+                    r: r2
+                }));
                 // this.draw.shape(opt.shape);
                 // this[shape] && this[shape](opt)
 
@@ -6085,7 +6301,13 @@
 
                     self.shape(opt.shape);
                     //显示半径
-                    opt.group.showRadius && self.draw.link([{ x: x, y: y }, { x: opt.shape.x, y: opt.shape.y }]);
+                    opt.group.showRadius && self.draw.link([{
+                        x: x,
+                        y: y
+                    }, {
+                        x: opt.shape.x,
+                        y: opt.shape.y
+                    }]);
 
 
                     //动画
@@ -6116,7 +6338,9 @@
                     if (r <= 0) {
                         return;
                     }
-                    opt.shape = _.clone(opt.shape, self.color(opt), { r: r });
+                    opt.shape = _.clone(opt.shape, self.color(opt), {
+                        r: r
+                    });
                     self.shape(opt.shape);
                     r = r - interval;
                     if (opt.group.animate) {
@@ -6130,7 +6354,10 @@
             //外切圆
             excircle: function(opt) {
                 this.shape(opt.shape);
-                opt.shape = _.clone(opt.shape, { shape: "circle", text: "" })
+                opt.shape = _.clone(opt.shape, {
+                    shape: "circle",
+                    text: ""
+                })
                 this.shape(opt.shape);
                 return this;
             },
@@ -6688,14 +6915,21 @@
                 var color = opt.color || 'black';
 
                 function _polygon(o) {
-                    self.point({ x: o.x, y: o.y, r: 1, color: color })
+                    self.point({
+                        x: o.x,
+                        y: o.y,
+                        r: 1,
+                        color: color
+                    })
                 }
                 vs.forEach(function(t, i) {
                     var t1 = vs[i + 1 == len ? 0 : i + 1];
                     var d = t.dist(t1);
                     var ps = [t].concat(t.split(t1, d / 10 << 0 || 1))
                     ps.forEach(function(o) {
-                        animate ? self.delay(function() { _polygon(o) }, time) : _polygon(o);
+                        animate ? self.delay(function() {
+                            _polygon(o)
+                        }, time) : _polygon(o);
                     })
                 });
             },
@@ -6717,7 +6951,12 @@
 
                 function _circle() {
                     p = p.rotate(1);
-                    self.point({ x: p.x, y: p.y, r: 1, color: color })
+                    self.point({
+                        x: p.x,
+                        y: p.y,
+                        r: 1,
+                        color: color
+                    })
                 }
                 var time = opt.delay || 10;
                 var animate = opt.animate || opt.delay;
@@ -6771,7 +7010,12 @@
                             y: p.y
                         }
                     })
-                    self.point({ x: p1.x, y: p1.y, r: 1, color: color })
+                    self.point({
+                        x: p1.x,
+                        y: p1.y,
+                        r: 1,
+                        color: color
+                    })
                 }
                 for (var i = 0; i < 360 * turns; i++) {
                     animate ? this.delay(_spiro, time) : _spiro();
@@ -6814,7 +7058,12 @@
                     })
                     // var p1 = p.clone({ r: p.r * (1 + _.sin(p.a * k)) });
 
-                    self.point({ x: p1.x, y: p1.y, r: 1, color: color })
+                    self.point({
+                        x: p1.x,
+                        y: p1.y,
+                        r: 1,
+                        color: color
+                    })
                 }
 
                 for (var i = 0; i < 360 * turns; i++) {
@@ -6882,8 +7131,14 @@
                             if (self.opt) {
                                 if (!self.opt.motion) {
                                     self.opt.shape.begin && self.clear();
-                                    if (self.opt.shape) self.opt.shape = _.extend(self.opt.shape, { x: mouse.x, y: mouse.y });
-                                    if (self.opt.group) self.opt.group = _.extend(self.opt.group, { x: mouse.x, y: mouse.y });
+                                    if (self.opt.shape) self.opt.shape = _.extend(self.opt.shape, {
+                                        x: mouse.x,
+                                        y: mouse.y
+                                    });
+                                    if (self.opt.group) self.opt.group = _.extend(self.opt.group, {
+                                        x: mouse.x,
+                                        y: mouse.y
+                                    });
                                     self.setup.call(self, self.opt);
                                 }
                             }
@@ -6946,30 +7201,24 @@
 
                     var bg = {};
                     [{
-                            k: "color",
-                            v: "background-color"
-                        },
-                        {
-                            k: "color",
-                            v: "background"
-                        },
-                        {
-                            k: "src",
-                            v: "background-image"
-                        },
-                        {
-                            k: "size",
-                            v: "background-size"
-                        },
-                        {
-                            k: "position",
-                            v: "background-position"
-                        },
-                        {
-                            k: "repeat",
-                            v: "background-repeat"
-                        }
-                    ].forEach(function(t) {
+                        k: "color",
+                        v: "background-color"
+                    }, {
+                        k: "color",
+                        v: "background"
+                    }, {
+                        k: "src",
+                        v: "background-image"
+                    }, {
+                        k: "size",
+                        v: "background-size"
+                    }, {
+                        k: "position",
+                        v: "background-position"
+                    }, {
+                        k: "repeat",
+                        v: "background-repeat"
+                    }].forEach(function(t) {
                         if (t.v in options) bg[t.k] = options[t.v]
                     });
                     this.background(bg);
@@ -7014,10 +7263,11 @@
                     y: this.height / 2
                 }
                 return this;
-
             },
             fullscreen: function() {
-                return this.size({ ratio: "fullscreen" });
+                return this.size({
+                    ratio: "fullscreen"
+                });
             },
             background: function(opt) {
                 var self = this,
@@ -7313,17 +7563,37 @@
             },
             //短参数 映射
             shortName: function(opt) {
-                opt && [{ k: "n", v: "num" },
-                    { k: "s", v: "shape" },
-                    { k: "showA", v: "showAngle" },
-                    { k: "showR", v: "showRadius" },
-                    { k: "showV", v: "showVertices" },
-                    { k: "showC", v: "showCenter" },
-                    { k: "showEC", v: "showExcircle" },
-                    { k: "showIC", v: "showIncircle" },
-                    { k: "showD", v: "showDiagonal" },
-                    { k: "showM", v: "showMirror" },
-                ].forEach(function(t) {
+                opt && [{
+                    k: "n",
+                    v: "num"
+                }, {
+                    k: "s",
+                    v: "shape"
+                }, {
+                    k: "showA",
+                    v: "showAngle"
+                }, {
+                    k: "showR",
+                    v: "showRadius"
+                }, {
+                    k: "showV",
+                    v: "showVertices"
+                }, {
+                    k: "showC",
+                    v: "showCenter"
+                }, {
+                    k: "showEC",
+                    v: "showExcircle"
+                }, {
+                    k: "showIC",
+                    v: "showIncircle"
+                }, {
+                    k: "showD",
+                    v: "showDiagonal"
+                }, {
+                    k: "showM",
+                    v: "showMirror"
+                }, ].forEach(function(t) {
                     if (!_.isUndefined(opt[t.k])) opt[t.v] = opt[t.k];
                 });
                 return opt;
@@ -7373,7 +7643,9 @@
                 }
                 //曲线
                 if (opt && opt.curve) {
-                    var po = _pointPolar({ o: this.o });
+                    var po = _pointPolar({
+                        o: this.o
+                    });
                     vs.forEach(function(t, i) {
                         var t1 = vs[i + 1 === len ? 0 : i + 1],
                             v1 = po.toV(t),
@@ -7418,7 +7690,11 @@
                         ia = Math.round(_.deg(v1.ia(v2)));
                     self.arc(t, 10, v1.rad(), v2.rad());
                     var p = t.toV().abs(opt.r + 15).toP(t.o);
-                    return self.text({ x: p.x, y: p.y, text: ia + '°' })
+                    return self.text({
+                        x: p.x,
+                        y: p.y,
+                        text: ia + '°'
+                    })
                 }
 
                 return opt.showAngle === "all" ? vs.map(function(t, i) {
@@ -7435,12 +7711,19 @@
             },
             // 外切圆
             excircle: function(opt) {
-                return this.shape(_.clone(opt, { shape: "circle", text: "" }));
+                return this.shape(_.clone(opt, {
+                    shape: "circle",
+                    text: ""
+                }));
             },
             //内切圆
             incircle: function(opt) {
                 var r = opt.r * _.cos(180 / opt.num);
-                return this.shape(_.clone(opt, { shape: "circle", r: r, text: "" }));
+                return this.shape(_.clone(opt, {
+                    shape: "circle",
+                    r: r,
+                    text: ""
+                }));
             },
             //旁切圆
             escribedcircle: function(opt) {
@@ -7513,7 +7796,9 @@
                     for (var j = i + 2; j < len; j++)
                         if (!(i === 0 && j === len - 1)) vsGroup.push([vs[i], vs[j]]);
 
-                return this.linkGroup(vsGroup, _.clone(opt, { showVertices: false }));
+                return this.linkGroup(vsGroup, _.clone(opt, {
+                    showVertices: false
+                }));
                 // return this.draw.link(vs, opt);
             },
             //间隔填色
@@ -7522,9 +7807,17 @@
                 var x = opt.x,
                     y = opt.y;
                 var vsGroup = _.slice(vs, 2).map(function(t) {
-                    return t.concat([{ x: x, y: y }])
+                    return t.concat([{
+                        x: x,
+                        y: y
+                    }])
                 })
-                return this.linkGroup(vsGroup, _.clone(opt, { fill: true, showVertices: false, showExcircle: false, fillInterval: false }));
+                return this.linkGroup(vsGroup, _.clone(opt, {
+                    fill: true,
+                    showVertices: false,
+                    showExcircle: false,
+                    fillInterval: false
+                }));
                 // return this.draw.link(vs, opt);
             },
             //顶点镜像
@@ -7544,7 +7837,12 @@
                 var po = vertex.po;
                 vs.forEach(function(t, i) {
                     var o = po.mirror(t);
-                    self.shape(_.clone(opt, { x: o.x, y: o.y, a: o.a + 180, showMirror: false }));
+                    self.shape(_.clone(opt, {
+                        x: o.x,
+                        y: o.y,
+                        a: o.a + 180,
+                        showMirror: false
+                    }));
                 })
             },
 
@@ -7556,7 +7854,9 @@
                 // }
                 // self.callback && self.callback(result);
                 if (opt && opt.animate) { //动画
-                    _.extend(opt, { animate: false })
+                    _.extend(opt, {
+                        animate: false
+                    })
                     var animationInterval = opt.animationInterval || 0;
                     vsGroup.forEach(function(t, i) {
                         // setTimeout(function() {
@@ -7601,19 +7901,31 @@
                 self.save().set(opt);
                 if (opt.animate && opt.easing) {
                     _tween({
-                        start: { x: opt.x, y: 0, a: opt.a - 180 },
-                        to: { x: opt.x, y: opt.y, a: opt.a },
+                        start: {
+                            x: opt.x,
+                            y: 0,
+                            a: opt.a - 180
+                        },
+                        to: {
+                            x: opt.x,
+                            y: opt.y,
+                            a: opt.a
+                        },
                         duration: opt.animationInterval || 2000,
                         type: opt.easing, //动画类型
                         callback: function(o) {
                             self.clear();
-                            self.shape(_.clone(opt, o, { easing: false }));
+                            self.shape(_.clone(opt, o, {
+                                easing: false
+                            }));
                         }
                     });
                 }
                 if (opt.delay) { //延迟动画
                     return self.delay(function() {
-                        self.shape(_.clone(opt, { delay: false }));
+                        self.shape(_.clone(opt, {
+                            delay: false
+                        }));
                     }, opt.delay)
                 }
                 var s = _.shape(self, opt);
@@ -7633,12 +7945,20 @@
 
                     if (opt.group.animate && opt.group.easing && opt.group.easing !== "none") {
                         _tween({
-                            start: { r: opt.group.r + 100, a: opt.group.a - 180 },
-                            to: { r: opt.group.r, a: opt.group.a },
+                            start: {
+                                r: opt.group.r + 100,
+                                a: opt.group.a - 180
+                            },
+                            to: {
+                                r: opt.group.r,
+                                a: opt.group.a
+                            },
                             duration: opt.group.animationInterval || 2000,
                             type: opt.group.easing, //动画类型
                             callback: function(o) {
-                                _.extend(opt.group, o, { easing: false }); //{ x: o.x, y: o.y,a }
+                                _.extend(opt.group, o, {
+                                    easing: false
+                                }); //{ x: o.x, y: o.y,a }
                                 self.clear();
                                 t = _shapeGroup(self, opt);
                             }
@@ -7674,7 +7994,9 @@
             global: function(opt) {
                 if (!(opt && opt.global)) return this;
                 //画布尺寸
-                opt.global.backgroundSize && this.size({ ratio: opt.global.backgroundSize });
+                opt.global.backgroundSize && this.size({
+                    ratio: opt.global.backgroundSize
+                });
                 var ctx = this.context;
                 //透明
                 this.setGlobalAlpha(ctx, opt.global.alpha);
@@ -7690,7 +8012,7 @@
                     this[opt.global.movie](opt.group || opt.shape);
                     return false;
                 } else {
-                    self.id && cancelAnimationFrame(self.id);
+                    this.id && cancelAnimationFrame(this.id);
                 }
                 //网格
                 if (opt.global.showGrid) {
@@ -7721,7 +8043,10 @@
                 var self = this;
                 var vs = self.vertices(opt.group);
                 return vs.map(function(t) {
-                    return self.vertices(_.clone(opt.shape, { x: t.x, y: t.y }));
+                    return self.vertices(_.clone(opt.shape, {
+                        x: t.x,
+                        y: t.y
+                    }));
                 })
             },
 
@@ -7760,7 +8085,10 @@
                     ctx.translate(p.x, p.y);
                     return this;
                 }
-                return { x: 0, y: 0 }
+                return {
+                    x: 0,
+                    y: 0
+                }
             },
 
             // translateX: function(opt, tx) {
@@ -7941,39 +8269,46 @@
                     color: 'rgba(0,0,0,0.2)',
                     r: 1,
                 });
-                var color = _.color();
+
                 var _randomR = function() {
                     return Math.random() > 0.9 ? 3 + Math.random() * 3 : 1 + Math.random() * 3;
                 }
-                var shadow = opt.shadow;
+                // var shadow = opt.shadow;
+                var color = _.color();
+                var colorArr = color.circle(num)
                 var ps = [];
                 while (num--) ps[ps.length] = p.clone({
                     x: Math.random() * width,
                     y: Math.random() * height,
                     r: _randomR(),
-                    color: shadow ? color.light() : color.rgb(),
+                    color: colorArr[num] //shadow ? color.light() : color.rgb(),
                 });
                 var lineMaxLength = opt.lineMaxLength || _.min(width / 4, 200); // 点之间产生连线的最大距离 threshold
                 // var background = 'rgba(0,0,0,0.05)'; 
                 var background = opt.background || color.deepdark();
-                var Line = function(p1, p2) {
-                    this.from = p1;
-                    this.to = p2;
+                var Line = function(a, b) {
+                    this.a = a;
+                    this.b = b;
                     this.len = _.vector({
-                        x: p1.x - p2.x,
-                        y: p1.y - p2.y
+                        x: a.x - b.x,
+                        y: a.y - b.y
                     }).abs();
                     this.life = this.len < lineMaxLength
                     this.alptha = 1 - this.len / lineMaxLength
                 }
 
                 function update() {
-                    shadow ? self.shadow(background) : self.clear();
+                    self.shadow();
                     var ls = [];
                     var len = ps.length;
                     ps.forEach(function(t, i) {
                         t.move()
-                        self.point({ x: t.x, y: t.y, r: t.r, color: t.color })
+                        self.point({
+                            x: t.x,
+                            y: t.y,
+                            r: t.r,
+                            color: t.color
+                        })
                         for (var j = i + 1; j < len; j++) {
                             var li = new Line(t, ps[j]);
                             if (li.life) ls[ls.length] = li;
@@ -7981,9 +8316,9 @@
                     })
                     ls.forEach(function(t) {
                         self.setLineWidth(ctx, t.alptha * 2.5);
-                        self.setStrokeStyle(ctx, color.mix(t.from.color, t.to.color))
+                        self.setStrokeStyle(ctx, color.mix(t.a.color, t.b.color))
                         // 'rgba(200,200,200,' + alptha + ')';
-                        self.link([t.from, t.to]);
+                        self.link([t.a, t.b]);
                     })
                 }
 
@@ -7995,7 +8330,7 @@
                             x: pos.x,
                             y: pos.y,
                             r: _randomR(),
-                            color: shadow ? color.light() : color.rgb(),
+                            color: color.rgb(),
                         })
                         ps.length >= maxNum && ps.shift();
                     }
@@ -8024,24 +8359,24 @@
                 var ctx = this.context;
                 var width = this.width,
                     height = this.height;
-                ctx.fillStyle = '#000';
-                ctx.fillRect(0, 0, width, height);
 
-                var listFire = [];
-                var listFirework = [];
+                var fs = [];
+                var fws = [];
                 var num = opt.num || 5;
-                var center = { x: width / 2, y: height / 2 };
                 var range = 100;
+                var colorArr = _.color().circle(num);
+                var o=this.o;
+
 
                 var Fire = function() {
-                    this.x = Math.random() * range / 2 - range / 4 + center.x;
+                    this.x = Math.random() * range / 2 - range / 4 + o.x;
                     this.y = Math.random() * range * 2 + height;
                     this.r = Math.random() + 0.5;
                     this.color = '#fd1';
                     this.vx = Math.random() - 0.5;
                     this.vy = -(Math.random() + 4);
                     this.ax = Math.random() * 0.02 - 0.01;
-                    this.far = Math.random() * range + (center.y - range);
+                    this.far = Math.random() * range + (o.y - range);
                     this.base = {
                         x: this.x,
                         y: this.y,
@@ -8093,37 +8428,43 @@
                     return this
                 }
                 for (var i = 0; i < num; i++) {
-                    listFire[listFire.length] = new Fire();
+                    fs[fs.length] = new Fire();
                 }
-                var _color = _.color()
-
                 function update() {
-                    listFire.forEach(function(t) {
+                    fs.forEach(function(t, i) {
                         if (t.move().reborn) {
-                            var color = _color.rgb();
-                            for (var i = 0; i < num * 5; i++) {
-                                listFirework[listFirework.length] = new Firework(t, color);
-                            }
+                            var len = 20; 
+                            while (len--) fws[fws.length] = new Firework(t, colorArr[i]);
                             t.reset()
                         }
                     })
 
-                    for (var i = listFirework.length - 1; i >= 0; i--) {
-                        var fw = listFirework[i];
-                        fw && fw.move().die && listFirework.splice(i, 1);
+                    for (var i = fws.length - 1; i >= 0; i--) {
+                        var fw = fws[i];
+                        fw && fw.move().die && fws.splice(i, 1);
                     }
                 }
 
                 function render() {
                     self.shadow();
-                    self.setGlobalCompositeOperation(ctx,'screen');
-                    self.setGlobalAlpha(ctx,1);
-                    listFire.forEach(function(t) {
-                        self.point({ x: t.x, y: t.y, r: t.r, color: t.color })
+                    self.setGlobalCompositeOperation(ctx, 'screen');
+                    self.setGlobalAlpha(ctx, 1);
+                    fs.forEach(function(t) {
+                        self.point({
+                            x: t.x,
+                            y: t.y,
+                            r: t.r,
+                            color: t.color
+                        })
                     });
-                    listFirework.forEach(function(t) {
-                        self.setGlobalAlpha(ctx,t.alpha);
-                        self.point({ x: t.x, y: t.y, r: t.r, color: t.color })
+                    fws.forEach(function(t) {
+                        self.setGlobalAlpha(ctx, t.alpha);
+                        self.point({
+                            x: t.x,
+                            y: t.y,
+                            r: t.r,
+                            color: t.color
+                        })
                     });
                 }
 
@@ -8134,7 +8475,252 @@
                     render();
                 })();
 
-            }
+            },
+            //下雨
+            rain: function(opt) {
+                opt = opt || {}
+                var self = this;
+                var ctx = this.context;
+                var width = this.width,
+                    height = this.height;
+
+                //雨线
+                var Line = function(x) {
+                    var temp = 0.25 * (50 + Math.random() * 100);
+                    this.speed = 2 * (Math.random() * 6 + 3);
+                    this.die = false;
+                    this.x = x;
+                    this.y = -200;
+                    this.h = temp;
+                    this.color = _.color().rgba(0, 0, 0); //Math.floor(temp*255/75)
+                }
+                //雨点 
+                var Drop = function(x, y,color) {
+                    this.die = false;
+                    this.x = x;
+                    this.y = y;
+                    this.vx = (Math.random() - 0.5) * 8;
+                    this.vy = Math.random() * (-6) - 3;
+                    this.r = Math.random() * 1.5 + 1,
+                    this.color=color
+                };
+                //
+                var gravity = 0.5; //重力
+                var speedx = 0;
+                var maxspeedx = 0;
+                Drop.prototype.move = function() {
+                    this.vx = this.vx + (speedx) / 2;
+                    this.x = this.x + this.vx;
+                    this.vy = this.vy + gravity;
+                    this.y = this.y + this.vy;
+                    if (this.y > height) {
+                        this.die = true;
+                    }
+                }
+                var dropList = [];
+                var mousePos = [0, 0];
+
+                function createDrops(x, y,color) {
+                    var maxi = Math.floor(Math.random() * 5 + 5);
+                    for (var i = 0; i < maxi; i++) {
+                        dropList[dropList.length] = new Drop(x, y,color)
+                    }
+                }
+                var ls = [];
+
+                function update() {
+
+                    dropList.forEach(function(t) {
+                        t.move();
+                    })
+                    for (var i = dropList.length - 1; i >= 0; i--) {
+                        if (dropList[i]&&dropList[i].die) {
+                            dropList.splice(i, 1);
+                        }
+                    }
+
+                    speedx = speedx + (maxspeedx - speedx) / 50;
+
+                    if(ls.length<=50)
+                        ls[ls.length] = new Line(Math.random() * 2 * width - (0.5 * width));
+
+
+                    var raindropLine = height - Math.random() * height / 5;
+                    ls.forEach(function(t) {
+                         if ((t.y + t.h) > raindropLine) {
+                            if (Math.random() > 0.75) {
+                                createDrops(t.x + speedx * t.h, t.y + t.h,t.color);
+                                t.die = true;
+                            }
+                        }
+                        if (t.y >= height) {
+                            t.die = true;
+                        } else {
+                            t.y +=  t.speed;
+                            t.x += t.speed * speedx;
+                        }
+                    });
+
+                    for (var i = ls.length - 1; i >= 0; i--) {
+                        ls[i]&&ls[i].die&&ls.splice(i, 1);
+                    }
+                }
+
+                function render() {
+                    self.shadow();
+
+                    ls.forEach(function(t) {
+                        ctx.strokeStyle = t.color;
+                        ctx.lineWidth = 3;
+                        ctx.beginPath();
+                        ctx.moveTo(t.x, t.y);
+                        ctx.lineTo(t.x + speedx * t.h, t.y + t.h);
+                        ctx.stroke();
+                    });
+                    
+                    dropList.forEach(function(t) {
+                        ctx.lineWidth = 1;
+                        ctx.strokeStyle = t.color;
+                        ctx.beginPath();
+                        ctx.arc(t.x, t.y, t.r, Math.random() * Math.PI * 2, 1 * Math.PI);
+                        ctx.stroke();
+                    });
+                }
+
+                self.id && cancelAnimationFrame(self.id);
+                (function loop() {
+                    self.id = requestAnimationFrame(loop);
+                    update();
+                    render();
+                })();
+
+                toucher({
+                    el: self.canvas,
+                    type: "touchmove",
+                    callback: function(e) {
+                        mousePos[0] = e.clientX;
+                        mousePos[1] = e.clientY;
+                        maxspeedx = (e.clientX - width / 2) / (width / 2);
+                    }
+                })
+            },
+            // 随变
+            vertexTransform: function(opt) {
+                var self = this;
+                var speed = 1;
+                var ctx = this.context;
+                opt = this.default(opt);
+
+
+                var color = _.color().rgb();
+                self.setStrokeStyle(ctx, color)
+
+                function resetVs() {
+                    var vs = _.vertex(opt).vs;
+                    return vs.map(function(t) {
+                        return _.extend(t, {
+                            vx: (Math.random() * 2 - 1) * speed,
+                            vy: (Math.random() * 2 - 1) * speed,
+                        })
+                    })
+                }
+                var vs = resetVs();
+                var width = this.width;
+                var height = this.height;
+                var lineMaxLength = opt.lineMaxLength || _.min(width / 4, 200);
+                var Line = function(a, b) {
+                    this.a = a;
+                    this.b = b;
+                    this.len = _.vector({
+                        x: a.x - b.x,
+                        y: a.y - b.y
+                    }).abs();
+                    this.life = this.len < lineMaxLength
+                    this.alptha = 1 - this.len / lineMaxLength
+                }
+                var ls = [];
+                var len = vs.length;
+                var po=_.vertex(opt).po;
+                // var colorArr = _.color().circle(len)
+                // var j = 0
+                // var color = colorArr[0]
+
+                function update() {
+                    self.shadow();
+                    // self.setStrokeStyle(ctx, color)
+                    vs.forEach(function(t, i) {
+                        t.x += t.vx;
+                        t.y += t.vy;
+
+                        if (t.x < 0 || t.x > width) {
+                            t.vx = -t.vx;
+                        } else if (t.y < 0 || t.y > height) {
+                            t.vy = -t.vy;
+                        }
+
+                        t1 = vs[i + 1 == len ? 0 : i + 1];
+                        var li = new Line(t, t1)
+                        ls[ls.length] = li;
+                        if (ls.length > len) ls.shift();
+
+                        if (li.alptha <= 0) {
+                            t.vx = -t.vx;
+                            t.vy = -t.vy;
+                            // color = colorArr[j + 1 > len ? j = 0 : j++]
+                        }
+                    });
+                    ctx.beginPath()
+                    vs.forEach(function(t, i) {
+                        var t1 = vs[i + 1 === len ? 0 : i + 1],
+                            v1 = po.toV(t),
+                            v2 = po.toV(t1);
+                        var p = v1.add(v2).toP(po);
+
+                        ctx.moveTo(t.x, t.y);
+                        ctx.quadraticCurveTo(
+                            p.x, p.y,
+                            t1.x, t1.y
+                        );
+
+                    })
+                    ctx.stroke()
+
+                    // ls.forEach(function(t) {
+                    //     self.link([t.a, t.b]);
+                    // })
+                }
+
+                self.id && cancelAnimationFrame(self.id);
+                (function loop() {
+                    self.id = requestAnimationFrame(loop);
+                    update();
+                })();
+            },
+            //转变
+            vertexRotate: function(opt) {
+                var self = this;
+                var ctx = this.context;
+                opt = this.default(opt);
+                var vs = _.vertex(opt).vs;
+                var num = opt.num || 10;
+                var speed = 1;
+                var color = _.color().rgb(); 
+                self.setStrokeStyle(ctx, color)
+
+                function update() {
+                    self.shadow();
+                    vs = vs.map(function(t, i) {
+                        return t.rotate(i * speed);
+                    });
+                    self.link(vs)
+                }
+
+                self.id && cancelAnimationFrame(self.id);
+                (function loop() {
+                    self.id = requestAnimationFrame(loop);
+                    update();
+                })();
+            },
         }
         _draw.prototype.init.prototype = _draw.prototype;
 
@@ -8190,7 +8776,7 @@
                                 case "color_rgba":
                                 case "color_rgb":
                                     var len = val.length || 15;
-                                    var colorArr = _color().circle(len);
+                                    var colorArr = ['#000', '#fff'].concat(_color().circle(len));
                                     // while (len--) {
                                     // if (type === "color_rgba") {
                                     //     colorArr.push(co.rgba());
@@ -8204,12 +8790,24 @@
                                     break;
                                 case undefined:
                                     if (_.isBoolean(val)) {
-                                        c = _.cycle([{ key: true, text: "是" }, { key: false, text: "否" }], val ? 0 : 1);
+                                        c = _.cycle([{
+                                            key: true,
+                                            text: "是"
+                                        }, {
+                                            key: false,
+                                            text: "否"
+                                        }], val ? 0 : 1);
                                         c.type = "toggle";
                                         c.value = val;
                                     } else if (_.isObject(val)) {
                                         if (_.isBoolean(val.value)) {
-                                            c = _.cycle([{ key: true, text: "是" }, { key: false, text: "否" }], val.value ? 0 : 1)
+                                            c = _.cycle([{
+                                                key: true,
+                                                text: "是"
+                                            }, {
+                                                key: false,
+                                                text: "否"
+                                            }], val.value ? 0 : 1)
                                             c.type = "toggle";
                                             c.value = val.value;
                                         }
@@ -8269,9 +8867,16 @@
             //view data
             optCycle.viewData = function() {
                 var data = optCycle.data;
-                var _viewData = { tabs: [] };
+                var _viewData = {
+                    tabs: []
+                };
                 for (var k in data) {
-                    var tab = { key: k, items: [], switch: "none", active: false }; //random: [],
+                    var tab = {
+                        key: k,
+                        items: [],
+                        switch: "none",
+                        active: false
+                    }; //random: [],
                     _viewData.tabs.push(tab);
 
                     var o = data[k];
@@ -8286,7 +8891,12 @@
                             } else if (x === "active") {
                                 tab[x] = val;
                             } else {
-                                var item = { key: x, value: val, text: x, id: k + "_" + x }; //method: _.camelCase("next", k, x),
+                                var item = {
+                                    key: x,
+                                    value: val,
+                                    text: x,
+                                    id: k + "_" + x
+                                }; //method: _.camelCase("next", k, x),
                                 if (_.isBoolean(val)) {
                                     item.filter = "toggle";
                                     item.value = optCycle.filters.toggle(val);
@@ -8354,12 +8964,19 @@
 
             },
             open: function(name, cfg) {
-                this.w.postMessage({ name: name, act: "open", cfg: _.clone(this.data, cfg) });
+                this.w.postMessage({
+                    name: name,
+                    act: "open",
+                    cfg: _.clone(this.data, cfg)
+                });
                 console.log("task open: " + name);
                 return this;
             },
             close: function(name) {
-                this.w.postMessage({ name: name, act: "close" })
+                this.w.postMessage({
+                    name: name,
+                    act: "close"
+                })
                 console.log("task close: " + name);
                 return this;
             }
@@ -8518,7 +9135,6 @@
 
 
 
-
                 if (history.state && history.state.pageIndex) {
                     this.pageIndex = history.state.pageIndex;
                 }
@@ -8601,7 +9217,9 @@
             },
             _go: function(route) {
                 this.pageIndex++;
-                history.replaceState && history.replaceState({ pageIndex: this.pageIndex }, '', location.href);
+                history.replaceState && history.replaceState({
+                    pageIndex: this.pageIndex
+                }, '', location.href);
                 var a = this.getAction(route);
 
                 if (_.isFunction(a)) {
@@ -8655,7 +9273,11 @@
                     }
                 }
                 if (!page) {
-                    var page = { "template": value, id: value, url: value };
+                    var page = {
+                        "template": value,
+                        id: value,
+                        url: value
+                    };
                     page[key] = value;
                     this.push(page)
                 }
@@ -8780,7 +9402,9 @@
 
                 var fs = ("" + filter).split(","),
                     len = fs.length;
-                if (len > 0 && fs[len - 1] !== "string") { fs.push("string"); }
+                if (len > 0 && fs[len - 1] !== "string") {
+                    fs.push("string");
+                }
                 fs.forEach(function(t) {
                     val = _callFilter.call(self, val, t, data);
                 });
@@ -9222,7 +9846,10 @@
                 _.each(self.directives, function(fn, key) {
                     self.methods["_on_" + key] = fn;
                 })
-                options = _.extend(options, { el: self.el, methods: self.methods });
+                options = _.extend(options, {
+                    el: self.el,
+                    methods: self.methods
+                });
                 //before render
                 _.isFunction(self.before) && self.before.call(self, self.data);
                 var el = self.el;
@@ -9242,7 +9869,9 @@
                     self.parser.call(options, el);
                 } else if (_.isArray(el) && _.size(el) > 0) {
                     el.forEach(function(t) {
-                        self.parser.call(_.clone(options, { el: t }), t);
+                        self.parser.call(_.clone(options, {
+                            el: t
+                        }), t);
                     });
                 }
                 //render ok
@@ -9282,7 +9911,9 @@
                     //     parseEl.call(_.clone(self, { el: t }));
                     // })
                     _.size(ts) > 0 && ts.each(function(item, index) {
-                        parseEl.call(_.clone(self, { el: item }));
+                        parseEl.call(_.clone(self, {
+                            el: item
+                        }));
                     });
 
                 }
@@ -9315,7 +9946,9 @@
         template.prototype.init.prototype = template.prototype;
         if (inBrowser) {
             //兼容 underscore
-            if (!window._) { window._ = _; }
+            if (!window._) {
+                window._ = _;
+            }
             window.tpler = _.tpler;
             window.toucher = _.toucher;
             window.walker = _.walker;
