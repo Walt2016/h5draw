@@ -4799,12 +4799,21 @@
                 var an;
                 for (var i = 0; i < num * turns; i++) {
                     switch (rRatioType) {
-                        case "cv": //case "constantvelocity": //匀速螺线 阿基米德螺线
+                        case "cv": //case "constantvelocity": //匀速螺线 阿基米德螺线 渐开线
                             rn += r * (rRatioCycle.next() - 1);
                             break;
-                        case "ac": //加速螺旋 case "acceleration":
+                        case "ac": //加速螺旋 case "acceleration": 
                             rn = i === 0 ? r : i === 1 ? r * rRatioCycle.val() : rn * rRatioCycle.next();
                             break;
+                        default:
+                        if(_.isArray(rRatio)){ //对称线
+                            var len=rRatio.length
+                           rn=r*  rRatio[i+1>len?(i)%len:i];
+                        }else{
+                            rn=r* Math.pow(rRatio,i)  //渐开线
+                        }
+                        
+                        break;
                     }
 
                     // switch (aRatioType) {
@@ -6061,9 +6070,9 @@
                 }
             },
             //多边形
-            polygon: function(opt) {
+            polygon: function(opt,vs) {
                 var self = this,
-                    groups = this.vs,
+                    groups = vs||this.vs,
                     po = this.po,
                     len = groups.length;
                 var vertex = _.vertex(opt.shape);
@@ -6160,6 +6169,24 @@
 
                     return drawShape;
                 });
+            },
+            //九宫格
+            sudoku:function(opt){
+                var self=this;
+                var vertex = _.vertex(_.clone(opt.group,{
+                    num:8,
+                    rRatio:[1,Math.sqrt(2)],
+                    rRatioType:"default"
+                }));
+
+                var vs=[vertex.po].concat(vertex.vs);
+                // vs.forEach(function(t,i){
+                //     self.draw.point({x:t.x,y:t.y,r:3,text:i})
+                // })
+                opt.group.rotation=false;
+
+                return this.polygon(opt,vs)
+
             },
             //分形
             fractal: function(opt) {
@@ -6425,27 +6452,28 @@
                 })();
                 return self;
             },
-            // 顶点变形
-            transform: function() {
-                var self = this;
-                var speed = 1;
-                var vs = this.vs;
-                vs.forEach(function(t) {
-                    t.v = {
-                        x: (Math.random() * 2 - 1) * speed,
-                        y: (Math.random() * 2 - 1) * speed,
-                    }
-                });
 
-                (function _move() {
-                    self.vs = vs.map(function(t) {
-                        return t.add(t.v)
-                    });
-                    self.draw.clear();
-                    self.polygon(self.opt)
-                    setTimeout(_move, 100);
-                })()
-            }
+            // // 顶点变形
+            // transform: function() {
+            //     var self = this;
+            //     var speed = 1;
+            //     var vs = this.vs;
+            //     vs.forEach(function(t) {
+            //         t.v = {
+            //             x: (Math.random() * 2 - 1) * speed,
+            //             y: (Math.random() * 2 - 1) * speed,
+            //         }
+            //     });
+
+            //     (function _move() {
+            //         self.vs = vs.map(function(t) {
+            //             return t.add(t.v)
+            //         });
+            //         self.draw.clear();
+            //         self.polygon(self.opt)
+            //         setTimeout(_move, 100);
+            //     })()
+            // }
 
 
             // repeatX: function(opt) {
