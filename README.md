@@ -21,6 +21,8 @@
 
 ![image](https://github.com/Walt2016/h5draw/blob/master/pic/zb.gif)
 
+![image](https://github.com/Walt2016/h5draw/blob/master/pic/fw.gif)
+
 
 ```
    var draw = _.draw({
