@@ -1,6 +1,6 @@
 //一个js开发框架
 //template.event.canvas
-//v0.7.20180609
+//v0.7.20180610
 ;
 (function(root, factory) {
     if (typeof define === "function" && define.amd) {
@@ -2343,7 +2343,7 @@
             light: function(color, level) {
                 var n = Math.random() * 3 << 0;
                 if (!color) return this.rgbaWrapper([255, 255, 255].map(function(t, i) {
-                    return i !== n ? 80 + Math.random() * 176 << 0 : t * Math.random() << 0;
+                    return i !== n ? 120 + Math.random() * 136 << 0 : t * Math.random() << 0;
                 }));
 
                 color = this.rgb(color);
@@ -4407,7 +4407,9 @@
             abs: function(len) {
                 if (_.isUndefined(len)) return Math.sqrt(this.x * this.x + this.y * this.y + this.z * this.z);
                 var abs = this.abs();
-                if (abs !== 0 && len !== abs) {
+                if (abs === 0) { //0向量
+                    this.x = len
+                } else if (len !== abs) { //abs !== 0 &&
                     this.scale(len / abs);
                 }
                 return this;
@@ -4806,34 +4808,20 @@
                             rn = i === 0 ? r : i === 1 ? r * rRatioCycle.val() : rn * rRatioCycle.next();
                             break;
                         default:
-                        if(_.isArray(rRatio)){ //对称线
-                            var len=rRatio.length
-                           rn=r*  rRatio[i+1>len?(i)%len:i];
-                        }else{
-                            rn=r* Math.pow(rRatio,i)  //渐开线
-                        }
-                        
-                        break;
+                            if (_.isArray(rRatio)) { //对称线
+                                var len = rRatio.length
+                                rn = r * rRatio[i + 1 > len ? (i) % len : i];
+                            } else {
+                                rn = r * Math.pow(rRatio, i) //渐开线
+                            }
+                            break;
                     }
 
-                    // switch (aRatioType) {
-                    //     case "cv":
-                    //     case "constantvelocity":
-                    //         // a += opt.a * (aRatio.next() - 1);
-                    //         a=i * 360 / num + opt.a,
-                    //         break;
-                    //     case "acc":
-                    //     case "acceleration": //加速螺旋
-                    //         // a = a == 0 ? opt.a * rRatio.val() : opt.a * rRatio.next();/
-                    //         a=i * 360 / num + opt.a,
-                    //         break;
-                    // }
                     an = i * 360 / num + a;
-                    var p = po.clone({
+                    vs[vs.length] = po.clone({
                         a: an,
                         r: rn
                     });
-                    vs[vs.length] = p;
                 }
                 return vs;
             },
@@ -6070,9 +6058,9 @@
                 }
             },
             //多边形
-            polygon: function(opt,vs) {
+            polygon: function(opt, vs) {
                 var self = this,
-                    groups = vs||this.vs,
+                    groups = vs || this.vs,
                     po = this.po,
                     len = groups.length;
                 var vertex = _.vertex(opt.shape);
@@ -6171,21 +6159,21 @@
                 });
             },
             //九宫格
-            sudoku:function(opt){
-                var self=this;
-                var vertex = _.vertex(_.clone(opt.group,{
-                    num:8,
-                    rRatio:[1,Math.sqrt(2)],
-                    rRatioType:"default"
+            sudoku: function(opt) {
+                var self = this;
+                var vertex = _.vertex(_.clone(opt.group, {
+                    num: 8,
+                    rRatio: [1, Math.sqrt(2)],
+                    rRatioType: "default"
                 }));
 
-                var vs=[vertex.po].concat(vertex.vs);
+                var vs = [vertex.po].concat(vertex.vs);
                 // vs.forEach(function(t,i){
                 //     self.draw.point({x:t.x,y:t.y,r:3,text:i})
                 // })
-                opt.group.rotation=false;
+                opt.group.rotation = false;
 
-                return this.polygon(opt,vs)
+                return this.polygon(opt, vs)
 
             },
             //分形
@@ -8066,6 +8054,8 @@
             },
             stop: function() {
                 this.motionCache && this.motionCache.stop();
+                this.id&&cancelAnimationFrame(this.id)
+                this.timmer&&clearTimeout(this.timmer)
             },
             verticesGroup: function(opt) {
                 var self = this;
@@ -8373,7 +8363,8 @@
                     }
                 }])
 
-                self.id && cancelAnimationFrame(self.id);
+               
+                self.stop();
                 (function loop() {
                     self.id = requestAnimationFrame(loop);
                     update();
@@ -8393,7 +8384,7 @@
                 var num = opt.num || 5;
                 var range = 100;
                 var colorArr = _.color().circle(num);
-                var o=this.o;
+                var o = this.o;
 
 
                 var Fire = function() {
@@ -8458,10 +8449,11 @@
                 for (var i = 0; i < num; i++) {
                     fs[fs.length] = new Fire();
                 }
+
                 function update() {
                     fs.forEach(function(t, i) {
                         if (t.move().reborn) {
-                            var len = 20; 
+                            var len = 20;
                             while (len--) fws[fws.length] = new Firework(t, colorArr[i]);
                             t.reset()
                         }
@@ -8496,7 +8488,8 @@
                     });
                 }
 
-                self.id && cancelAnimationFrame(self.id);
+               
+                self.stop();
                 (function loop() {
                     self.id = requestAnimationFrame(loop);
                     update();
@@ -8523,14 +8516,14 @@
                     this.color = _.color().rgba(0, 0, 0); //Math.floor(temp*255/75)
                 }
                 //雨点 
-                var Drop = function(x, y,color) {
+                var Drop = function(x, y, color) {
                     this.die = false;
                     this.x = x;
                     this.y = y;
                     this.vx = (Math.random() - 0.5) * 8;
                     this.vy = Math.random() * (-6) - 3;
                     this.r = Math.random() * 1.5 + 1,
-                    this.color=color
+                        this.color = color
                 };
                 //
                 var gravity = 0.5; //重力
@@ -8548,10 +8541,10 @@
                 var dropList = [];
                 var mousePos = [0, 0];
 
-                function createDrops(x, y,color) {
+                function createDrops(x, y, color) {
                     var maxi = Math.floor(Math.random() * 5 + 5);
                     for (var i = 0; i < maxi; i++) {
-                        dropList[dropList.length] = new Drop(x, y,color)
+                        dropList[dropList.length] = new Drop(x, y, color)
                     }
                 }
                 var ls = [];
@@ -8562,35 +8555,35 @@
                         t.move();
                     })
                     for (var i = dropList.length - 1; i >= 0; i--) {
-                        if (dropList[i]&&dropList[i].die) {
+                        if (dropList[i] && dropList[i].die) {
                             dropList.splice(i, 1);
                         }
                     }
 
                     speedx = speedx + (maxspeedx - speedx) / 50;
 
-                    if(ls.length<=50)
+                    if (ls.length <= 50)
                         ls[ls.length] = new Line(Math.random() * 2 * width - (0.5 * width));
 
 
                     var raindropLine = height - Math.random() * height / 5;
                     ls.forEach(function(t) {
-                         if ((t.y + t.h) > raindropLine) {
+                        if ((t.y + t.h) > raindropLine) {
                             if (Math.random() > 0.75) {
-                                createDrops(t.x + speedx * t.h, t.y + t.h,t.color);
+                                createDrops(t.x + speedx * t.h, t.y + t.h, t.color);
                                 t.die = true;
                             }
                         }
                         if (t.y >= height) {
                             t.die = true;
                         } else {
-                            t.y +=  t.speed;
+                            t.y += t.speed;
                             t.x += t.speed * speedx;
                         }
                     });
 
                     for (var i = ls.length - 1; i >= 0; i--) {
-                        ls[i]&&ls[i].die&&ls.splice(i, 1);
+                        ls[i] && ls[i].die && ls.splice(i, 1);
                     }
                 }
 
@@ -8605,7 +8598,7 @@
                         ctx.lineTo(t.x + speedx * t.h, t.y + t.h);
                         ctx.stroke();
                     });
-                    
+
                     dropList.forEach(function(t) {
                         ctx.lineWidth = 1;
                         ctx.strokeStyle = t.color;
@@ -8615,7 +8608,8 @@
                     });
                 }
 
-                self.id && cancelAnimationFrame(self.id);
+               
+                self.stop();
                 (function loop() {
                     self.id = requestAnimationFrame(loop);
                     update();
@@ -8668,7 +8662,7 @@
                 }
                 var ls = [];
                 var len = vs.length;
-                var po=_.vertex(opt).po;
+                var po = _.vertex(opt).po;
                 // var colorArr = _.color().circle(len)
                 // var j = 0
                 // var color = colorArr[0]
@@ -8718,7 +8712,8 @@
                     // })
                 }
 
-                self.id && cancelAnimationFrame(self.id);
+               
+                self.stop();
                 (function loop() {
                     self.id = requestAnimationFrame(loop);
                     update();
@@ -8732,7 +8727,7 @@
                 var vs = _.vertex(opt).vs;
                 var num = opt.num || 10;
                 var speed = 1;
-                var color = _.color().rgb(); 
+                var color = _.color().rgb();
                 self.setStrokeStyle(ctx, color)
 
                 function update() {
@@ -8743,12 +8738,106 @@
                     self.link(vs)
                 }
 
-                self.id && cancelAnimationFrame(self.id);
+               
+                self.stop();
                 (function loop() {
                     self.id = requestAnimationFrame(loop);
                     update();
                 })();
             },
+            //螺旋
+            spiral: function() {
+                var self=this;
+                var offsetRect = 30;
+                var ctx = this.context;
+                var width = this.width,
+                    height = this.height;
+                // var color1 = _.color().light()
+                // var color = _.color().deepdark()
+                // var color2 = color;
+                var colorArr = _.color().circle(360);
+                var _spiral = function(interval, offsetAngle) {
+                    var p = _.pointPolar({
+                        o: self.o
+                    })
+                    var ps = [p];
+                    var i = 0;
+                    do {
+                        var v = p.toV().rotate(offsetAngle)
+                        if (i % 2 == 0) {
+                            var abs = v.abs()
+                            v = v.abs(abs + interval)
+                        }
+                        p = v.toP(p)
+                        ps[ps.length] = p;
+                        i++;
+
+                    } while (p.x > 0 && p.x < width && p.y > 0 && p.y < height)
+
+                    ctx.beginPath();
+                    ps.forEach(function(t, i) {
+                        draw.line(ctx, t, i == 0)
+                    })
+                    ctx.lineWidth = 1;
+                    ctx.strokeStyle = colorArr[offsetAngle];
+                    ctx.stroke();
+                }
+
+
+                var update = function(i) {
+                    self.clear()
+                    // self.setFillStyle(ctx, bg);
+                    // ctx.fillRect(0, 0, width, height);
+
+                   _spiral(5, i);
+                    ctx.beginPath();
+                    self.setFillStyle(ctx, colorArr[i]);
+                    ctx.rect(offsetRect, 0, (width - offsetRect) * i / 360, 20)
+                    ctx.fill()
+                    self.point({
+                        x: 10,
+                        y: 10,
+                        text: i,
+                        color: '#fff',
+                        r: 12
+                    })
+                }
+
+                var pasue = false;
+                var i = 0;
+                self.stop();
+                (function loop() {
+                    if (!pasue) update(i);
+                    i++;
+                    i %= 360;
+                    self.timmer=setTimeout(loop, 200);
+                })();
+
+                toucher([{
+                    el: self.canvas,
+                    callback: function(item, ev) {
+                        var pos = _.pos(ev);
+                        if (pos.y < 20) {
+                            pasue = true
+                            i = 360 * (pos.x - offsetRect) / width << 0
+                            update(i)
+                        } else {
+                            pasue = !pasue;
+                        }
+                    }
+                }, {
+                    el: self.canvas,
+                    type: "touchmove",
+                    callback: function(item, ev) {
+                        var pos = _.pos(ev);
+                        if (pos.y < 20) {
+                            pasue = true
+                            i = 360 * (pos.x - offsetRect) / width << 0 % 360
+                            update(i)
+                        }
+                    }
+                }])
+            }
         }
         _draw.prototype.init.prototype = _draw.prototype;
 
@@ -9116,6 +9205,7 @@
             },
             stop: function() {
                 this.timer && clearTimeout(this.timer);
+
             }
         }
         scroller.prototype.init.prototype = scroller.prototype;
