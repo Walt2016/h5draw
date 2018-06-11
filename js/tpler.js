@@ -8740,7 +8740,6 @@
             //螺旋
             spiral: function() {
                 var self = this;
-
                 var ctx = this.context;
                 var width = this.width,
                     height = this.height;
@@ -8766,7 +8765,7 @@
 
                     ctx.beginPath();
                     ps.forEach(function(t, i) {
-                        draw.line(ctx, t, i == 0)
+                        self.line(ctx, t, i == 0)
                     })
                     ctx.lineWidth = 1;
                     ctx.strokeStyle = colorArr[offsetAngle];
