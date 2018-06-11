@@ -8738,14 +8738,20 @@
                 }
             },
             //螺旋
-            spiral: function() {
+            // draw.spiral({
+            //    interval:5,
+            //    step:2
+            // });
+            spiral: function(opt) {
                 var self = this;
-                var ctx = this.context;
-                var width = this.width,
-                    height = this.height;
+                var ctx = self.context,
+                    width = self.width,
+                    height = self.height;
                 var colorArr = _.color().circle(361);
-                var offsetRect = 30;
-                var widthRect = width - offsetRect * 2;
+                opt = opt || {};
+                var interval = opt.interval || 1;
+                var step = opt.step || 1;
+
                 var _spiral = function(interval, offsetAngle) {
                     var p = _.pointPolar({
                         o: self.o
@@ -8754,7 +8760,7 @@
                     var i = 0;
                     do {
                         var v = p.toV().rotate(offsetAngle)
-                        if (i % 2 == 0) {
+                        if (i % step === 0) {
                             var abs = v.abs()
                             v = v.abs(abs + interval)
                         }
@@ -8772,24 +8778,35 @@
                     ctx.stroke();
                 }
 
+                var pConfig = {
+                    x: 30,
+                    y: 10,
+                    height: 20
+                }
+                pConfig.width = width - pConfig.x * 2;
 
-                var update = function(i) {
-                    self.clear()
-                    _spiral(5, i);
+                //进度条
+                var progressBar = function(cfg, i) {
                     ctx.beginPath();
                     self.setFillStyle(ctx, "#dedede");
-                    ctx.rect(offsetRect, 0, widthRect, 20)
+                    ctx.rect(cfg.x, cfg.y, cfg.width, cfg.height)
                     ctx.fill();
                     ctx.beginPath();
                     self.setFillStyle(ctx, colorArr[i]);
-                    ctx.rect(offsetRect, 0, widthRect * i / 360, 20)
+                    ctx.rect(cfg.x, cfg.y, cfg.width * i / 360, cfg.height)
                     ctx.fill();
                     self.text({
-                        x: 10,
-                        y: 10,
+                        x: cfg.x - 20,
+                        y: cfg.y + cfg.height / 2,
                         text: i,
                         r: 12
                     })
+                }
+
+                var update = function(i) {
+                    self.clear()
+                    _spiral(interval, i);
+                    progressBar(pConfig, i);
                 }
 
                 var pasue = false;
@@ -8806,9 +8823,9 @@
                     type: "touchstart",
                     callback: function(item, ev) {
                         var pos = _.pos(ev);
-                        if (pos.y < 20) {
+                        if ((pos.y < pConfig.y + pConfig.height) && pos.y > pConfig.y) {
                             pasue = true
-                            i = 360 * (pos.x - offsetRect) / widthRect << 0
+                            i = 360 * (pos.x - pConfig.x) / pConfig.width << 0
                             i = _.between(0, 360, i);
                             update(i)
                             isDragging = true;
@@ -8823,7 +8840,7 @@
                         var pos = _.pos(ev);
                         if (isDragging) {
                             pasue = true
-                            i = 360 * (pos.x - offsetRect) / widthRect << 0
+                            i = 360 * (pos.x - pConfig.x) / pConfig.width << 0
                             i = _.between(0, 360, i);
                             update(i)
                         }
