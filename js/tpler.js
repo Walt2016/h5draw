@@ -1,6 +1,6 @@
 //一个js开发框架
 //template.event.canvas
-//v0.7.20180610
+//v0.8.20180611
 ;
 (function(root, factory) {
     if (typeof define === "function" && define.amd) {
@@ -63,7 +63,7 @@
             var len = arguments.length;
             if (len > 1) obj = obj || {};
             for (var i = 1; i < len; i++) {
-                var source = arguments[i]; //args[i];
+                var source = arguments[i];
                 if (source)
                     for (var prop in source)
                         obj[prop] = source[prop]; //include functions in prototype
@@ -189,6 +189,7 @@
             //has(obj,"z.b.c")  key in obj
             has: function(obj, key) {
                 if (_.isObject(obj)) {
+                    if (_.isNumber(+key)) return obj.hasOwnProperty('' + key);
                     var ks = key.split("."),
                         o = obj;
                     while (key = ks.shift()) { //trim
@@ -417,9 +418,26 @@
                     return str;
                 }
             },
-            //随机
-            between: function(min, max) {
-                return min + Math.round((max - min) * Math.random());
+            //规定范围内取值
+            between: function(left, right, val) {
+                var len = arguments.length;
+                if (len === 3) return _.min(right, _.max(left, val));
+                if (len === 1) return left * Math.random() << 0;
+                if (String(left).indexOf(".") === -1) return left + (right - left + 1) * Math.random() << 0;
+                var n = String(left).split(".")[1].length;
+                return +(left + (right - left) * Math.random()).toFixed(n);
+            },
+            //数组分组统计
+            grpstats: function(arr) {
+                var o = {}
+                arr.forEach(function(t) {
+                    if (_.has(o, t)) {
+                        o[t] += 1
+                    } else {
+                        o[t] = 1
+                    }
+                })
+                return o
             },
             //自动为ele生成一个随机id
             autoid: function(ele, force) {
@@ -457,8 +475,6 @@
             //找不到 返回  []，与 closest addclass removeclass等统一[] ，方便链式写
             //找到数组 [el]，长度为1的时，返回 el  ，方便 siblings链式
             query: function(selector) {
-                // var args = Array.prototype.slice.call(arguments),
-                //     len = args.length;
                 var len = arguments.length,
                     args = new Array(len);
                 while (len--) args[len] = arguments[len];
@@ -1006,8 +1022,6 @@
                 var elem = this;
                 var clsArr = Array.prototype.slice.call(arguments);
                 if (clsArr.length === 1 && cls) clsArr = cls.split(" ");
-
-
                 clsArr.length > 1 && clsArr.forEach(function(t) {
                     _.removeClass.call(elem, t)
                 });
@@ -1126,9 +1140,6 @@
                 }
                 editor.focus();
             },
-
-
-
             //图片状态
             isImgLoad: function(img) {
                 return isIE ? img.readyState === 'complete' : img.complete;
@@ -1279,16 +1290,13 @@
                 var _masic = function(originImg) {
 
                 }
-
             },
             //时序sequence ,间隔时间
             timeSeq: function(arr, interval, callback) {
                 arr.forEach(function(t, i) {
-                    (function(index) {
-                        setTimeout(function() {
-                            callback && callback(t);
-                        }, (interval || 500) * index)
-                    })(i)
+                    setTimeout(function() {
+                        callback && callback(t);
+                    }, (interval || 500) * i)
                 })
             },
             background: function(el, imgSrc) {
@@ -1297,8 +1305,6 @@
                     el.style.backgroundImage = 'url("' + img.src + '")';
                 })
             },
-
-
             each: function(obj, iterator, context) {
                 if (obj == null) return obj;
                 if (Array.prototype.forEach && obj.forEach === Array.prototype.forEach) {
@@ -2363,11 +2369,7 @@
             // //黑白灰 000
             rgba: function(r, g, b, a) {
                 var len = arguments.length;
-                if (len < 4) {
-                    var min = 0.1,
-                        max = 0.7;
-                    a = (min + (max - min) * Math.random()).toFixed(1);
-                }
+                if (len < 4) a = _.between(0.1, 0.7);
                 if (len < 3) b = 1;
                 if (len < 2) g = 1;
                 if (len < 1) r = 1;
@@ -3439,10 +3441,8 @@
                             }
 
                             var _posInRange = function(pos, range) {
-                                var x = _.min(pos.x, range.right);
-                                x = _.max(x, range.left);
-                                var y = _.min(pos.y, range.bottom);
-                                y = _.max(y, range.top);
+                                var x = _.between(range.left, range.right, pos.x);
+                                var y = _.between(range.top, range.bottom, pos.y);
                                 return {
                                     left: x,
                                     top: y
@@ -3465,10 +3465,9 @@
                                     (function() {
                                         var left = endPos.x - startPos.x + offset.x;
                                         var top = endPos.y - startPos.y + offset.y;
-                                        left = _.min(left, maxLeft);
-                                        left = _.max(0, left);
-                                        top = _.min(top, maxTop);
-                                        top = _.max(0, top);
+                                        left = _.between(0, maxLeft, left);
+                                        top = _.between(0, maxTop, top);
+
                                         if (type !== "drag-y") el.css({
                                             left: left + "px"
                                         });
@@ -5249,9 +5248,8 @@
                 var x = opt.x,
                     y = opt.y,
                     r = opt.r || 12;
-                var text = opt.text || opt.num;
-                var color = opt.color || "#000";
-                ctx.fillStyle = color;
+                var text = _.isUndefined(opt.text) ? opt.num : opt.text;
+                ctx.fillStyle = opt.color || "#000";
                 ctx.font = r + "px Verdana";
                 var measure = ctx.measureText(text);
                 ctx.fillText(text, x - measure.width / 2, y + r / 2);
@@ -8054,8 +8052,8 @@
             },
             stop: function() {
                 this.motionCache && this.motionCache.stop();
-                this.id&&cancelAnimationFrame(this.id)
-                this.timmer&&clearTimeout(this.timmer)
+                this.id && cancelAnimationFrame(this.id)
+                this.timmer && clearTimeout(this.timmer)
             },
             verticesGroup: function(opt) {
                 var self = this;
@@ -8168,7 +8166,6 @@
                     o: {
                         x: this.width / 2,
                         y: this.height / 2
-
                     }
                 });
                 var TICK_WIDTH = 15;
@@ -8363,12 +8360,11 @@
                     }
                 }])
 
-               
-                self.stop();
-                (function loop() {
-                    self.id = requestAnimationFrame(loop);
+
+                self.loop(function() {
                     update();
-                })();
+                    render();
+                });
             },
             //烟花
             firework: function(opt) {
@@ -8488,14 +8484,10 @@
                     });
                 }
 
-               
-                self.stop();
-                (function loop() {
-                    self.id = requestAnimationFrame(loop);
+                self.loop(function() {
                     update();
                     render();
-                })();
-
+                });
             },
             //下雨
             rain: function(opt) {
@@ -8608,14 +8600,10 @@
                     });
                 }
 
-               
-                self.stop();
-                (function loop() {
-                    self.id = requestAnimationFrame(loop);
+                self.loop(function() {
                     update();
                     render();
-                })();
-
+                });
                 toucher({
                     el: self.canvas,
                     type: "touchmove",
@@ -8711,13 +8699,7 @@
                     //     self.link([t.a, t.b]);
                     // })
                 }
-
-               
-                self.stop();
-                (function loop() {
-                    self.id = requestAnimationFrame(loop);
-                    update();
-                })();
+                self.loop(update);
             },
             //转变
             vertexRotate: function(opt) {
@@ -8737,25 +8719,34 @@
                     });
                     self.link(vs)
                 }
-
-               
+                self.loop(update);
+            },
+            //循环动画
+            loop: function(callback, times) {
+                var self = this;
                 self.stop();
-                (function loop() {
-                    self.id = requestAnimationFrame(loop);
-                    update();
-                })();
+                if (times) {
+                    (function _loop() {
+                        self.timmer = setTimeout(_loop, times);
+                        callback && callback();
+                    })()
+                } else {
+                    (function _loop() {
+                        self.id = requestAnimationFrame(_loop);
+                        callback && callback();
+                    })()
+                }
             },
             //螺旋
             spiral: function() {
-                var self=this;
-                var offsetRect = 30;
+                var self = this;
+
                 var ctx = this.context;
                 var width = this.width,
                     height = this.height;
-                // var color1 = _.color().light()
-                // var color = _.color().deepdark()
-                // var color2 = color;
-                var colorArr = _.color().circle(360);
+                var colorArr = _.color().circle(361);
+                var offsetRect = 30;
+                var widthRect = width - offsetRect * 2;
                 var _spiral = function(interval, offsetAngle) {
                     var p = _.pointPolar({
                         o: self.o
@@ -8771,7 +8762,6 @@
                         p = v.toP(p)
                         ps[ps.length] = p;
                         i++;
-
                     } while (p.x > 0 && p.x < width && p.y > 0 && p.y < height)
 
                     ctx.beginPath();
@@ -8786,41 +8776,43 @@
 
                 var update = function(i) {
                     self.clear()
-                    // self.setFillStyle(ctx, bg);
-                    // ctx.fillRect(0, 0, width, height);
-
-                   _spiral(5, i);
+                    _spiral(5, i);
+                    ctx.beginPath();
+                    self.setFillStyle(ctx, "#dedede");
+                    ctx.rect(offsetRect, 0, widthRect, 20)
+                    ctx.fill();
                     ctx.beginPath();
                     self.setFillStyle(ctx, colorArr[i]);
-                    ctx.rect(offsetRect, 0, (width - offsetRect) * i / 360, 20)
-                    ctx.fill()
-                    self.point({
+                    ctx.rect(offsetRect, 0, widthRect * i / 360, 20)
+                    ctx.fill();
+                    self.text({
                         x: 10,
                         y: 10,
                         text: i,
-                        color: '#fff',
                         r: 12
                     })
                 }
 
                 var pasue = false;
                 var i = 0;
-                self.stop();
-                (function loop() {
+                self.loop(function() {
                     if (!pasue) update(i);
                     i++;
                     i %= 360;
-                    self.timmer=setTimeout(loop, 200);
-                })();
+                }, 200);
+                var isDragging = false;
 
                 toucher([{
                     el: self.canvas,
+                    type: "touchstart",
                     callback: function(item, ev) {
                         var pos = _.pos(ev);
                         if (pos.y < 20) {
                             pasue = true
-                            i = 360 * (pos.x - offsetRect) / width << 0
+                            i = 360 * (pos.x - offsetRect) / widthRect << 0
+                            i = _.between(0, 360, i);
                             update(i)
+                            isDragging = true;
                         } else {
                             pasue = !pasue;
                         }
@@ -8830,12 +8822,20 @@
                     type: "touchmove",
                     callback: function(item, ev) {
                         var pos = _.pos(ev);
-                        if (pos.y < 20) {
+                        if (isDragging) {
                             pasue = true
-                            i = 360 * (pos.x - offsetRect) / width << 0 % 360
+                            i = 360 * (pos.x - offsetRect) / widthRect << 0
+                            i = _.between(0, 360, i);
                             update(i)
                         }
                     }
+                }, {
+                    el: self.canvas,
+                    type: "touchend",
+                    callback: function(item, ev) {
+                        isDragging = false;
+                    }
+
                 }])
             }
         }
@@ -9781,7 +9781,6 @@
 
             var dragHandler = function() {
                 console.log("dragHandler");
-
             }
             StandardDirectives[ON] = onHandler;
 
@@ -9828,7 +9827,6 @@
                     set: function(newVal) { //监控数据被修改
                         var oldVal = _result[name];
                         _result[name] = newVal;
-
                         if (newVal !== oldVal) {
                             template.prototype.apply(name, newVal);
                         }
