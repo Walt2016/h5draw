@@ -1,6 +1,6 @@
 //一个js开发框架
 //template.event.canvas
-//v0.8.20180611
+//v0.8.20180612
 ;
 (function(root, factory) {
     if (typeof define === "function" && define.amd) {
@@ -3304,7 +3304,7 @@
         var addEvent = function(type, el, listener) {
             if (_.isFunction(listener)) {
                 if (window.addEventListener) {
-                    el.addEventListener(type, listener, false);
+                    el.addEventListener(type, listener, { passive: false }); //false
                 } else {
                     el.attachEvent('on' + type, listener);
                 }
@@ -3327,7 +3327,7 @@
             if (!_.isElement(el)) return false;
             if (listener) {
                 if (window.removeEventListener) {
-                    el.removeEventListener(type, listener, false);
+                    el.removeEventListener(type, listener, { passive: false }); //false
                 } else {
                     el.detachEvent('on' + type, listener);
                 }
@@ -3349,9 +3349,10 @@
         var startPos = {},
             endPos = {},
             offset = {},
-            _touchstart = isSupportTouch ? "touchstart" : "mousedown",
+            _touchstar = isSupportTouch ? "touchstart" : "mousedown",
             _touchend = isSupportTouch ? "touchend" : "mouseup",
             _touchmove = isSupportTouch ? "touchmove" : "mousemove";
+
 
         //事件
         var Events = (function() {
@@ -3377,6 +3378,7 @@
                     var self = this;
                     if (!isSupportTouch && type === TAP) type = "click";
 
+
                     switch (type) {
                         case TAP:
                             var startHandler = function(ev) {
@@ -3399,7 +3401,7 @@
                                     if (once) self.off(type, el);
                                 }
                             }
-                            addEvent(_touchstart, el, startHandler);
+                            addEvent(_touchstar, el, startHandler);
                             addEvent(_touchend, el, endHandler);
                             break;
                         case LONGTAP: //长按
@@ -3419,7 +3421,7 @@
                             var endHandler = function(ev) {
                                 _longtap && clearTimeout(_longtap);
                             }
-                            addEvent(_touchstart, el, startHandler);
+                            addEvent(_touchstar, el, startHandler);
                             addEvent(_touchend, el, endHandler);
                             break;
                         case DRAG:
@@ -3497,12 +3499,32 @@
                                     cursor: "normal"
                                 })
                             });
-                            addEvent(_touchstart, el, startHandler);
+                            addEvent(_touchstar, el, startHandler);
                             addEvent(_touchmove, document, moveHandler);
                             addEvent(_touchend, document, endHandler);
                             break;
                         default:
                             var _handler = function(ev) {
+                                // var _call = function() {
+                                //     if (_.isFunction(listener)) {
+                                //         listener.call(el, el, ev);
+                                //     } else if (_.isArray(listener)) {
+                                //         listener.forEach(function(t) {
+                                //             t.call(el, el, ev);
+                                //         });
+                                //     }
+                                // }
+                                // if (type === "mousedown") {
+                                //     isDragging = true;
+                                // } else if (type === "mouseup") {
+                                //     isDragging = false;
+                                // }
+                                // if (type === "mousemove") {
+                                //     isDragging && _call();
+                                // } else {
+                                //     _call();
+                                // }
+
                                 if (_.isFunction(listener)) {
                                     listener.call(el, el, ev);
                                 } else if (_.isArray(listener)) {
@@ -3518,7 +3540,7 @@
                 },
                 off: function(type, el, listener) {
                     if (TAP === type) {
-                        removeEvent(_touchstart, el);
+                        removeEvent(_touchstar, el);
                         removeEvent(_touchend, el);
                     } else {
                         removeEvent(type, el, listener);
@@ -3547,6 +3569,14 @@
                         once = opt.once || false; //事件只运行一次，运行一次就自行remove
                     if (_.isElement(el)) {
                         if (el.nodeName.toLowerCase() === "input" && type === TAP) type = "click";
+                        // var touchmap = {
+                        //     "touchstart": isSupportTouch ? "touchstart" : "mousedown",
+                        //     "touchend": isSupportTouch ? "touchend" : "mouseup",
+                        //     "touchmove": isSupportTouch ? "touchmove" : "mousemove"
+                        // }
+                        // type = type in touchmap ? touchmap[type] : type;
+                        // var isDragging = false;
+
                         clear && self.clear({
                             el: el,
                             type: type
@@ -3564,20 +3594,6 @@
                                 el: t
                             }));
                         });
-                        // el.forEach(function(t) {
-                        //     clear && self.clear({
-                        //         el: t,
-                        //         type: type
-                        //     });
-
-                        //     es.push({
-                        //         type: type,
-                        //         el: t,
-                        //         listener: listener,
-                        //         once: once
-                        //     })
-
-                        // });
                     }
                 }
                 if (_.isArray(options)) {
@@ -4413,7 +4429,6 @@
                 }
                 return this;
             },
-
             //方向 向量的角度
             deg: function(deg) {
                 if (_.isUndefined(deg)) return this.radToDeg(Math.atan2(this.y, this.x));
@@ -7087,6 +7102,128 @@
         }
         _track.prototype.init.prototype = _track.prototype;
 
+        //可滑动进度条
+        var _slider = _.slider = function(draw, opt) {
+            return new _slider.prototype.init(draw, opt)
+        }
+        _slider.prototype = {
+            constructor: _slider,
+            init: function(draw, opt) {
+                var self = this;
+                this.draw = draw;
+                this.context = draw.context;
+                var width = draw.width;
+                this.canvas = draw.canvas
+                this.pasue = false;
+                opt = opt || {};
+                this.x = opt.x || 30;
+                this.y = opt.y || 10;
+                this.height = opt.height || 20;
+                this.width = opt.width || width - this.x * 2;
+                this.max = opt.max || 100;
+                this.min = opt.min || 0;
+                var progess = this.progess = opt.progess || 0;
+                var color = this.color = opt.color || "#000";
+
+                this.callback = opt.callback || function(p) {
+                    self.render(p, color);
+                };
+                this.render(progess, color);
+                this.addEvent();
+            },
+            render: function(progess, color) {
+                var self = this;
+                var ctx = this.context;
+                var x = this.x,
+                    y = this.y,
+                    height = this.height,
+                    width = this.width,
+                    max = this.max;
+                this.progess = progess;
+
+                ctx.beginPath();
+                self.draw.setFillStyle(ctx, "#dedede");
+                ctx.rect(x, y, width, height)
+                ctx.fill();
+                ctx.beginPath();
+                self.draw.setFillStyle(ctx, color);
+                ctx.rect(x, y, width * progess / max, height)
+                ctx.fill();
+                ctx.beginPath();
+                self.draw.setFillStyle(ctx, "#fff");
+                ctx.rect(0, y, x, height)
+                ctx.fill();
+                self.draw.text({
+                    x: x - 18,
+                    y: y + height / 2,
+                    text: progess,
+                    r: 12
+                });
+            },
+            addEvent: function() {
+                var self = this;
+                var x = this.x,
+                    y = this.y,
+                    height = this.height,
+                    width = this.width,
+                    max = this.max,
+                    min = this.min;
+                var isDragging = false;
+                toucher([{
+                    el: self.canvas,
+                    type: _touchstar,
+                    callback: function(item, ev) {
+                        var pos = _.pos(ev);
+                        if ((pos.y < y + height) && pos.y > y) {
+                            self.pasue = true
+                            i = max * (pos.x - x) / width << 0
+                            i = _.between(0, max, i);
+                            self.callback && self.callback(i);
+                            isDragging = true;
+                        } else {
+                            self.pasue = !self.pasue;
+                        }
+                    }
+                }, {
+                    el: self.canvas,
+                    type: _touchmove,
+                    callback: function(item, ev) {
+                        var pos = _.pos(ev);
+                        if (isDragging) {
+                            self.pasue = true
+                            i = max * (pos.x - x) / width << 0
+                            i = _.between(0, max, i);
+                            self.callback && self.callback(i);
+                        }
+                    }
+                }, {
+                    el: self.canvas,
+                    type: _touchend,
+                    callback: function(item, ev) {
+                        isDragging = false;
+                    }
+                }])
+
+            },
+            run: function() {
+                var self = this;
+                var max = this.max;
+                var color = this.color;
+
+                var i = this.progess;
+                self.draw.loop(function() {
+                    if (!self.pasue) {
+                        self.render(i++, color);
+                        i %= max;
+                    }else{
+                        i = self.progess;
+                    }
+                }, 200);
+
+            }
+        }
+        _slider.prototype.init.prototype = _slider.prototype;
+
         //画图 
         //基础图形组合，加动画
         var _draw = _.draw = function(options, canvas) {
@@ -8778,84 +8915,35 @@
                     ctx.stroke();
                 }
 
-                var pConfig = {
-                    x: 30,
-                    y: 10,
-                    height: 20
-                }
-                pConfig.width = width - pConfig.x * 2;
-
-                //进度条
-                var progressBar = function(cfg, i) {
-                    ctx.beginPath();
-                    self.setFillStyle(ctx, "#dedede");
-                    ctx.rect(cfg.x, cfg.y, cfg.width, cfg.height)
-                    ctx.fill();
-                    ctx.beginPath();
-                    self.setFillStyle(ctx, colorArr[i]);
-                    ctx.rect(cfg.x, cfg.y, cfg.width * i / 360, cfg.height)
-                    ctx.fill();
-                    self.text({
-                        x: cfg.x - 20,
-                        y: cfg.y + cfg.height / 2,
-                        text: i,
-                        r: 12
-                    })
-                }
-
+                var max = 360;
+                var slider = this.slider({
+                    max: max,
+                    callback: function(i) {
+                        update(i);
+                    }
+                })
                 var update = function(i) {
                     self.clear()
                     _spiral(interval, i);
-                    progressBar(pConfig, i);
+                    slider.render(i, colorArr[i]);
                 }
 
-                var pasue = false;
                 var i = 0;
                 self.loop(function() {
-                    if (!pasue) update(i);
-                    i++;
-                    i %= 360;
+                    if (!slider.pasue) {
+                        update(i++);
+                        i %= max;
+                    }
                 }, 200);
-                var isDragging = false;
-
-                toucher([{
-                    el: self.canvas,
-                    type: "touchstart",
-                    callback: function(item, ev) {
-                        var pos = _.pos(ev);
-                        if ((pos.y < pConfig.y + pConfig.height) && pos.y > pConfig.y) {
-                            pasue = true
-                            i = 360 * (pos.x - pConfig.x) / pConfig.width << 0
-                            i = _.between(0, 360, i);
-                            update(i)
-                            isDragging = true;
-                        } else {
-                            pasue = !pasue;
-                        }
-                    }
-                }, {
-                    el: self.canvas,
-                    type: "touchmove",
-                    callback: function(item, ev) {
-                        var pos = _.pos(ev);
-                        if (isDragging) {
-                            pasue = true
-                            i = 360 * (pos.x - pConfig.x) / pConfig.width << 0
-                            i = _.between(0, 360, i);
-                            update(i)
-                        }
-                    }
-                }, {
-                    el: self.canvas,
-                    type: "touchend",
-                    callback: function(item, ev) {
-                        isDragging = false;
-                    }
-
-                }])
+            },
+            slider: function(opt) {
+                return _slider(this, opt);
             }
         }
         _draw.prototype.init.prototype = _draw.prototype;
+
+
+
 
 
 
