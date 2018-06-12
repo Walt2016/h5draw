@@ -7208,18 +7208,15 @@
             run: function() {
                 var self = this;
                 var max = this.max;
-                var color = this.color;
-
                 var i = this.progess;
                 self.draw.loop(function() {
                     if (!self.pasue) {
-                        self.render(i++, color);
+                        self.callback && self.callback(i++);
                         i %= max;
-                    }else{
+                    } else {
                         i = self.progess;
                     }
                 }, 200);
-
             }
         }
         _slider.prototype.init.prototype = _slider.prototype;
@@ -8915,9 +8912,8 @@
                     ctx.stroke();
                 }
 
-                var max = 360;
                 var slider = this.slider({
-                    max: max,
+                    max: 360,
                     callback: function(i) {
                         update(i);
                     }
@@ -8927,14 +8923,7 @@
                     _spiral(interval, i);
                     slider.render(i, colorArr[i]);
                 }
-
-                var i = 0;
-                self.loop(function() {
-                    if (!slider.pasue) {
-                        update(i++);
-                        i %= max;
-                    }
-                }, 200);
+                slider.run();
             },
             slider: function(opt) {
                 return _slider(this, opt);
