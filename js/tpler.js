@@ -95,7 +95,7 @@
                     if (target.hasOwnProperty(key)) {
                         console.log(_.type(target) + " hasOwnProperty " + key)
                     } else {
-                        //不覆盖
+                        //不覆盖已有属性
                         var descriptor = {
                             key: key,
                             value: props[key],
@@ -1738,23 +1738,23 @@
         };
 
         _.ajax = function(uri) {
-            var xmlHttp = false;
-            var done = false;
-            var invokeTimes = 0;
-            var type = type || 'GET';
-            var option = {
-                method: "GET",
-                data: null,
-                arguments: null,
-                success: function() {},
-                error: function() {},
-                complete: function() {},
-                isAsync: true,
-                timeout: 30000,
-                contentType: null,
-                // type: "xml"  //resultType
-                dataType: "json"
-            };
+            var xmlHttp = false,
+                done = false,
+                invokeTimes = 0,
+                type = type || 'GET',
+                option = {
+                    method: "GET",
+                    data: null,
+                    arguments: null,
+                    success: function() {},
+                    error: function() {},
+                    complete: function() {},
+                    isAsync: true,
+                    timeout: 30000,
+                    contentType: null,
+                    // type: "xml"  //resultType
+                    dataType: "json"
+                };
 
 
             var args = Array.prototype.slice.call(arguments),
@@ -1964,7 +1964,6 @@
             var self = this;
             var $dom = _.query("#" + id);
             var $img = $dom.query("img");
-
             var t_img; // 定时器
             var isLoad = true; // 控制变量
             // 判断图片加载的函数
@@ -2563,8 +2562,8 @@
                 {
                     //混合 color1, color2 或 [c1,c2,c3]
                     mix: function() {
-                        var len = arguments.length;
-                        var arr = [];
+                        var len = arguments.length,
+                            arr = [];
                         if (len === 0) return;
                         for (var i = 0; i < len; i++) {
                             arr[i] = rgbaArr(arguments[i]);
@@ -2601,10 +2600,7 @@
                     }
                 })
         }();
-
-
         var _prototype = {};
-
         //原型扩展
         _prototype.obj = {
             //四则运算 "1+2"
@@ -2714,8 +2710,6 @@
                 }
                 return Number(s1.replace(".", "")) * Number(s2.replace(".", "")) / Math.pow(10, m);
             },
-
-
             //除法  
             div: function(arg) {
                 var t1 = 0,
@@ -4128,8 +4122,8 @@
 
         //polyfill  requestAnimationFrame
         inBrowser && (function() {
-            var lastTime = 0;
-            var vendors = ['ms', 'moz', 'webkit', 'o'];
+            var lastTime = 0,
+                vendors = ['ms', 'moz', 'webkit', 'o'];
             for (var x = 0; x < vendors.length && !window.requestAnimationFrame; ++x) {
                 window.requestAnimationFrame = window[vendors[x] + 'RequestAnimationFrame'];
                 window.cancelAnimationFrame = window[vendors[x] + 'CancelAnimationFrame'] || window[vendors[x] + 'CancelRequestAnimationFrame'];
@@ -4358,10 +4352,9 @@
                 },
                 //更新
                 update: function() {
-                    var self = this;
-                    // this.step++;
-                    var time = +new Date();
-                    var obj = this.calculate.call(this, time)
+                    var self = this,
+                        time = +new Date(),
+                        obj = this.calculate.call(this, time);
 
                     if (time - this._startTime <= this.duration) {
                         this.callback(obj)
@@ -4506,12 +4499,12 @@
                 },
                 //向量的绕Z轴旋转
                 rotate: function(deg) {
-                    var ca = _.cos(deg);
-                    var sa = _.sin(deg);
-                    var x = this.x,
-                        y = this.y;
-                    var rx = x * ca - y * sa;
-                    var ry = x * sa + y * ca;
+                    var ca = _.cos(deg),
+                        sa = _.sin(deg),
+                        x = this.x,
+                        y = this.y,
+                        rx = x * ca - y * sa,
+                        ry = x * sa + y * ca;
                     this.x = rx;
                     this.y = ry;
                     return this;
@@ -4541,12 +4534,10 @@
                         sa = _.sin(a),
                         cb = _.cos(b),
                         sb = _.sin(b);
-
                     var x = this.x,
                         y = this.y,
                         z = this.z,
                         rz = y * sa + z * ca;
-
                     this.y = y * ca - z * sa;
                     this.z = x * -sb + rz * cb;
                     this.x = x * cb + rz * sb;
@@ -4821,8 +4812,8 @@
                         rRatio = opt.rRatio || 1,
                         aRatio = opt.aRatio || 1,
                         turns = opt.turns || 1,
-                        num = opt.num || 3;
-                    var po = this.po;
+                        num = opt.num || 3,
+                        po = this.po;
 
                     //变化类型：加速 匀速
                     var rRatioType = opt.rRatioType;
@@ -4879,9 +4870,8 @@
                 },
                 regularVertices: function(opt) {
                     var num = opt.num,
-                        po = this.po;
-                    //夹角
-                    var ia = 360 / num,
+                        po = this.po,
+                        ia = 360 / num, //夹角
                         vs = [p];
                     for (var i = 0; i < num; i++) vs[vs.length] = p = po.rotate(ia);
                     return vs;
@@ -5002,8 +4992,8 @@
             }
             return createClass(Shape, {
                 setup: function(opt) {
-                    var opt = opt || this.opt;
-                    var shape = opt.shape;
+                    var opt = opt || this.opt,
+                        shape = opt.shape;
                     if (shape in this) {
 
                         if (opt.fractalMirror) return this.fractalMirror(opt);
@@ -5039,11 +5029,11 @@
                     this.setup(_.clone(opt, {
                         fractal: false
                     }));
-                    var fractalRatio = opt.fractalRatio || 0.618;
-                    var r = opt.r * fractalRatio; //ratio增大，计算量大，会致死锁，设置最大level5
-                    var minR = opt.minR || 5;
-                    var fractalLevel = opt.fractalLevel || 0;
-                    var maxLevel = _.isUndefined(opt.maxLevel) ? 5 : opt.maxLevel;
+                    var fractalRatio = opt.fractalRatio || 0.618,
+                        r = opt.r * fractalRatio; //ratio增大，计算量大，会致死锁，设置最大level5
+                    var minR = opt.minR || 5,
+                        fractalLevel = opt.fractalLevel || 0,
+                        maxLevel = _.isUndefined(opt.maxLevel) ? 5 : opt.maxLevel;
                     fractalLevel++;
                     var fractal = !(fractalLevel >= maxLevel || r < minR); // ? false : true;
                     this.vs.forEach(function(t) {
@@ -5062,12 +5052,12 @@
                     this.setup(_.clone(opt, {
                         fractalIn: false
                     }));
-                    var fractalLevel = opt.fractalLevel || 0;
-                    var maxLevel = _.isUndefined(opt.maxLevel) ? 5 : opt.maxLevel;
+                    var fractalLevel = opt.fractalLevel || 0,
+                        maxLevel = _.isUndefined(opt.maxLevel) ? 5 : opt.maxLevel;
                     fractalLevel++;
                     if (fractalLevel >= maxLevel) return;
-                    var vs = this.vs;
-                    var po = this.po;
+                    var vs = this.vs,
+                        po = this.po;
                     if (vs.length < 2) return;
                     var v = vs[0].toV().add(vs[1].toV()); //计算上级r a，相连的向量和
                     // var p = v.toP(po);
@@ -5084,15 +5074,15 @@
                     this.setup(_.clone(opt, {
                         fractalMirror: false
                     }));
-                    var fractalLevel = opt.fractalLevel || 0;
-                    var maxLevel = _.isUndefined(opt.maxLevel) ? 5 : opt.maxLevel;
+                    var fractalLevel = opt.fractalLevel || 0,
+                        maxLevel = _.isUndefined(opt.maxLevel) ? 5 : opt.maxLevel;
                     fractalLevel++;
                     if (fractalLevel >= maxLevel) return;
-                    var vertex = _.vertex(opt);
-                    var vs = vertex.vs;
-                    var po = vertex.po;
-                    var fractalRatio = opt.fractalRatio || 0.618;
-                    var minR = opt.minR || 5;
+                    var vertex = _.vertex(opt),
+                        vs = vertex.vs,
+                        po = vertex.po,
+                        fractalRatio = opt.fractalRatio || 0.618,
+                        minR = opt.minR || 5;
                     vs.forEach(function(t, i) {
                         var o = po.mirror(t, fractalRatio);
                         if (o.r < minR) return;
@@ -5151,10 +5141,8 @@
                     var num = opt.num,
                         fb = _.fibonacci(num),
                         sequence = opt.group.sequence,
-                        clockwise = sequence === "clockwise";
-
-                    // var clockwise = opt.clockwise;
-                    var ctx = this.context,
+                        clockwise = sequence === "clockwise",
+                        ctx = this.context,
                         x = opt.x,
                         y = opt.y,
                         r = opt.r;
@@ -5190,8 +5178,8 @@
                         // var radius = r ; //r * 5
                         //五倍半径画，不然太小了
 
-                        var startAngle = Math.PI
-                        var endAngle = Math.PI * 0.5
+                        var startAngle = Math.PI,
+                            endAngle = Math.PI * 0.5;
                         //每个半径只画1/4个圆，所以开始角度和结束角度刚好相差 1/4 * PI
 
 
@@ -5280,8 +5268,8 @@
                     var ctx = this.context,
                         x = opt.x,
                         y = opt.y,
-                        r = opt.r || 12;
-                    var text = _.isUndefined(opt.text) ? opt.num : opt.text;
+                        r = opt.r || 12,
+                        text = _.isUndefined(opt.text) ? opt.num : opt.text;
                     ctx.fillStyle = opt.color || "#000";
                     ctx.font = r + "px Verdana";
                     var measure = ctx.measureText(text);
@@ -5513,10 +5501,9 @@
                     var self = this,
                         vertex = this.vertex,
                         vs = vertex.vs,
-                        vsGroup = [vs];
-
-                    var level = 0;
-                    var turns = opt.turns || 3;
+                        vsGroup = [vs],
+                        level = 0,
+                        turns = opt.turns || 3;
                     (function _rose(vs) {
                         if (level >= turns) return;
                         var r = opt.r / Math.pow(2, ++level);
@@ -5540,7 +5527,6 @@
                         vsGroup = [],
                         vs = this.vs,
                         len = vs.length;
-
                     for (var i = 0; i < len; i++) {
                         var vs2 = [];
                         vs2.push(vs[i]);
@@ -5551,11 +5537,9 @@
                 },
                 //谢尔宾斯基三角形
                 sierpinski: function(opt) {
-                    var self = this;
-                    var vertex = this.vertex;
-                    var vs = vertex.vs;
-                    var vsGroup = [vs];
-
+                    var vertex = this.vertex,
+                        vs = vertex.vs,
+                        vsGroup = [vs];
                     //内切三角形
                     (function _intriangle(vs) {
                         var vs2 = vertex.invertices(vs);
@@ -5567,7 +5551,7 @@
                             });
                         }
                     })(vs);
-                    return self.draw.linkGroup(vsGroup, opt);
+                    return this.draw.linkGroup(vsGroup, opt);
                 },
                 //谢尔宾斯基地毯
                 carpet: function(opt) {
@@ -5667,12 +5651,12 @@
                 },
                 //蜂巢
                 comb: function(opt) {
-                    var self = this;
-                    var vsGroup = [];
+                    var self = this,
+                        vsGroup = [];
                     opt.num = 6;
-                    var vertex = this.vertex;
-                    var vs = vertex.vs;
-                    var po = vertex.po;
+                    var vertex = this.vertex,
+                        vs = vertex.vs,
+                        po = vertex.po;
                     vsGroup.push(vs);
                     var a = opt.a,
                         num = opt.num,
@@ -5834,11 +5818,11 @@
                         po = vertex.po,
                         vsGroup = [];
                     var _ray = function(opt) {
-                        var vertex = _.vertex(opt);
-                        var vs = vertex.vs,
+                        var vertex = _.vertex(opt),
+                            vs = vertex.vs,
                             len = vs.length,
-                            po = vertex.po;
-                        var vsGroup = [];
+                            po = vertex.po,
+                            vsGroup = [];
                         if (opt.fillInterval) {
                             for (var i = 0; i < len; i += 2) vsGroup.push([po, vs[i], vs[i + 1 === len ? 0 : i + 1]])
                         } else {
@@ -6006,8 +5990,8 @@
                 var r = opt.shape.r,
                     colorful = opt.group.colorful,
                     x = _.isUndefined(opt.group.x) ? this.canvas.width / 2 : opt.group.x,
-                    y = _.isUndefined(opt.group.y) ? this.canvas.height / 2 : opt.group.y;
-                var sr = r,
+                    y = _.isUndefined(opt.group.y) ? this.canvas.height / 2 : opt.group.y,
+                    sr = r,
                     width = r,
                     height = r;
 
@@ -6101,7 +6085,6 @@
                             break;
                     }
                     return groups.map(function(t, i) {
-
                         opt.shape = _.clone(opt.shape, {
                             x: t.x,
                             y: t.y,
@@ -6385,25 +6368,22 @@
                 },
                 //平铺
                 repeat: function(opt) {
-                    var self = this;
-                    var canvas = this.canvas;
-                    var w = canvas.width,
-                        h = canvas.height;
-                    var r = opt.group.interval || opt.shape.r; //间距
-                    var mx = w % r;
-                    var my = h % r;
-                    var animate = opt.group.animate;
-                    var animationInterval = opt.group.animationInterval || 5;
-                    var sequence = opt.group.sequence;
-                    var clockwise = sequence === "clockwise";
-                    // var clockwise = opt.group.clockwise;
-                    var rotation = opt.group.rotation; //自转
-                    var sa = opt.group.a || 0;
-
-
-                    var top = r + my / 2;
-                    var left = r + mx / 2;
-                    var right = w - r - mx / 2;
+                    var self = this,
+                        canvas = this.canvas,
+                        w = canvas.width,
+                        h = canvas.height,
+                        r = opt.group.interval || opt.shape.r, //间距
+                        mx = w % r,
+                        my = h % r,
+                        animate = opt.group.animate,
+                        animationInterval = opt.group.animationInterval || 5,
+                        sequence = opt.group.sequence,
+                        clockwise = sequence === "clockwise",
+                        rotation = opt.group.rotation, //自转
+                        sa = opt.group.a || 0,
+                        top = r + my / 2,
+                        left = r + mx / 2,
+                        right = w - r - mx / 2;
                     opt.shape.y = top;
                     if (clockwise) {
                         opt.shape.x = left;
@@ -6527,9 +6507,8 @@
                     num = opt.motion.num || 1,
                     colorful = opt.motion.colorful,
                     bounce = opt.motion.bounce,
-                    click = opt.motion.click;
-
-                var width = this.draw.width,
+                    click = opt.motion.click,
+                    width = this.draw.width,
                     height = this.draw.height;
 
                 this.groups = [];
@@ -6591,11 +6570,11 @@
             }
             return createClass(Motion, {
                 setup: function() {
-                    var self = this;
-                    var vsGroup = [];
-                    var groups = self.groups;
-                    var len = groups.length;
-                    var motion = self.motion;
+                    var self = this,
+                        vsGroup = [],
+                        groups = self.groups,
+                        len = groups.length,
+                        motion = self.motion;
                     self.shadow ? self.draw.shadow() : self.draw.clear();
 
                     groups.forEach(function(t, i) {
