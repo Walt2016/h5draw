@@ -1,6 +1,6 @@
 //一个js开发框架
 //template.event.canvas
-//v0.8.20180616
+//v0.8.20180619
 ;
 (function(root, factory) {
     if (typeof define === "function" && define.amd) {
@@ -16,38 +16,8 @@
     }
 }(this,
     function() {
-        //模板标签  ([^|]+?[\|(string|file|image|time)]?     /{=([\s\S]+?)}/g; 
-        var reg_tpl_tag = /{=(.*?)(?:\|(.*?))?}/g,
-            reg_operation_symbol = /[\+|\-|\*|\/|\(|\)]+/g, //支持 加减乘除括号  operation symbol
-            rootEl, $index = 1,
-            $length = 1,
-            toucher,
-            customFilters = {}, //扩展类型
-            customSyntax = "", //书写语法   pre markdown  html text 文本格式类型
-            customMethods = {},
-            customDirectives = {},
-            templateConfig = {},
-            SYNTAX = "syntax",
-            GROUP = "group",
-            LAZY = "lazy",
-            MORE = "more",
-            DEFAULT = "default",
-            DATA = "data",
-            PAGESIZE = "pagesize",
-            KEYWORD = "keyword",
-            TEMPLATE = "template",
-            NOLOOP = "noloop",
-            LOOP = "loop",
-            MODEL = "model", //双向绑定模型
-            TAP = "tap",
-            LONGTAP = "longtap",
-            DRAG = "drag",
-            ON = "on", //绑定事件
-            BIND = "bind"; //单向绑定
-
         var inBrowser = typeof window !== 'undefined';
         console.log("before inBrowser:" + inBrowser);
-
         var isSupportTouch = inBrowser ? (function() {
             try {
                 document.createEvent("TouchEvent");
@@ -2355,10 +2325,51 @@
                 }
             };
 
-            var Color = function(color) {
-                if (!(this instanceof Color)) return new Color(color);
-                color = color || '#' + ('00000' + (Math.random() * 0x1000000 << 0).toString(16)).slice(-6); //"#000";
-                this.color = rgbaArr(color);
+            var Color = function(color, alpha) {
+                if (!(this instanceof Color)) return new Color(color, alpha);
+                // color = color || '#' + ('00000' + (Math.random() * 0x1000000 << 0).toString(16)).slice(-6); //"#000";
+                if (isRgba(color) || isHex(color)) {
+                    this.color = rgbaArr(color);
+                } else {
+                    //分类颜色
+                    //红 100
+                    //绿 010
+                    //青 001 
+                    //黄 110 
+                    //紫 101
+                    //全彩 111
+                    //黑白灰 000
+                    var colorMap = {
+                        red: [1, 0, 0],
+                        green: [0, 1, 0],
+                        syan: [0, 0, 1],
+                        yellow: [1, 1, 0],
+                        purple: [1, 0, 1],
+                        gray: [0, 0, 0],
+                        colorful: [1, 1, 1]
+                    }
+
+                    var arr = color in colorMap ? colorMap[color] : colorMap["colorful"];
+                    var r = arr[0],
+                        g = arr[1],
+                        b = arr[2];
+                    if (r & g & b === 1) { //全彩
+                        arr = arr.map(function(t) {
+                            return Math.random() * 255 << 0;
+                        });
+                    } else if (r & g & b === 0) { //灰
+                        var t = Math.random() * 255 << 0;
+                        arr = [t, t, t];
+                    } else {
+                        var rgb = 155;
+                        var c = (Math.random() * (255 - rgb) << 0) + rgb;
+                        arr = arr.map(function(t) {
+                            return t === 1 ? (Math.random() * (255 - rgb) << 0) + rgb : Math.random() * (c / 2) << 0;
+                        });
+                    }
+                    if (alpha) arr[arr.length] = alpha;
+                    this.color = arr;
+                }
             }
             return createClass(Color, {
                     toString: function() {
@@ -2372,158 +2383,57 @@
                     },
                     //深色  随机深色(rgb两位小于 80)，指定颜色加深
                     dark: function(color, level) {
-                        var n = Math.random() * 3 << 0;
-                        if (!color) return rgbaWrapper([255, 255, 255].map(function(t, i) {
-                            return i !== n ? Math.random() * 80 << 0 : t * Math.random() << 0;
-                        }));
-
-                        color = this.rgb(color);
+                        color = color ? rgbaArr(color) : this.color;
                         level = level || 0.5;
-                        return rgbaWrapper(rgbaArr(color).map(function(t) {
+                        return rgbaWrapper(color.map(function(t) {
                             return t * (1 - level) << 0
                         }))
                     },
                     deepdark: function() {
-                        var n = Math.random() * 3 << 0;
-                        return rgbaWrapper([255, 255, 255].map(function(t, i) {
-                            return i !== n ? Math.random() * 20 << 0 : t * Math.random() << 0;
-                        }));
+                        return this.dark(null, 0.1);
                     },
                     //浅色  
                     light: function(color, level) {
-                        var n = Math.random() * 3 << 0;
-                        if (!color) return rgbaWrapper([255, 255, 255].map(function(t, i) {
-                            return i !== n ? 120 + Math.random() * 136 << 0 : t * Math.random() << 0;
-                        }));
-                        color = this.rgb(color);
+                        color = color ? rgbaArr(color) : this.color;
                         level = level || 0.5;
-                        return rgbaWrapper(rgbaArr(color).map(function(t) {
+                        return rgbaWrapper(color.map(function(t) {
                             return t + (255 - t) * level << 0
                         }))
                     },
-                    // 显示分类颜色 
-                    // //红 100
-                    // //绿 010
-                    // //青 001 
-                    // //黄 110 
-                    // //紫 101
-                    // //全彩 111
-                    // //黑白灰 000
-                    rgba: function(r, g, b, a) {
-                        var len = arguments.length;
-                        if (len < 4) a = _.between(0.1, 0.7);
-                        if (len < 3) b = 1;
-                        if (len < 2) g = 1;
-                        if (len < 1) r = 1;
-                        // if (len === 0) return this.rgb(this.hex(), a);
-                        var arr = [r, g, b];
-                        if (r & g & b === 1) {
-                            arr = arr.map(function(t) {
-                                return Math.random() * 255 << 0;
-                            });
-                        } else if (r | g | b === 0) {
-                            var t = Math.random() * 255 << 0;
-                            arr = [t, t, t];
-                        } else {
-                            var rgb = 155;
-                            var c = Math.random() * (255 - rgb) << 0 + rgb;
-                            arr = arr.map(function(t) {
-                                return t === 1 ? Math.random() * (255 - rgb) << 0 + rgb : Math.random() * (c / 2) << 0;
-                            });
-                        }
-                        arr[arr.length] = a;
-                        return rgbaWrapper(arr)
-                    },
                     //透明度
                     alpha: function(a) {
-                        var arr = rgbaArr(color);
-                        if (a) arr[3] = a;
-                        return rgbaWrapper(arr);
+                        if (a) this.color[3] = a;
+                        return rgbaWrapper(this.color);
                     },
-                    //hex2rgb
                     rgb: function(color, alpha) {
-                        color = color || this.color;
-                        return this.alpha(alpha);
+                        if (!color) return this.alpha(alpha)
+                        return this.constructor.rgb(color, alpha)
                     },
                     //混合
                     mix: function(color1, color2) {
-                        var a1 = rgbaArr(color1),
-                            a2 = rgbaArr(color2);
-                        var _mix = a1.map(function(t, i) {
-                            if (i === 3) {
-                                if (_.isUndefined(a2[i])) a2[i] = 1;
-                                return ((t + a2[i]) / 2).toFixed(2);
-                            } else {
-                                return (t + a2[i]) / 2 << 0;
-                            }
-                        })
-                        return rgbaWrapper(_mix);
+                        var args = Array.prototype.slice.call(arguments);
+                        args[args.length] = this.rgb();
+                        return this.constructor.mix(args);
                     },
                     //rgb2hex
                     hex: function(color) {
-                        color = color || this.color;
-                        if (isHex6(color)) return color;
-                        if (isHex3(color)) {
-                            return color.replace(/[0-9a-fA-f]/g, function(m) {
-                                return m + m;
-                            });
-                        }
-                        //[r,g,b,a]
-                        return "#" + rgbaArr(color).map(function(t, i) {
-                            return i > 2 ? null : ('0' + (+t).toString(16)).slice(-2);
-                        }).join("")
+                        return this.constructor.hex(color || this.color);
                     },
                     //色相环
                     circle: function(len) {
-                        var a = 0,
-                            step = 360 / len;
-                        var arr = [];
-                        for (var i = 0; i < len; i++) {
-                            a += step
-                            var r = _.cos(a) * 127 + 128 << 0,
-                                g = _.cos(a + 120) * 127 + 128 << 0,
-                                b = _.cos(a + 240) * 127 + 128 << 0;
-                            arr[arr.length] = rgbaWrapper([r, g, b])
-                        }
-                        return arr;
+                        return this.constructor.circle(len);
                     },
                     //互补色
                     complementary: function(color) {
-                        var rgb = this.rgb(color),
-                            rgbaArr = rgbaArr(rgb),
-                            r = rgbaArr[0],
-                            g = rgbaArr[1],
-                            b = rgbaArr[2],
-                            max = Math.max(r, Math.max(g, b)),
-                            min = Math.min(r, Math.min(g, b)),
-                            sum = max + min,
-                            R = sum - r,
-                            G = sum - g,
-                            B = sum - b;
-                        return rgbaWrapper([R, G, B]);
+                        return this.constructor.complementary(color || this.color);
                     },
                     //颜色过渡  gradient
-                    tween: function(color1, color2, step, easing) {
-                        color1 = this.rgb(color1);
-                        color2 = this.rgb(color2);
-                        step = step || 1;
-                        easing = easing || "linear";
-                        var start = rgbaArr(color1),
-                            end = rgbaArr(color2),
-                            colorArr = [];
-                        for (var i = 0; i <= step; i++) {
-                            var k = _.Easing[easing](i / step);
-                            colorArr[colorArr.length] = rgbaWrapper(end.map(function(t, i) {
-                                return i > 2 ? +(start[i] + (t - start[i]) * k).toFixed(2) : start[i] + (t - start[i]) * k << 0
-                            }))
-                        }
-                        return colorArr;
-
+                    tween: function(color, step, easing) {
+                        return this.constructor.tween(this.color, color, step, easing)
                     },
                     // 灰度值的心理学公式  值越小越深 <192为深色
                     grayLevel: function(color) {
-                        color = this.rgb(color)
-                        color = rgbaArr(color)
+                        color = color ? rgbaArr(color) : this.color;
                         return 0.30 * color[0] + 0.59 * color[1] + 0.11 * color[2]
                     },
                     isDark: function(color) {
@@ -2560,32 +2470,77 @@
                 },
                 //静态方法
                 {
-                    //混合 color1, color2 或 [c1,c2,c3]
-                    mix: function() {
-                        var len = arguments.length,
-                            arr = [];
-                        if (len === 0) return;
-                        for (var i = 0; i < len; i++) {
-                            arr[i] = rgbaArr(arguments[i]);
-                        }
-                        if (len === 1) return _.isArray(arr[0]) ? this.mix.apply(this, arr[0]) : arr[0];
-                        var _mix = arr[0].map(function(t, i) {
-                            if (i === 3) {
-                                for (var j = 1; j < len; j++) {
-                                    t += _.isUndefined(arr[j][i]) ? 1 : arr[j][i];
-                                }
-                                return (t / len).toFixed(2);
-                            } else {
-                                for (var j = 1; j < len; j++) {
-                                    t += arr[j][i];
-                                }
-                                return t / len << 0
+                    //混合  [c1,c2,c3]  或  color1, color2 
+                    mix: function(colorArr) {
+                        if (_.isArray(colorArr)) {
+                            var len = colorArr.length,
+                                arr = new Array(len);
+                            for (var i = 0; i < len; i++) {
+                                arr[i] = rgbaArr(colorArr[i]);
                             }
+                            var _mix = arr[0].map(function(t, i) {
+                                if (i === 3) {
+                                    for (var j = 1; j < len; j++) {
+                                        t += _.isUndefined(arr[j][i]) ? 1 : arr[j][i];
+                                    }
+                                    return (t / len).toFixed(2);
+                                } else {
+                                    for (var j = 1; j < len; j++) {
+                                        t += arr[j][i];
+                                    }
+                                    return t / len << 0
+                                }
+                            })
+                            return rgbaWrapper(_mix);
+                        } else {
+                            var len = arguments.length,
+                                arr = [];
+                            if (len === 0) return;
+                            for (var i = 0; i < len; i++) {
+                                arr[i] = rgbaArr(arguments[i]);
+                            }
+                            return this.mix.call(this, arr)
+                        }
+
+                    },
+                    //rgb2hex
+                    hex: function(color) {
+                        if (!color) return;
+                        if (isHex6(color)) return color;
+                        if (isHex3(color)) {
+                            return color.replace(/[0-9a-fA-f]/g, function(m) {
+                                return m + m;
+                            });
+                        }
+
+                        function _hex(rgbaArr) {
+                            return "#" + rgbaArr.map(function(t, i) {
+                                return i > 2 ? null : ('0' + (+t).toString(16)).slice(-2);
+                            }).join("")
+                        }
+                        return _hex(rgbaArr(color))
+                    },
+                    //hex2rgb
+                    rgb: function(color, alpha) {
+                        if (!color) return;
+                        if (isRgba(color)) return color;
+                        var arr = rgbaArr(color);
+                        if (alpha) arr[3] = alpha;
+                        return rgbaWrapper(arr);
+                    },
+                    //互补色
+                    complementary: function(color) {
+                        var arr = rgbaArr(color),
+                            max = Math.max.apply(Math, arr), //_.max
+                            min = Math.min.apply(Math, arr),
+                            sum = max + min;
+                        arr = arr.map(function(t) {
+                            return sum - t
                         })
-                        return rgbaWrapper(_mix);
+                        return rgbaWrapper(arr);
                     },
                     //色相环
-                    circle: function(len) {
+                    circle: function(len, alpha) {
                         var a = 0,
                             step = 360 / len;
                         var arr = [];
@@ -2594,10 +2549,45 @@
                             var r = _.cos(a) * 127 + 128 << 0,
                                 g = _.cos(a + 120) * 127 + 128 << 0,
                                 b = _.cos(a + 240) * 127 + 128 << 0;
-                            arr[arr.length] = rgbaWrapper([r, g, b])
+                            arr[arr.length] = rgbaWrapper(_.isUndefined(alpha) ? [r, g, b] : [r, g, b, alpha]);
                         }
                         return arr;
-                    }
+                    },
+                    //颜色过渡  gradient
+                    tween: function(color1, color2, step, easing) {
+                        step = step || 1;
+                        easing = easing || "linear";
+                        var start = rgbaArr(color1),
+                            end = rgbaArr(color2),
+                            colorArr = [];
+                        for (var i = 0; i <= step; i++) {
+                            var k = _.Easing[easing](i / step);
+                            colorArr[colorArr.length] = rgbaWrapper(end.map(function(t, i) {
+                                return i > 2 ? +(start[i] + (t - start[i]) * k).toFixed(2) : start[i] + (t - start[i]) * k << 0
+                            }))
+                        }
+                        return colorArr;
+                    },
+                    //深色  随机深色(rgb两位小于 80)，指定颜色加深
+                    dark: function(level) {
+                        var n = Math.random() * 3 << 0;
+                        return rgbaWrapper([255, 255, 255].map(function(t, i) {
+                            return i !== n ? Math.random() * 80 << 0 : t * Math.random() << 0;
+                        }));
+                    },
+                    deepdark: function() {
+                        var n = Math.random() * 3 << 0;
+                        return rgbaWrapper([255, 255, 255].map(function(t, i) {
+                            return i !== n ? Math.random() * 20 << 0 : t * Math.random() << 0;
+                        }));
+                    },
+                    //浅色  
+                    light: function(level) {
+                        var n = Math.random() * 3 << 0;
+                        return rgbaWrapper([255, 255, 255].map(function(t, i) {
+                            return i !== n ? 120 + Math.random() * 136 << 0 : t * Math.random() << 0;
+                        }));
+                    },
                 })
         }();
         var _prototype = {};
@@ -6011,18 +6001,18 @@
                 switch (colorful) {
                     case "circle":
                         //色相环
-                        colorArr = co.circle(len)
+                        colorArr = _.color.circle(len)
                         break;
                     case "gradient":
                         //渐变色
-                        colorArr = co.tween(co.light(), co.dark(), len);
+                        colorArr = _.color.tween(co.light(), co.dark(), len);
                         break;
                     case "singleGradient":
                         //单色渐变
-                        colorArr = co.tween(co.dark(), "#ffffff", len);
+                        colorArr = _.color.tween(co.dark(), "#ffffff", len);
                         break;
                     case "random": //随机
-                        for (var i = 0; i < len; i++) colorArr[colorArr.length] = co.hex()
+                        for (var i = 0; i < len; i++) colorArr[colorArr.length] = _.color().hex()
                         break;
                     case "solid": //单色
                         break;
@@ -6049,7 +6039,7 @@
                     var colorful = opt.group.colorful,
                         fill = opt.shape.fill,
                         opt2 = {};
-                    if (colorful) opt2.color = fill ? _.color().rgba() : _.color().rgb();
+                    if (colorful) opt2.color = _.color().rgb(); // fill ? _.color().rgba() : _.color().rgb();
                     return opt2;
                 },
                 setup: function(opt) {
@@ -7070,21 +7060,21 @@
         var _slider = _.slider = function() {
             function Slider(draw, opt) {
                 if (!(this instanceof Slider)) return new Slider(draw, opt);
-                var self = this;
+                opt = opt || {};
+                var self = this,
+                    width = draw.width,
+                    progess = this.progess = opt.progess || 0,
+                    color = this.color = opt.color || "#000";
                 this.draw = draw;
                 this.context = draw.context;
-                var width = draw.width;
                 this.canvas = draw.canvas
                 this.pasue = false;
-                opt = opt || {};
                 this.x = opt.x || 30;
                 this.y = opt.y || 10;
                 this.height = opt.height || 20;
                 this.width = opt.width || width - this.x * 2;
                 this.max = opt.max || 100;
                 this.min = opt.min || 0;
-                var progess = this.progess = opt.progess || 0;
-                var color = this.color = opt.color || "#000";
 
                 this.callback = opt.callback || function(p) {
                     self.render(p, color);
@@ -7123,14 +7113,14 @@
                     });
                 },
                 addEvent: function() {
-                    var self = this;
-                    var x = this.x,
+                    var self = this,
+                        x = this.x,
                         y = this.y,
                         height = this.height,
                         width = this.width,
                         max = this.max,
-                        min = this.min;
-                    var isDragging = false;
+                        min = this.min,
+                        isDragging = false;
                     toucher([{
                         el: self.canvas,
                         type: _touchstar,
@@ -7389,7 +7379,7 @@
                         color = opt.color,
                         callback = opt.callback;
                     if (color) {
-                        self.setFillStyle(color);
+                        self.setFillStyle(ctx, color);
                         ctx.fillRect(0, 0, canvas.width, canvas.height);
                     }
 
@@ -7430,7 +7420,7 @@
                                         zoom: zoom,
                                         callback: function() {
                                             var bg = ctx.createPattern(this, 'repeat');
-                                            self.setFillStyle(bg);
+                                            self.setFillStyle(ctx, bg);
                                             ctx.fillRect(0, 0, canvasWidth, canvasHeight);
                                             ctx.fill();
                                         }
@@ -7476,7 +7466,7 @@
                             break;
                         case "canvas":
                             var canvas = this.canvas;
-                            var draw = _.draw(this.options);
+                            var draw = Draw(this.options);
                             var imgData = this.context.getImageData(0, 0, canvas.width, canvas.height);
                             draw.context.putImageData(imgData, 0, 0);
                             div.appendChild(draw.canvas);
@@ -7540,10 +7530,11 @@
                     ctx.globalCompositeOperation = compositeOperation;
                     ctx.setGlobalCompositeOperation && ctx.setGlobalCompositeOperation(compositeOperation);
                 },
+
                 set: function(opt) {
                     if (opt) {
                         var ctx = this.context;
-                        if (opt.randomColor) opt.color = _.color().rgba();
+                        if (opt.randomColor) opt.color = _.color().rgb();
                         this.setLineJoin(ctx, opt.lineJoin);
                         this.setLineWidth(ctx, opt.lineWidth);
                         this.setStrokeStyle(ctx, opt.lineColor || opt.color);
@@ -8252,17 +8243,17 @@
                 },
                 //刻度盘
                 dial: function(opt) {
-                    var r = opt.r || 50;
-                    var longSticks = [];
-                    var shortSticks = [];
-                    var p = _.pointPolar({
-                        r: r,
-                        a: 0,
-                        o: {
-                            x: this.width / 2,
-                            y: this.height / 2
-                        }
-                    });
+                    var r = opt.r || 50,
+                        longSticks = [],
+                        shortSticks = [],
+                        p = _.pointPolar({
+                            r: r,
+                            a: 0,
+                            o: {
+                                x: this.width / 2,
+                                y: this.height / 2
+                            }
+                        });
                     var TICK_WIDTH = 15;
 
                     for (var a = 0, cnt = 0; a < 360; a += 180 / 64, ++cnt) {
@@ -8290,9 +8281,9 @@
                 },
                 // 反转颜色
                 reverse: function() {
-                    var canvas = this.canvas;
-                    var ctx = this.context;
-                    var imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                    var canvas = this.canvas,
+                        ctx = this.context,
+                        imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
 
                     for (var i = 0; i < imgData.data.length; i += 4) {
                         imgData.data[i] = 255 - imgData.data[i];
@@ -8304,13 +8295,13 @@
                 },
                 //粒子
                 getPixels: function() {
-                    var canvas = this.canvas;
-                    var ctx = this.context;
-                    var imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-                    var cols = 100,
-                        rows = 100;
-                    var s_width = imgData.width / cols << 0;
-                    var s_heihgt = imgData.height / rows << 0;
+                    var canvas = this.canvas,
+                        ctx = this.context,
+                        imgData = ctx.getImageData(0, 0, canvas.width, canvas.height),
+                        cols = 100,
+                        rows = 100,
+                        s_width = imgData.width / cols << 0,
+                        s_heihgt = imgData.height / rows << 0;
 
                     console.log(imgData.data.length)
                     var ps = []
@@ -8339,11 +8330,12 @@
                 },
                 //粒子消散 particle
                 disappear: function(opt) {
-                    var self = this;
-                    var time = opt.disappear || 1000;
-                    var dots = this.getPixels();
-                    var timeout;
-                    var _disappear = function() {
+                    var self = this,
+                        time = opt.disappear || 1000,
+                        dots = this.getPixels(),
+                        timeout;
+
+                    function _disappear() {
                         self.clear();
                         dots.forEach(function(t) {
                             self.point(t.move());
@@ -8364,12 +8356,12 @@
                 },
                 //星空  点和线
                 starrySky: function(opt) {
-                    var self = this;
-                    var width = this.width;
-                    var height = this.height;
-                    var ctx = this.context;
-                    var num = opt.num || 10;
-                    var maxNum = opt.maxNum || 100;
+                    var self = this,
+                        width = this.width,
+                        height = this.height,
+                        ctx = this.context,
+                        num = opt.num || 10,
+                        maxNum = opt.maxNum || 100;
                     var p = _.point({
                         x: Math.random() * width,
                         y: Math.random() * height,
@@ -8384,8 +8376,7 @@
                         return Math.random() > 0.9 ? 3 + Math.random() * 3 : 1 + Math.random() * 3;
                     }
                     // var shadow = opt.shadow;
-                    var color = _.color();
-                    var colorArr = color.circle(num)
+                    var colorArr = _.color.circle(num)
                     var ps = [];
                     while (num--) ps[ps.length] = p.clone({
                         x: Math.random() * width,
@@ -8395,7 +8386,7 @@
                     });
                     var lineMaxLength = opt.lineMaxLength || _.min(width / 4, 200); // 点之间产生连线的最大距离 threshold
                     // var background = 'rgba(0,0,0,0.05)'; 
-                    var background = opt.background || color.deepdark();
+                    var background = opt.background || _.color.deepdark();
                     var Line = function(a, b) {
                         this.a = a;
                         this.b = b;
@@ -8464,19 +8455,16 @@
                 //烟花
                 firework: function(opt) {
                     opt = opt || {}
-
-                    var self = this;
-                    var ctx = this.context;
-                    var width = this.width,
-                        height = this.height;
-
-                    var fs = [];
-                    var fws = [];
-                    var num = opt.num || 5;
-                    var range = 100;
-                    var colorArr = _.color().circle(num);
-                    var o = this.o;
-
+                    var self = this,
+                        ctx = this.context,
+                        width = this.width,
+                        height = this.height,
+                        fs = [],
+                        fws = [],
+                        num = opt.num || 5,
+                        range = 100,
+                        colorArr = _.color.circle(num),
+                        o = this.o;
 
                     var Fire = function() {
                         this.x = Math.random() * range / 2 - range / 4 + o.x;
@@ -8587,9 +8575,9 @@
                 //下雨
                 rain: function(opt) {
                     opt = opt || {}
-                    var self = this;
-                    var ctx = this.context;
-                    var width = this.width,
+                    var self = this,
+                        ctx = this.context,
+                        width = this.width,
                         height = this.height;
 
                     //雨线
@@ -8600,7 +8588,7 @@
                         this.x = x;
                         this.y = -200;
                         this.h = temp;
-                        this.color = _.color().rgba(0, 0, 0); //Math.floor(temp*255/75)
+                        this.color = _.color("gray").rgb(); //.rgba(0, 0, 0); //Math.floor(temp*255/75)
                     }
                     //雨点 
                     var Drop = function(x, y, color) {
@@ -8637,7 +8625,6 @@
                     var ls = [];
 
                     function update() {
-
                         dropList.forEach(function(t) {
                             t.move();
                         })
@@ -8646,7 +8633,6 @@
                                 dropList.splice(i, 1);
                             }
                         }
-
                         speedx = speedx + (maxspeedx - speedx) / 50;
 
                         if (ls.length <= 50)
@@ -8711,13 +8697,11 @@
                 },
                 // 随变
                 vertexTransform: function(opt) {
-                    var self = this;
-                    var speed = 1;
-                    var ctx = this.context;
                     opt = this.default(opt);
-
-
-                    var color = _.color().rgb();
+                    var self = this,
+                        speed = 1,
+                        ctx = this.context,
+                        color = _.color().rgb();
                     self.setStrokeStyle(ctx, color)
 
                     function resetVs() {
@@ -8729,10 +8713,10 @@
                             })
                         })
                     }
-                    var vs = resetVs();
-                    var width = this.width;
-                    var height = this.height;
-                    var lineMaxLength = opt.lineMaxLength || _.min(width / 4, 200);
+                    var vs = resetVs(),
+                        width = this.width,
+                        height = this.height,
+                        lineMaxLength = opt.lineMaxLength || _.min(width / 4, 200);
                     var Line = function(a, b) {
                         this.a = a;
                         this.b = b;
@@ -8746,9 +8730,6 @@
                     var ls = [];
                     var len = vs.length;
                     var po = _.vertex(opt).po;
-                    // var colorArr = _.color().circle(len)
-                    // var j = 0
-                    // var color = colorArr[0]
 
                     function update() {
                         self.shadow();
@@ -8797,13 +8778,13 @@
                 },
                 //转变
                 vertexRotate: function(opt) {
-                    var self = this;
-                    var ctx = this.context;
                     opt = this.default(opt);
-                    var vs = _.vertex(opt).vs;
-                    var num = opt.num || 10;
-                    var speed = 1;
-                    var color = _.color().rgb();
+                    var self = this,
+                        ctx = this.context,
+                        vs = _.vertex(opt).vs,
+                        num = opt.num || 10,
+                        speed = 1,
+                        color = _.color().rgb();
                     self.setStrokeStyle(ctx, color)
 
                     function update() {
@@ -8837,14 +8818,14 @@
                 //    step:2
                 // });
                 spiral: function(opt) {
-                    var self = this;
-                    var ctx = self.context,
-                        width = self.width,
-                        height = self.height;
-                    var colorArr = _.color().circle(361);
                     opt = opt || {};
-                    var interval = opt.interval || 1;
-                    var step = opt.step || 1;
+                    var self = this,
+                        ctx = self.context,
+                        width = self.width,
+                        height = self.height,
+                        colorArr = _.color.circle(361),
+                        interval = opt.interval || 1,
+                        step = opt.step || 1;
 
                     var _spiral = function(interval, offsetAngle) {
                         var p = _.pointPolar({
@@ -8887,6 +8868,49 @@
                 },
                 slider: function(opt) {
                     return _slider(this, opt);
+                },
+                bomb: function() {
+                    var self = this,
+                        colorArr = _.color.circle(101);
+                    var slider = this.slider({
+                        min: 3,
+                        max: 100,
+                        callback: function(i) {
+                            update(i);
+                        }
+                    })
+
+                    function update(i) {
+                        self.clear()
+                        var opt = {
+                            shape: "ploygon",
+                            num: i || 3,
+                            r: 40,
+                            x: self.width / 2,
+                            y: self.height / 2
+                        }
+
+                        var vertex = _.vertex(opt),
+                            vs = vertex.vs,
+                            len = vs.length,
+                            ctx = self.context,
+                            po = vertex.po;
+                        ctx.beginPath();
+                        vs.forEach(function(t, i) {
+                            var t1 = vs[i + 1 === len ? 0 : i + 1];
+                            ctx.moveTo(t.x, t.y)
+                            ctx.quadraticCurveTo(
+                                po.x, po.y,
+                                t1.x, t1.y
+                            );
+                        })
+                        self.setStrokeStyle(ctx,colorArr[i]);
+                        ctx.stroke()
+                        slider.render(i, colorArr[i]);
+                    }
+
+                    slider.run()
+
                 }
             })
         }();
@@ -9107,7 +9131,6 @@
         var tasker = _.tasker = function() {
             function Tasker(options) {
                 if (!(this instanceof Tasker)) return new Tasker(options);
-                // this.name = options.name;
                 var file = options.file;
                 var data = this.data = options.data; //参数
                 var callback = options.callback;
@@ -9124,7 +9147,6 @@
 
             }
             return createClass(Tasker, {
-
                 open: function(name, cfg) {
                     this.w.postMessage({
                         name: name,
@@ -9150,9 +9172,7 @@
             function Scroller(options) {
                 if (!(this instanceof Scroller)) return new Scroller(options);
                 var self = this;
-
                 if (options) {
-
                     var _scroll = function() {
                         toucher({
                             el: self.el, //document
@@ -9440,6 +9460,37 @@
                 }
             })
         }();
+
+
+
+        //模板标签  ([^|]+?[\|(string|file|image|time)]?     /{=([\s\S]+?)}/g; 
+        var reg_tpl_tag = /{=(.*?)(?:\|(.*?))?}/g,
+            reg_operation_symbol = /[\+|\-|\*|\/|\(|\)]+/g, //支持 加减乘除括号  operation symbol
+            rootEl, $index = 1,
+            $length = 1,
+            toucher,
+            customFilters = {}, //扩展类型
+            customSyntax = "", //书写语法   pre markdown  html text 文本格式类型
+            customMethods = {},
+            customDirectives = {},
+            templateConfig = {},
+            SYNTAX = "syntax",
+            GROUP = "group",
+            LAZY = "lazy",
+            MORE = "more",
+            DEFAULT = "default",
+            DATA = "data",
+            PAGESIZE = "pagesize",
+            KEYWORD = "keyword",
+            TEMPLATE = "template",
+            NOLOOP = "noloop",
+            LOOP = "loop",
+            MODEL = "model", //双向绑定模型
+            TAP = "tap",
+            LONGTAP = "longtap",
+            DRAG = "drag",
+            ON = "on", //绑定事件
+            BIND = "bind"; //单向绑定
 
 
         //标准过滤器
