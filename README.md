@@ -27,8 +27,15 @@
 
 ![image](https://github.com/Walt2016/h5draw/blob/master/pic/spiral1.gif)
 
+![image](https://github.com/Walt2016/h5draw/blob/master/pic/spiralpolygon.gif)
+
+
+
 
 ```
+<canvas id="myCanvas"></canvas>
+<script src="js/tpler.js"></script>
+<script>
    var draw = _.draw({
         canvasid: "myCanvas",
         fullscreen: true
@@ -54,6 +61,7 @@
         }
     }
     draw.setup(opt)
+</script>
 
 ```
 
