@@ -4695,15 +4695,16 @@
                         a: (this.a + a) % 360
                     });
                 },
+                rotateXY: function(a, b) {
+                    return this.toV().rotateXY(a, b).proj().toP(this);
+                },
                 rotateX: function(a) {
                     return this.rotateXY(a, 0);
                 },
                 rotateY: function(a) {
                     return this.rotateXY(0, a);
                 },
-                rotateXY: function(a, b) {
-                    return this.toV().rotateXY(a, b).proj().toP(this);
-                },
+
                 scale: function(e) {
                     return this.clone({
                         r: this.r * e
@@ -4890,6 +4891,12 @@
                         return t.rotateXY(a, b);
                     })
                     return this;
+                },
+                rotateX: function(a) {
+                    return this.rotateXY(a, 0);
+                },
+                rotateY: function(a) {
+                    return this.rotateXY(0, a);
                 },
                 add: function(p) {
                     this.vs = this.vs.map(function(t) {
@@ -5946,9 +5953,6 @@
                         ctx = this.context;
                     ctx.beginPath();
                     var ms = vs.map(function(t, i) {
-                        // opt.showVertices && self.draw.point({ x: t.x, y: t.y, text: i })
-                        // //显示顶点
-                        // if (opt.showVertices || opt.identifierVertices) self.draw.vertices(vs, opt);
                         var t1 = vs[i + 1 === len ? 0 : i + 1];
                         return t.mid(t1);
                     });
@@ -5962,6 +5966,27 @@
                         );
                     });
                     this.draw.render(opt, vs)
+                },
+                //爆炸曲线
+                bomb: function(opt) {
+                    var vertex = this.vertex,
+                        vs = vertex.vs,
+                        po = vertex.po,
+                        len = vs.length,
+                        ctx = this.context,
+                        color = opt.color;
+
+                    ctx.beginPath();
+                    vs.forEach(function(t, i) {
+                        var t1 = vs[i + 1 === len ? 0 : i + 1];
+                        ctx.moveTo(t.x, t.y)
+                        ctx.quadraticCurveTo(
+                            po.x, po.y,
+                            t1.x, t1.y
+                        );
+                    })
+                    this.draw.setStrokeStyle(ctx, color);
+                    ctx.stroke()
                 }
             });
 
@@ -7056,6 +7081,24 @@
             })
         }();
 
+
+        //循环
+        var _loop = _.loop = function() {
+            var Loop = function(callback, times) {
+                if (!(this instanceof Loop)) return new Loop(callback, times);
+                this.times = times
+                this.callback = callback || function(i) { console.log(i) }
+                this.run()
+            }
+            return createClass(Loop, {
+                run: function() {
+                    for (var i = 0; i < this.times; i++) {
+                        this.callback && this.callback(i)
+                    }
+                }
+            })
+        }();
+
         //可滑动进度条
         var _slider = _.slider = function() {
             function Slider(draw, opt) {
@@ -7075,14 +7118,21 @@
                 this.width = opt.width || width - this.x * 2;
                 this.max = opt.max || 100;
                 this.min = opt.min || 0;
+                this.loop = _.isUndefined(opt.loop) ? true : opt.loop;
+                this.colors = opt.colors;
+                this.timeInterval = _.isUndefined(opt.timeInterval) ? 200 : opt.timeInterval;
 
-                this.callback = opt.callback || function(p) {
-                    self.render(p, color);
-                };
-                this.render(progess, color);
+                this.callback = function(p) {
+                    opt.callback && opt.callback(p)
+                    self.render(p);
+                }
+                this.render(progess);
                 this.addEvent();
             }
             return createClass(Slider, {
+                getColor: function(progess) {
+                    return this.colors ? this.colors[(this.colors.length - 1) * progess / this.max << 0] : this.color;
+                },
                 render: function(progess, color) {
                     var self = this,
                         ctx = this.context,
@@ -7092,6 +7142,7 @@
                         width = this.width,
                         max = this.max;
                     this.progess = progess;
+                    color = color || this.getColor(progess);
 
                     ctx.beginPath();
                     self.draw.setFillStyle(ctx, "#dedede");
@@ -7155,20 +7206,25 @@
                             isDragging = false;
                         }
                     }])
-
                 },
                 run: function() {
-                    var self = this;
-                    var max = this.max;
-                    var i = this.progess;
-                    self.draw.loop(function() {
+                    var self = this,
+                        max = this.max,
+                        i = this.progess,
+                        loop = this.loop,
+                        timeInterval = this.timeInterval;
+                    self.draw.animate(function() {
                         if (!self.pasue) {
                             self.callback && self.callback(i++);
-                            i %= max;
+                            if (!loop && i === max + 1) {
+                                self.pasue = true;
+                                self.progess = 0;
+                            }
+                            i %= (max + 1);
                         } else {
                             i = self.progess;
                         }
-                    }, 200);
+                    }, timeInterval);
                 }
             })
         }();
@@ -8141,6 +8197,29 @@
                     this.id && cancelAnimationFrame(this.id)
                     this.timmer && clearTimeout(this.timmer)
                 },
+                //循环 循环次数
+                // loop: function(callback, times) {
+                //     times = times || 100;
+                //     for (var i = 0; i < times; i++) {
+                //         callback && callback(i);
+                //     }
+                // },
+                //动画 时间间隔 
+                animate: function(callback, timeInterval) {
+                    var self = this;
+                    self.stop();
+                    if (_.isUndefined(timeInterval)) {
+                        (function _anitmate() {
+                            self.id = requestAnimationFrame(_anitmate);
+                            callback && callback();
+                        })()
+                    } else {
+                        (function _anitmate() {
+                            self.timmer = setTimeout(_anitmate, timeInterval);
+                            callback && callback();
+                        })()
+                    }
+                },
                 verticesGroup: function(opt) {
                     var self = this;
                     var vs = self.vertices(opt.group);
@@ -8224,8 +8303,9 @@
 
                 //格子
                 grid: function(opt) {
+                    opt = opt || {};
                     var color = opt.background || opt.color || _.color().rgb();
-                    self._grid(color, 10)
+                    this._grid(color, 10)
                 },
                 //心电图网格
                 ecgGrid: function(opt) {
@@ -8447,7 +8527,7 @@
                     }])
 
 
-                    self.loop(function() {
+                    self.animate(function() {
                         update();
                         render();
                     });
@@ -8567,7 +8647,7 @@
                         });
                     }
 
-                    self.loop(function() {
+                    self.animate(function() {
                         update();
                         render();
                     });
@@ -8681,7 +8761,7 @@
                         });
                     }
 
-                    self.loop(function() {
+                    self.animate(function() {
                         update();
                         render();
                     });
@@ -8774,7 +8854,7 @@
                         //     self.link([t.a, t.b]);
                         // })
                     }
-                    self.loop(update);
+                    self.animate(update);
                 },
                 //转变
                 vertexRotate: function(opt) {
@@ -8794,24 +8874,9 @@
                         });
                         self.link(vs)
                     }
-                    self.loop(update);
+                    self.animate(update);
                 },
-                //循环动画
-                loop: function(callback, times) {
-                    var self = this;
-                    self.stop();
-                    if (times) {
-                        (function _loop() {
-                            self.timmer = setTimeout(_loop, times);
-                            callback && callback();
-                        })()
-                    } else {
-                        (function _loop() {
-                            self.id = requestAnimationFrame(_loop);
-                            callback && callback();
-                        })()
-                    }
-                },
+
                 //螺旋
                 // draw.spiral({
                 //    interval:5,
@@ -8853,32 +8918,62 @@
                         ctx.stroke();
                     }
 
-                    var slider = this.slider({
-                        max: 360,
-                        callback: function(i) {
-                            update(i);
-                        }
-                    })
+
                     var update = function(i) {
                         self.clear()
                         _spiral(interval, i);
-                        slider.render(i, colorArr[i]);
                     }
-                    slider.run();
+
+                    _.slider(this, {
+                        max: 360,
+                        colors: colorArr,
+                        callback: function(i) {
+                            update(i);
+                        }
+                    }).run();
                 },
-                slider: function(opt) {
-                    return _slider(this, opt);
+                //螺旋多边形
+                spiralPolygon: function(opt) {
+                    opt = opt || {};
+                    var self = this,
+                        width = this.width,
+                        height = this.height,
+                        r = opt.r || 100,
+                        num = opt.num || 3,
+                        inR = r * _.cos(180 / num),
+                        shape = opt.shape || "cornercurve",
+                        v = _.vector({
+                            x: width / 2,
+                            y: height / 2
+                        }),
+                        n = Math.log(v.abs() / inR) / Math.log(1.05) << 0,
+                        max = 360,
+                        colorArr = _.color.circle(max + 1); //, 0.05
+
+                    function update(p) {
+                        self.clear()
+                        _.loop(function(i) {
+                            self.shape({
+                                shape: shape, //  polygon bomb cornercurve
+                                num: num,
+                                r: r * Math.pow(1.05, i),
+                                a: i * 5 + p, //180 * _.sin(p),
+                                color: colorArr[p],
+                            })
+                        }, n)
+                    }
+                    _.slider(this, {
+                        max: max,
+                        colors: colorArr,
+                        loop: false,
+                        callback: function(i) {
+                            update(i)
+                        },
+                    }).run()
                 },
                 bomb: function() {
                     var self = this,
                         colorArr = _.color.circle(101);
-                    var slider = this.slider({
-                        min: 3,
-                        max: 100,
-                        callback: function(i) {
-                            update(i);
-                        }
-                    })
 
                     function update(i) {
                         self.clear()
@@ -8904,13 +8999,18 @@
                                 t1.x, t1.y
                             );
                         })
-                        self.setStrokeStyle(ctx,colorArr[i]);
+                        self.setStrokeStyle(ctx, colorArr[i]);
                         ctx.stroke()
-                        slider.render(i, colorArr[i]);
                     }
 
-                    slider.run()
-
+                    _.slider(this, {
+                        min: 3,
+                        max: 100,
+                        callback: function(i) {
+                            update(i);
+                        },
+                        colors: colorArr
+                    }).run();
                 }
             })
         }();
@@ -9236,8 +9336,8 @@
                     callback && callback.call(this.el);
                 },
                 scrollpage: function(direction, distance) { //方向  距离
-                    var self = this;
-                    var step = distance || 10;
+                    var self = this,
+                        step = distance || 10;
                     self.timer && clearTimeout(self.timer);
                     self.srollerTimer && clearTimeout(self.srollerTimer);
                     switch (direction) {
