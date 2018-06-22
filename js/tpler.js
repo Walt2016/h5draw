@@ -4317,7 +4317,7 @@
         }();
 
 
-        //循环
+        //循环  按次数调用 接收参数
         var _loop = _.loop = function() {
             var Loop = function(callback, times, delay) {
                 if (!(this instanceof Loop)) return new Loop(callback, times, delay);
@@ -4340,6 +4340,46 @@
 
                 }
             })
+        }();
+
+        //动画 不断重复 
+        var _animate = _.animate = function() {
+            var timmer, anId;
+            function Animate(callback, timeInterval) {
+                if (!(this instanceof Animate)) return new Animate(callback, timeInterval);
+                this.stop();
+                this.start(callback, timeInterval)
+            }
+            return createClass(Animate, {
+                stop: function() {
+                    anId && inBrowser && cancelAnimationFrame(anId)
+                    timmer && clearTimeout(timmer)
+                },
+                start: function(callback, timeInterval) {
+                    if (_.isUndefined(timeInterval) && inBrowser) {
+                        (function update() {
+                            anId = requestAnimationFrame(update);
+                            callback && callback();
+                        })()
+                    } else {
+                        timeInterval = _.isUndefined(timeInterval) ? 17 : timeInterval;
+                        (function update() {
+                            timmer = setTimeout(update, timeInterval);
+                            callback && callback();
+                        })()
+                    }
+                }
+            })
+            var intance;
+            return function(callback, timeInterval) {
+                if (intance) {
+                    intance.stop();
+                    intance.start(callback, timeInterval)
+                } else {
+                    intance = Animate(callback, timeInterval)
+                }
+                return intance;
+            }
         }();
 
 
@@ -4494,7 +4534,6 @@
                 this.x = opt.x || 0;
                 this.y = opt.y || 0;
                 this.z = opt.z || 0;
-
             }
             return createClass(Vector, {
                 // reset:function(){
@@ -4505,11 +4544,6 @@
                     return ((v.x === this.x) && (v.y === this.y) && (v.z === this.z));
                 },
                 clone: function() {
-                    // return this.constructor({
-                    //     x: this.x,
-                    //     y: this.y,
-                    //     z: this.z
-                    // });
                     return Vector({
                         x: this.x,
                         y: this.y,
@@ -4527,11 +4561,6 @@
                 //法向量 normal vector 垂直向量 
                 //Vector norm
                 norm: function() {
-                    // return this.constructor({
-                    //     x: -this.y,
-                    //     y: this.x
-                    // });
-
                     return Vector({
                         x: -this.y,
                         y: this.x
@@ -4576,8 +4605,8 @@
                 deg: function(deg) {
                     if (_.isUndefined(deg)) return this.radToDeg(Math.atan2(this.y, this.x));
                     var r = this.abs();
-                    this.x = r * Math.cos(this.degToRad(deg));
-                    this.y = r * Math.sin(this.degToRad(deg));
+                    this.x = r * _.cos(deg); // Math.cos(this.degToRad(deg));
+                    this.y = r * _.sin(deg); //Math.sin(this.degToRad(deg));
                     return this;
                 },
                 //方向 向量的弧度
@@ -4704,7 +4733,6 @@
                     p = this.xy(r, a, o);
                 this.x = p.x;
                 this.y = p.y;
-
             };
             return createClass(PointPolar, {
                 //极坐标转xy坐标
@@ -4712,7 +4740,6 @@
                     return {
                         x: o.x + r * _.cos(a),
                         y: o.y + r * _.sin(a),
-
                     }
                 },
 
@@ -4824,6 +4851,9 @@
                         a: (this.a + a) % 360
                     });
                 },
+                rotateZ: function(a) {
+                    return this.rotate(a)
+                },
                 rotateXY: function(a, b) {
                     return this.toV().rotateXY(a, b).proj().toP(this);
                 },
@@ -4833,7 +4863,6 @@
                 rotateY: function(a) {
                     return this.rotateXY(0, a);
                 },
-
                 scale: function(e) {
                     return this.clone({
                         r: this.r * e
@@ -4856,7 +4885,7 @@
         }();
 
         //点
-        //直角坐标 xy Coordinate
+        //直角坐标 xyz Coordinate
         var _point = _.point = function() {
             function Point(opt) {
                 if (!(this instanceof Point)) return new Point(opt);
@@ -4864,31 +4893,67 @@
                 this.y = opt.y;
                 this.r = opt.r;
                 this.color = opt.color;
-
-                var speed = opt.speed || 1;
-                this.vx = (Math.random() * 2 - 1) * speed;
-                this.vy = (Math.random() * 2 - 1) * speed;
+                this.speed = opt.speed || 1;
+                this.vx = 0;
+                this.vy = 0;
+                this.vz = 0;
+                this.spring = 0.01;
                 //range
-
                 this.left = opt.left || 0;
                 this.right = opt.right || opt.width;
                 this.top = opt.top || 0;
                 this.bottom = opt.bottom || opt.height;
+
+                this.initSpeed()
             }
             return createClass(Point, {
+                // spring: 0.01, //弹力
+                friction: 0.9, //摩擦力
+                //初始速度
+                initSpeed: function() {
+                    this.vx = (Math.random() * 2 - 1) * this.speed;
+                    this.vy = (Math.random() * 2 - 1) * this.speed;
+                    this.vz = (Math.random() * 2 - 1) * this.speed;
+                    this.spring = 0.01 + Math.random() * 0.04;
+                },
+                //移动目标
+                target: function(t) {
+                    this.tx = t.x;
+                    this.ty = t.y;
+                    this.tz = t.z;
+                },
+                //跟随移动  位移过渡
+                follow: function() {
+                    this.vx += (this.tx - this.x) * this.spring;
+                    this.vy += (this.ty - this.y) * this.spring;
+                    this.vz += (this.tz - this.z) * this.spring;
+
+                    this.vx *= this.friction;
+                    this.vy *= this.friction;
+                    this.vz *= this.friction;
+
+                    this.x += this.vx;
+                    this.y += this.vy;
+                    this.z += this.vz;
+                },
+                //移动
                 move: function() {
                     this.x += this.vx;
                     this.y += this.vy;
+                    this.z += this.vz;
                     // this.a=this.a*0.9;
                     // this.vy+=0.22; //加速下落
                     // this.vy += 0.01 * this.vx * this.vx; //*this.vx
 
                     // this.vx+=0.41*this.vy
 
-
+                    this.bound();
+                    return this;
+                },
+                //回弹
+                bound: function() {
                     if (this.x < this.left || this.x > this.right) this.vx *= -1;
                     if (this.y < this.top || this.y > this.bottom) this.vy *= -1;
-                    return this;
                 },
                 clone: function(opt) {
                     // return this.constructor(_.extend({}, this, opt))
@@ -5733,21 +5798,6 @@
                     })(vs);
                     return self.draw.linkGroup(vsGroup, opt);
                 },
-                //顶点镜像
-                // mirror: function(opt) {
-                //     var vsGroup = [];
-                //     // var vs = _.vertex(opt).vs;
-                //     var vs=this.vs;
-                //     vsGroup.push(vs);
-                //     vs.forEach(function(t) {
-                //         var vs2 = [];
-                //         vs.forEach(function(t2) {
-                //             vs2.push(t2.mirror(t));
-                //         })
-                //         vsGroup.push(vs2);
-                //     });
-                //     return this.draw.linkGroup(vsGroup, opt);
-                // },
                 //轴对称
                 axialMirror: function(opt) {
                     var self = this,
@@ -5967,43 +6017,6 @@
                     })
                 },
 
-                // // 顶点变形
-                // vertexTransform: function() {
-                //     var self = this;
-                //     var speed = 1;
-                //     var vs = this.vs;
-                //     vs = vs.map(function(t) {
-                //         return _.extend(t, {
-                //             vx: (Math.random() * 2 - 1) * speed,
-                //             vy: (Math.random() * 2 - 1) * speed,
-                //         })
-                //     });
-                //     self.timmer && clearTimeout(self.timmer);
-                //     (function _move() {
-                //         vs.forEach(function(t) {
-                //             t.x += t.vx;
-                //             t.y += t.vy;
-                //         });
-                //         // self.draw.clear();
-                //         self.draw.link(vs);
-                //         self.timmer = setTimeout(_move, 100);
-                //     })()
-                // },
-                // //顶点旋转
-                // vertexRotate: function() {
-                //     var self = this;
-                //     var vs = this.vs;
-                //     var i = 0;
-                //     self.timmer && clearTimeout(self.timmer);
-                //     (function rotate() {
-                //         self.draw.clear();
-                //         vs = vs.map(function(t) {
-                //             return t.rotate(i++)
-                //         });
-                //         self.draw.link(vs)
-                //         self.timmer = setTimeout(rotate, 170);
-                //     })()
-                // },
                 //一笔画 画饼
                 pie: function(opt) {
                     var vertex = this.vertex,
@@ -6120,7 +6133,6 @@
             });
 
         }();
-
 
 
         //图形组合
@@ -6559,8 +6571,7 @@
                         if (opt.group.colorArr.length > index) {
                             opt.shape.color = opt.group.colorArr[index++];
                         }
-
-                        opt.shape = _.clone(opt.shape); //, self.color(opt)
+                        opt.shape = _.clone(opt.shape);
                         self.shape.call(self, opt.shape);
                         opt.shape.y += 2 * r;
                         if (animate) {
@@ -6571,29 +6582,6 @@
                     })();
                     return self;
                 },
-
-                // // 顶点变形
-                // transform: function() {
-                //     var self = this;
-                //     var speed = 1;
-                //     var vs = this.vs;
-                //     vs.forEach(function(t) {
-                //         t.v = {
-                //             x: (Math.random() * 2 - 1) * speed,
-                //             y: (Math.random() * 2 - 1) * speed,
-                //         }
-                //     });
-
-                //     (function _move() {
-                //         self.vs = vs.map(function(t) {
-                //             return t.add(t.v)
-                //         });
-                //         self.draw.clear();
-                //         self.polygon(self.opt)
-                //         setTimeout(_move, 100);
-                //     })()
-                // }
-
 
                 // repeatX: function(opt) {
                 //     opt.group.repeatX = true;
@@ -6638,6 +6626,8 @@
         //rotate move zoom  gravitate  jiggle  float circle ellips
         //组合运动 rotate_zoom
         var _motion = _.motion = function() {
+
+
             function Motion(draw, opt) {
                 if (!(this instanceof Motion)) return new Motion(draw, opt);
                 var self = this;
@@ -6709,8 +6699,8 @@
                     };
                 }
                 this.len = this.groups.length;
-                this.setup();
-
+                // this.setup();
+                this.animate = _.animate(self.setup.bind(self))
             }
             return createClass(Motion, {
                 setup: function() {
@@ -6740,11 +6730,10 @@
                         }
                     });
                     self.draw.canvas.callback && self.draw.canvas.callback.call(self.draw.context, self.draw.context);
-                    self.id = inBrowser ? requestAnimationFrame(self.setup.bind(self)) : setTimeout(self.setup.bind(self), 17);
                 },
                 //停止
                 stop: function() {
-                    inBrowser && this.id ? cancelAnimationFrame(this.id) : clearTimeout(this.id);
+                    this.animate && this.animate.stop();
                 },
                 //移动跟随 followmove
                 follow: function(opt) {
@@ -6752,7 +6741,7 @@
                     //移动中心点
                     if (!!~["circle", "ellipse"].indexOf(this.motion)) { //"spiral",
                         var self = this;
-                        if (opt.follow && mouse) { //移动跟随
+                        if (opt.follow && mouse) { //移动跟随 
                             var dx = mouse.x - self.centerX;
                             var dy = mouse.y - self.centerY;
                             self.centerX += (dx * opt.followSpeed);
@@ -7001,6 +6990,10 @@
                 this.point = draw.point.bind(draw);
                 this.width = draw.width;
                 this.height = draw.height;
+                this.center = {
+                    x: this.width / 2,
+                    y: this.height / 2
+                }
                 var shape = opt.shape || "circle";
                 this[shape] && this[shape](opt);
             }
@@ -7038,14 +7031,12 @@
                         color = opt.color || 'black',
                         animate = opt.animate || opt.delay,
                         a = opt.a || 0,
-                        r = opt.r || 100;
+                        r = opt.r || 100,
+                        o = this.center;
                     var p = _.pointPolar({
                         r: r,
                         a: a,
-                        o: {
-                            x: this.width / 2,
-                            y: this.height / 2
-                        }
+                        o: o
                     });
                     var delay = animate ? opt.delay || 10 : 0;
                     var times = 360;
@@ -7068,14 +7059,12 @@
                         color = opt.color || 'black',
                         animate = opt.animate || opt.delay,
                         interval = opt.interval || 0.1,
-                        a = opt.a || 0;
+                        a = opt.a || 0,
+                        o = this.center;
                     var p = _.pointPolar({
                         r: r,
                         a: a,
-                        o: {
-                            x: this.width / 2,
-                            y: this.height / 2
-                        }
+                        o: o
                     });
 
                     var delay = animate ? opt.delay || 10 : 0;
@@ -7117,15 +7106,13 @@
                         color = opt.color || 'black',
                         turns = opt.turns || 1,
                         k = opt.k || (1 + r / r2),
-                        a = opt.a || 0;
+                        a = opt.a || 0,
+                        o = this.center;
 
                     var p = _.pointPolar({
                         r: r,
                         a: a,
-                        o: {
-                            x: this.width / 2,
-                            y: this.height / 2
-                        }
+                        o: o
                     })
 
                     var delay = animate ? opt.delay || 10 : 0;
@@ -7162,14 +7149,12 @@
                         r = opt.r || opt.r1 || 50,
                         r2 = opt.r2 || 50,
                         k = opt.k || (1 + r / r2),
-                        a = opt.a || 0;
+                        a = opt.a || 0,
+                        o = this.center;
                     var p = _.pointPolar({
                         r: r,
                         a: a,
-                        o: {
-                            x: this.width / 2,
-                            y: this.height / 2
-                        }
+                        o: o
                     })
 
                     var delay = animate ? opt.delay || 10 : 0;
@@ -7201,11 +7186,9 @@
                     var self = this,
                         r = opt.r || 50,
                         animate = opt.animate || opt.delay,
+                        o = this.center,
                         p = _.pointPolar({
-                            o: {
-                                x: this.width / 2,
-                                y: this.height / 2
-                            }
+                            o: o
                         });
 
                     var delay = animate ? opt.delay || 10 : 0;
@@ -7230,11 +7213,9 @@
                     var self = this,
                         r = opt.r || 50,
                         animate = opt.animate || opt.delay,
+                        o = this.center,
                         p = _.pointPolar({
-                            o: {
-                                x: this.width / 2,
-                                y: this.height / 2
-                            }
+                            o: o
                         });
                     var a = 100;
 
@@ -7374,7 +7355,8 @@
                         i = this.progess,
                         loop = this.loop,
                         timeInterval = this.timeInterval;
-                    self.draw.animate(function() {
+                    // self.draw.
+                    _.animate(function() {
                         if (!self.pasue) {
                             self.callback && self.callback(i++);
                             if (!loop && i === max + 1) {
@@ -8331,9 +8313,7 @@
                     if (opt.global.movie !== "none") {
                         this[opt.global.movie](opt.group || opt.shape);
                         return false;
-                    } else {
-                        this.id && cancelAnimationFrame(this.id);
-                    }
+                    } 
                     //网格
                     if (opt.global.showGrid) {
                         if (opt.global.grid === "ecgGrid") this.ecgGrid(opt.global);
@@ -8349,39 +8329,9 @@
                     });
 
                     this.opt = opt;
-                    this.motionCache && this.motionCache.stop();
-                    if (opt.motion) return this.motionCache = this.motion(opt);
                     if (this.global(opt)) {
+                        if (opt.motion) return  this.motion(opt);
                         return this.group(opt);
-                    }
-                    // return this.global(opt).group(opt);
-                },
-                stop: function() {
-                    this.motionCache && this.motionCache.stop();
-                    this.id && cancelAnimationFrame(this.id)
-                    this.timmer && clearTimeout(this.timmer)
-                },
-                //循环 循环次数
-                // loop: function(callback, times) {
-                //     times = times || 100;
-                //     for (var i = 0; i < times; i++) {
-                //         callback && callback(i);
-                //     }
-                // },
-                //动画 时间间隔 
-                animate: function(callback, timeInterval) {
-                    var self = this;
-                    self.stop();
-                    if (_.isUndefined(timeInterval)) {
-                        (function _anitmate() {
-                            self.id = requestAnimationFrame(_anitmate);
-                            callback && callback();
-                        })()
-                    } else {
-                        (function _anitmate() {
-                            self.timmer = setTimeout(_anitmate, timeInterval);
-                            callback && callback();
-                        })()
                     }
                 },
                 verticesGroup: function(opt) {
@@ -8394,9 +8344,7 @@
                         }));
                     })
                 },
-
                 //Canvas(画布)的translate(平移)、scale(缩放) 、rotate(旋转) 、skew(错切)
-
                 //离散顶点 discrete  离散数列 discrete series
                 //平移  translation 平移点阵 translational lattice;
                 //canvas.translate() － 画布的平移：
@@ -8436,17 +8384,6 @@
                     }
                 },
 
-                // translateX: function(opt, tx) {
-
-                // },
-                // translateY: function(opt, ty) {
-
-                // },
-                // //相似图形 ， 变大小
-                // scale: function() {
-                //     //context.scale(scalewidth,scaleheight);
-
-                // },
                 _grid: function(color, interval) {
                     var ctx = this.context;
                     var w = this.width,
@@ -8493,10 +8430,7 @@
                         p = _.pointPolar({
                             r: r,
                             a: 0,
-                            o: {
-                                x: this.width / 2,
-                                y: this.height / 2
-                            }
+                            o: this.o
                         });
                     var TICK_WIDTH = 15;
 
@@ -8691,7 +8625,7 @@
                     }])
 
 
-                    self.animate(function() {
+                    _.animate(function() {
                         update();
                         render();
                     });
@@ -8811,7 +8745,7 @@
                         });
                     }
 
-                    self.animate(function() {
+                    _.animate(function() {
                         update();
                         render();
                     });
@@ -8925,7 +8859,7 @@
                         });
                     }
 
-                    self.animate(function() {
+                    _.animate(function() {
                         update();
                         render();
                     });
@@ -9018,7 +8952,7 @@
                         //     self.link([t.a, t.b]);
                         // })
                     }
-                    self.animate(update);
+                    _.animate(update);
                 },
                 //转变
                 vertexRotate: function(opt) {
@@ -9038,7 +8972,7 @@
                         });
                         self.link(vs)
                     }
-                    self.animate(update);
+                    _.animate(update);
                 },
 
                 //螺旋
