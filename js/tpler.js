@@ -4130,6 +4130,30 @@
             if (!window.cancelAnimationFrame) window.cancelAnimationFrame = function(id) {
                 clearTimeout(id);
             };
+
+            //IE10以前的版本，不支持为setTimeout()和setInterval()方法传递第三个参数
+            if (document.all && !window.setTimeout.isPolyfill) {
+                var __nativeST__ = window.setTimeout;
+                window.setTimeout = function(vCallback, nDelay /*, argumentToPass1, argumentToPass2, etc. */ ) {
+                    var aArgs = Array.prototype.slice.call(arguments, 2);
+                    return __nativeST__(vCallback instanceof Function ? function() {
+                        vCallback.apply(null, aArgs);
+                    } : vCallback, nDelay);
+                };
+                window.setTimeout.isPolyfill = true;
+            }
+
+            if (document.all && !window.setInterval.isPolyfill) {
+                var __nativeSI__ = window.setInterval;
+                window.setInterval = function(vCallback, nDelay /*, argumentToPass1, argumentToPass2, etc. */ ) {
+                    var aArgs = Array.prototype.slice.call(arguments, 2);
+                    return __nativeSI__(vCallback instanceof Function ? function() {
+                        vCallback.apply(null, aArgs);
+                    } : vCallback, nDelay);
+                };
+                window.setInterval.isPolyfill = true;
+            }
+
         }());
 
 
@@ -4174,7 +4198,7 @@
             return arr;
         }
 
-        //延迟队列
+        //延迟 函数队列  (带参数)
         var _queue = _.queue = function() {
             function Queue(fn) {
                 if (!(this instanceof Queue)) return new Queue(fn);
@@ -4184,33 +4208,136 @@
                     fast: 200,
                     _default: 400
                 };
-                fn && this.enqueue(fn)
+                fn && this.push(fn)
             }
             return createClass(Queue, {
-                enqueue: function(fn) {
+                push: function(fn) {
+                    // var self = this;
+                    // this.dataStore.push(function() {
+                    //     fn && fn()
+                    //     self.next()
+                    // })
                     this.dataStore.push(fn);
                 },
-                dequeue: function() {
+                shift: function() {
                     return this.dataStore.shift();
                 },
-                exequeue: function() {
-                    var fn = this.dequeue();
-                    fn && fn.call(this, this.exequeue);
+                //执行
+                next: function() {
+                    var fn = this.shift();
+                    fn && fn();
+                    // fn && fn.call(this, this.next);
                 },
                 //延迟
                 delay: function(fn, time) {
                     var self = this;
                     time = _.isNumber(time) ? time : time in this.speeds ? this.speeds[time] : this.speeds._default;
-                    this.enqueue(function(next) {
-                        setTimeout(function() {
-                            fn && fn();
+                    this.push(function(next) {
+                        setTimeout(function(i) {
+                            fn && fn(i);
                             next && next.call(self);
                         }, time);
                     })
                     self.timeout && clearTimeout(self.timeout);
                     self.timeout = setTimeout(function() {
-                        self.exequeue();
+                        self.next();
                     }, 0)
+                }
+            })
+        }();
+
+        //延迟函数队列
+        var _delay = _.delay = function() {
+            var stack = [],
+                speeds = {
+                    slow: 600,
+                    fast: 200,
+                    _default: 400
+                },
+                timeout, index = 0;
+
+            function Delay(fn, time) {
+                // if (!(this instanceof Delay)) return new Delay(fn, time);
+                var self = this instanceof Delay ? this : Object.create(Delay.prototype);
+                fn && self.load.apply(self, arguments);
+                self.stack = stack;
+                return self;
+            }
+
+            createClass(Delay, {
+                //填弹
+                load: function(fn, time) {
+                    var self = this;
+                    var args = Array.prototype.slice.call(arguments, 2);
+                    time = _.isNumber(time) ? time : time in speeds ? speeds[time] : speeds._default;
+                    stack.push({
+                        fn: function() {
+                            fn && fn.apply(null, args)
+                            self.next()
+                            // console.timeEnd("delay");
+                            // console.time("delay");
+                        },
+                        time: time,
+                        args: args //参数
+                    })
+
+                    this.fire()
+                    return this
+                },
+                //连续 发射
+                next: function() {
+                    var obj = stack[index++];
+                    if (obj) {
+                        if (this.force) // true 规定时间内没执行完不执行
+                            timeout && clearTimeout(timeout);
+                        timeout = setTimeout(obj.fn, obj.time) //
+                    }
+                },
+                //点火   重头开始执行   没执行完不执行  覆盖执行
+                fire: function(i) {
+                    if (stack.length === 0) return;
+                    index = _.isUndefined(i) ? 0 : _.between(0, stack.length, i);
+                    timeout && clearTimeout(timeout);
+                    timeout = setTimeout(function() {
+                        var obj = stack[index++];
+                        obj.fn && obj.fn.apply(null, obj.args);
+                    }, stack[index].time)
+                    // console.time("delay");
+                }
+            })
+            var instance;
+            //代理
+            return function() {
+                if (instance)
+                    instance.load.apply(instance, arguments);
+                else
+                    instance = Delay.apply(null, arguments);
+                return instance
+            }
+        }();
+
+
+        //循环
+        var _loop = _.loop = function() {
+            var Loop = function(callback, times, delay) {
+                if (!(this instanceof Loop)) return new Loop(callback, times, delay);
+                this.times = times
+                this.callback = callback || function(i) { console.log(i) }
+                this.delay = delay
+                this.run()
+            }
+            return createClass(Loop, {
+                run: function() {
+                    if (this.delay) {
+                        for (var i = 0; i < this.times; i++) {
+                            _.delay(this.callback, this.delay, i);
+                        }
+                    } else {
+                        for (var i = 0; i < this.times; i++) {
+                            this.callback && this.callback(i)
+                        }
+                    }
+
                 }
             })
         }();
@@ -4375,7 +4502,7 @@
                 // },
                 //相等 equals
                 equal: function(v) {
-                    return ((v.x === this.x) && (v.y === this.y));
+                    return ((v.x === this.x) && (v.y === this.y) && (v.z === this.z));
                 },
                 clone: function() {
                     // return this.constructor({
@@ -4571,7 +4698,8 @@
                     r = this.r = opt.r || 0,
                     o = this.o = opt.o || {
                         x: 0,
-                        y: 0
+                        y: 0,
+                        z: 0
                     },
                     p = this.xy(r, a, o);
                 this.x = p.x;
@@ -4583,7 +4711,8 @@
                 xy: function(r, a, o) {
                     return {
                         x: o.x + r * _.cos(a),
-                        y: o.y + r * _.sin(a)
+                        y: o.y + r * _.sin(a),
+
                     }
                 },
 
@@ -6864,12 +6993,11 @@
             })
         }();
 
-        //轨迹 点图
+        //轨迹 点阵图
         var _track = _.track = function() {
             function Track(draw, opt) {
                 if (!(this instanceof Track)) return new Track(draw, opt);
                 this.draw = draw;
-                this.delay = draw.delay.bind(draw);
                 this.point = draw.point.bind(draw);
                 this.width = draw.width;
                 this.height = draw.height;
@@ -6877,52 +7005,17 @@
                 this[shape] && this[shape](opt);
             }
             return createClass(Track, {
-                // point:function(opt,algorithm){
-                //     var self=this;
-                //     //起点
-                //     var p = _.pointPolar(
-                //         _.extend({
-                //             r: 50,
-                //             a: 0,
-                //             o: {
-                //                 x: this.width / 2,
-                //                 y: this.height / 2
-                //             }
-                //         }, opt)
-                //     )
-                //     // var r1 = opt.r || opt.r1 || 50;
-                //     // var r2 = opt.r2 || 50;
-                //     // var rRatio = opt.rRatio || 1;
-                //     // var aRatio = opt.aRatio || 1;
-                //     // var k = opt.k || (1 + r1 / r2);
-
-                //     var time = opt.delay || 10;
-                //     var animate = opt.animate || opt.delay;
-                //     var color = opt.color || 'black';
-                //     var turns = opt.turns || 1;
-
-                //     function _point(){
-                //         var p=algorithm(opt)
-                //         self.draw.point({ x: p.x, y: p.y, r: 1, color: color })
-                //     }
-
-
-
-                //      for (var i = 0; i < 360 * turns; i++) {
-                //         animate ? this.delay(_point, time) : _point();
-                //     }
-                // },
                 //多边形路径动画 
                 polygon: function(opt) {
-                    var self = this;
-                    var vertex = _.vertex(opt),
+                    var self = this,
+                        vertex = _.vertex(opt),
                         vs = vertex.vs,
-                        len = vs.length;
-                    var time = opt.delay || 50;
-                    var animate = opt.animate || opt.delay;
-                    var color = opt.color || 'black';
+                        len = vs.length,
+                        time = opt.delay || 50,
+                        animate = opt.animate || opt.delay,
+                        color = opt.color || 'black';
 
-                    function _polygon(o) {
+                    function update(o) {
                         self.point({
                             x: o.x,
                             y: o.y,
@@ -6935,29 +7028,29 @@
                         var d = t.dist(t1);
                         var ps = [t].concat(t.split(t1, d / 10 << 0 || 1))
                         ps.forEach(function(o) {
-                            animate ? self.delay(function() {
-                                _polygon(o)
-                            }, time) : _polygon(o);
+                            animate ? _.delay(update, time, o) : update(o);
                         })
                     });
                 },
                 //圆路径动画 
                 circle: function(opt) {
-                    var self = this;
-                    //起点
-                    var p = _.pointPolar(
-                        _.extend({
-                            r: 100,
-                            a: 0,
-                            o: {
-                                x: this.width / 2,
-                                y: this.height / 2
-                            }
-                        }, opt)
-                    )
-                    var color = opt.color || 'black';
+                    var self = this,
+                        color = opt.color || 'black',
+                        animate = opt.animate || opt.delay,
+                        a = opt.a || 0,
+                        r = opt.r || 100;
+                    var p = _.pointPolar({
+                        r: r,
+                        a: a,
+                        o: {
+                            x: this.width / 2,
+                            y: this.height / 2
+                        }
+                    });
+                    var delay = animate ? opt.delay || 10 : 0;
+                    var times = 360;
 
-                    function _circle() {
+                    function update() {
                         p = p.rotate(1);
                         self.point({
                             x: p.x,
@@ -6966,11 +7059,42 @@
                             color: color
                         })
                     }
-                    var time = opt.delay || 10;
-                    var animate = opt.animate || opt.delay;
-                    for (var i = 0; i < 360; i++) {
-                        animate ? this.delay(_circle, time) : _circle()
+                    _.loop(update, times, delay);
+                },
+                //螺旋
+                spiral: function(opt) {
+                    var self = this,
+                        r = opt.r || 10,
+                        color = opt.color || 'black',
+                        animate = opt.animate || opt.delay,
+                        interval = opt.interval || 0.1,
+                        a = opt.a || 0;
+                    var p = _.pointPolar({
+                        r: r,
+                        a: a,
+                        o: {
+                            x: this.width / 2,
+                            y: this.height / 2
+                        }
+                    });
+
+                    var delay = animate ? opt.delay || 10 : 0;
+                    var times = (this.height / 2 - r) / interval;
+
+
+                    function update() {
+                        p = p.rotate(1);
+                        p = p.clone({
+                            r: p.r + interval
+                        })
+                        self.point({
+                            x: p.x,
+                            y: p.y,
+                            r: 1,
+                            color: color
+                        })
                     }
+                    _.loop(update, times, delay);
                 },
                 //var opt = {
                 //     shape:"spiro",
@@ -6984,30 +7108,30 @@
                 // }
                 //繁画曲线  二级
                 spiro: function(opt) {
-                    var self = this;
-                    //起点
-                    var p = _.pointPolar(
-                        _.extend({
-                            r: 50,
-                            a: 0,
-                            o: {
-                                x: this.width / 2,
-                                y: this.height / 2
-                            }
-                        }, opt)
-                    )
-                    var r1 = opt.r || opt.r1 || 50;
-                    var r2 = opt.r2 || 50;
-                    var rRatio = opt.rRatio || 1;
-                    var aRatio = opt.aRatio || 1;
-                    var time = opt.delay || 10;
-                    var animate = opt.animate || opt.delay;
-                    var color = opt.color || 'black';
-                    var turns = opt.turns || 1;
-                    var k = opt.k || (1 + r1 / r2);
+                    var self = this,
+                        r = opt.r || opt.r1 || 50,
+                        r2 = opt.r2 || 50,
+                        rRatio = opt.rRatio || 1,
+                        aRatio = opt.aRatio || 1,
+                        animate = opt.animate || opt.delay,
+                        color = opt.color || 'black',
+                        turns = opt.turns || 1,
+                        k = opt.k || (1 + r / r2),
+                        a = opt.a || 0;
 
+                    var p = _.pointPolar({
+                        r: r,
+                        a: a,
+                        o: {
+                            x: this.width / 2,
+                            y: this.height / 2
+                        }
+                    })
 
-                    function _spiro() {
+                    var delay = animate ? opt.delay || 10 : 0;
+                    var times = 360 * turns; //(this.height / 2 - r) / interval;
+
+                    function update() {
                         p = p.rotate(1);
                         var a1 = k * p.a % 360;
                         var p1 = _.pointPolar({
@@ -7025,35 +7149,34 @@
                             color: color
                         })
                     }
-                    for (var i = 0; i < 360 * turns; i++) {
-                        animate ? this.delay(_spiro, time) : _spiro();
-                    }
+
+                    _.loop(update, times, delay)
                 },
+
                 //正弦
                 sine: function(opt) {
-                    var self = this;
-                    //起点
-                    var p = _.pointPolar(
-                        _.extend({
-                            r: 100,
-                            a: 0,
-                            o: {
-                                x: this.width / 2,
-                                y: this.height / 2
-                            }
-                        }, opt)
-                    )
+                    var self = this,
+                        animate = opt.animate || opt.delay,
+                        color = opt.color || 'black',
+                        turns = opt.turns || 1,
+                        r = opt.r || opt.r1 || 50,
+                        r2 = opt.r2 || 50,
+                        k = opt.k || (1 + r / r2),
+                        a = opt.a || 0;
+                    var p = _.pointPolar({
+                        r: r,
+                        a: a,
+                        o: {
+                            x: this.width / 2,
+                            y: this.height / 2
+                        }
+                    })
 
-                    var time = opt.delay || 10;
-                    var animate = opt.animate || opt.delay;
-                    var color = opt.color || 'black';
-                    var turns = opt.turns || 1;
-                    var r1 = opt.r || opt.r1 || 50;
-                    var r2 = opt.r2 || 50;
-                    var k = opt.k || (1 + r1 / r2);
+                    var delay = animate ? opt.delay || 10 : 0;
+                    var times = 360 * turns; //(this.height / 2 - r) / interval;
 
 
-                    function _sine() {
+                    function update() {
                         p = p.rotate(1);
                         var a1 = k * p.a % 360;
                         var p1 = _.pointPolar({
@@ -7064,8 +7187,6 @@
                                 y: p.y
                             }
                         })
-                        // var p1 = p.clone({ r: p.r * (1 + _.sin(p.a * k)) });
-
                         self.point({
                             x: p1.x,
                             y: p1.y,
@@ -7073,31 +7194,71 @@
                             color: color
                         })
                     }
-
-                    for (var i = 0; i < 360 * turns; i++) {
-                        animate ? this.delay(_sine, time) : _sine();
-                    }
+                    _.loop(update, times, delay);
                 },
-            })
-        }();
+                //笛卡尔心形线
+                cardioid: function(opt) {
+                    var self = this,
+                        r = opt.r || 50,
+                        animate = opt.animate || opt.delay,
+                        p = _.pointPolar({
+                            o: {
+                                x: this.width / 2,
+                                y: this.height / 2
+                            }
+                        });
 
+                    var delay = animate ? opt.delay || 10 : 0;
+                    var times = 360; //(this.height / 2 - r) / interval;
 
-        //循环
-        var _loop = _.loop = function() {
-            var Loop = function(callback, times) {
-                if (!(this instanceof Loop)) return new Loop(callback, times);
-                this.times = times
-                this.callback = callback || function(i) { console.log(i) }
-                this.run()
-            }
-            return createClass(Loop, {
-                run: function() {
-                    for (var i = 0; i < this.times; i++) {
-                        this.callback && this.callback(i)
+                    function update() {
+                        p = p.rotate(1);
+                        p = p.clone({
+                            r: r * (1 + _.sin(p.a)), //50*(_.sin(i)*Math.sqrt(_.cos(i))/ (_.sin(i)+7/5)- 2*_.sin(i)+2), 
+                            // a: -i //-180*_.cos(i)
+                        })
+                        self.point({
+                            x: p.x,
+                            y: p.y,
+                            r: 1
+                        })
                     }
+                    _.loop(update, times, delay);
+                },
+                //双纽线 ρ^2=2(a^2)*cos2θ
+                lemniscate: function(opt) {
+                    var self = this,
+                        r = opt.r || 50,
+                        animate = opt.animate || opt.delay,
+                        p = _.pointPolar({
+                            o: {
+                                x: this.width / 2,
+                                y: this.height / 2
+                            }
+                        });
+                    var a = 100;
+
+                    var delay = animate ? opt.delay || 10 : 0;
+                    var times = 360;
+
+                    function update() {
+                        p = p.rotate(1);
+                        p = p.clone({
+                            r: Math.sqrt(2 * Math.pow(a, 2) * _.cos(p.a * 2))
+                        })
+                        self.point({
+                            x: p.x,
+                            y: p.y,
+                            r: 1
+                        })
+                    }
+                    _.loop(update, times, delay);
                 }
             })
         }();
+
+
+
 
         //可滑动进度条
         var _slider = _.slider = function() {
@@ -7377,11 +7538,11 @@
                     });
                     this.background(bg);
                     this.callback = options.callback;
-                    var queue = _queue();
-                    //延迟
-                    this.delay = function(callback, time) {
-                        queue.delay(callback, time);
-                    }
+                    // var queue = _queue();
+                    // //延迟
+                    // this.delay = function(callback, time) {
+                    //     queue.delay(callback, time);
+                    // }
                 }
 
             }
@@ -7927,9 +8088,7 @@
                             t.color = verticesColor;
                             t.r = 3;
                         }
-                        animate ? self.delay(function() {
-                            self.point(t);
-                        }, animationInterval) : self.point(t);
+                        animate ? _.delay(self.point, animationInterval, t) : self.point(t);
                     });
 
                 },
@@ -8018,9 +8177,11 @@
                             // setTimeout(function() {
                             //     self.link(t, opt);
                             // }, animationInterval * i);
-                            self.delay(function() {
-                                self.link(t, opt);
-                            }, animationInterval)
+                            // _.delay(function() {
+                            //     self.link(t, opt);
+                            // }, animationInterval)
+
+                            _.delay(self.link, animationInterval, t, opt)
                         })
                     } else {
                         vsGroup.forEach(function(t) {
@@ -8078,11 +8239,14 @@
                         });
                     }
                     if (opt.delay) { //延迟动画
-                        return self.delay(function() {
-                            self.shape(_.clone(opt, {
-                                delay: false
-                            }));
-                        }, opt.delay)
+                        return _.delay(self.shape, opt.delay, _.clone(opt, {
+                            delay: false
+                        }))
+                        // return _.delay(function() {
+                        //     self.shape(_.clone(opt, {
+                        //         delay: false
+                        //     }));
+                        // }, opt.delay)
                     }
                     var s = _.shape(self, opt);
                     if (opt.disappear) {
@@ -10235,7 +10399,6 @@
         }();
 
         //继承工具
-        // _.extend(template.prototype, _);
         createClass(template, _);
         if (inBrowser) {
             if (!window._) window._ = _; //兼容 underscore

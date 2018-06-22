@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+    <title>queue</title>
+    <link rel="shortcut icon" type="image/x-icon" href="data:image/gif;base64,YQ==">
+    <style>
+    html,
+    body {
+        margin: 0;
+        padding: 0
+    }
+    </style>
+</head>
+
+<body>
+    <canvas id="myCanvas"></canvas>
+    <script src="js/tpler.js?v=4"></script>
+    <script>
+    var draw = _.draw({
+        canvasid: "myCanvas",
+        fullscreen: true
+    })
+
+    draw.track({
+        shape: "sine", // polygon  circlespiralspirocardioidlemniscate
+        x: draw.width / 2,
+        y: draw.height / 2,
+        delay: 10,
+    })
+    </script>
+</body>
+
+</html>
