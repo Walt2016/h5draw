@@ -1,15 +1,13 @@
 # h5draw
 几何画图（h5）：开向几何世界的神奇校车出发了
 
-![image](https://github.com/Walt2016/h5draw/blob/master/pic/shadow.gif)
-
 |||
 |--|--|
-|![image](https://github.com/Walt2016/h5draw/blob/master/pic/group.gif)|![image](https://github.com/Walt2016/h5draw/blob/master/pic/diagonal.gif)|
-|![image](https://github.com/Walt2016/h5draw/blob/master/pic/sierpinski.gif)|![image](https://github.com/Walt2016/h5draw/blob/master/pic/spiralpolygon.gif)|
-|![image](https://github.com/Walt2016/h5draw/blob/master/pic/spiral.gif)||
+|![image](https://github.com/Walt2016/h5draw/blob/master/pic/group.gif)|![image](https://github.com/Walt2016/h5draw/blob/master/pic/sierpinski.gif)| 
+|![image](https://github.com/Walt2016/h5draw/blob/master/pic/diagonal.gif)|![image](https://github.com/Walt2016/h5draw/blob/master/pic/bomb.gif)|
+|![image](https://github.com/Walt2016/h5draw/blob/master/pic/spiral.gif)|![image](https://github.com/Walt2016/h5draw/blob/master/pic/spiralpolygon.gif)|
 
-
+![image](https://github.com/Walt2016/h5draw/blob/master/pic/shadow.gif)
 
 代码示例
 ```
