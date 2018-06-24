@@ -1,37 +1,20 @@
 # h5draw
 几何画图（h5）：开向几何世界的神奇校车出发了
 
-![image](https://github.com/Walt2016/h5draw/blob/master/pic/star.gif)
+![image](https://github.com/Walt2016/h5draw/blob/master/pic/shadow.gif)
 
-![image](https://github.com/Walt2016/h5draw/blob/master/pic/mgi.gif)
+![image](https://github.com/Walt2016/h5draw/blob/master/pic/group.gif)
 
-![image](https://github.com/Walt2016/h5draw/blob/master/pic/fd10.gif)
+![image](https://github.com/Walt2016/h5draw/blob/master/pic/diagonal.gif)
 
-![image](https://github.com/Walt2016/h5draw/blob/master/pic/fp12.gif)
-
-![image](https://github.com/Walt2016/h5draw/blob/master/pic/fr18.gif)
-
-![image](https://github.com/Walt2016/h5draw/blob/master/pic/frfi20.gif)
-
-![image](https://github.com/Walt2016/h5draw/blob/master/pic/fs14.gif)
-
-![image](https://github.com/Walt2016/h5draw/blob/master/pic/fskc5.gif)
-
-![image](https://github.com/Walt2016/h5draw/blob/master/pic/fskp10.gif)
-
-![image](https://github.com/Walt2016/h5draw/blob/master/pic/zb.gif)
-
-![image](https://github.com/Walt2016/h5draw/blob/master/pic/fw.gif)
-
-![image](https://github.com/Walt2016/h5draw/blob/master/pic/sky.gif)
-
-![image](https://github.com/Walt2016/h5draw/blob/master/pic/spiral1.gif)
+![image](https://github.com/Walt2016/h5draw/blob/master/pic/sierpinski.gif)
 
 ![image](https://github.com/Walt2016/h5draw/blob/master/pic/spiralpolygon.gif)
 
+![image](https://github.com/Walt2016/h5draw/blob/master/pic/spiral.gif)
 
 
-
+代码示例
 ```
 <canvas id="myCanvas"></canvas>
 <script src="js/tpler.js"></script>

@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+    <title>diagonal</title>
+    <link rel="stylesheet" href="css/draw.min.css">
+    <style>
+    html,
+    body {
+        margin: 0;
+        padding: 0
+    }
+    </style>
+</head>
+
+<body>
+    <canvas id="myCanvas"></canvas>
+    <script src="js/tpler.js?v=4"></script>
+    <script>
+    var draw = _.draw({
+        canvasid: "myCanvas",
+        fullscreen: true,
+    });
+
+        draw.sliderGroup({
+            max:180
+        })
+
+
+   
+    </script>
+</body>
+
+</html>

@@ -4322,7 +4322,9 @@
             var Loop = function(callback, times, delay) {
                 if (!(this instanceof Loop)) return new Loop(callback, times, delay);
                 this.times = times
-                this.callback = callback || function(i) { console.log(i) }
+                this.callback = callback || function(i) {
+                    console.log(i)
+                }
                 this.delay = delay
                 this.run()
             }
@@ -4345,6 +4347,7 @@
         //动画 不断重复 
         var _animate = _.animate = function() {
             var timmer, anId;
+
             function Animate(callback, timeInterval) {
                 if (!(this instanceof Animate)) return new Animate(callback, timeInterval);
                 this.stop();
@@ -4889,8 +4892,9 @@
         var _point = _.point = function() {
             function Point(opt) {
                 if (!(this instanceof Point)) return new Point(opt);
-                this.x = opt.x;
-                this.y = opt.y;
+                this.x = opt.x || 0;
+                this.y = opt.y || 0;
+                this.z = opt.z || 0;
                 this.r = opt.r;
                 this.color = opt.color;
                 this.speed = opt.speed || 1;
@@ -4918,9 +4922,11 @@
                 },
                 //移动目标
                 target: function(t) {
-                    this.tx = t.x;
-                    this.ty = t.y;
-                    this.tz = t.z;
+                    this.translating = true;
+                    this.tx = t.x || 0;
+                    this.ty = t.y || 0;
+                    this.tz = t.z || 0;
+                    return this;
                 },
                 //跟随移动  位移过渡
                 follow: function() {
@@ -4935,7 +4941,13 @@
                     this.x += this.vx;
                     this.y += this.vy;
                     this.z += this.vz;
+                    //到达
+                    if (Math.abs(this.tx - this.x) < 5 && Math.abs(this.ty - this.y) < 5 && Math.abs(this.tz - this.z) < 5) {
+                        this.translating = false;
+                    }
+                    return this;
                 },
+
                 //移动
                 move: function() {
                     this.x += this.vx;
@@ -4947,13 +4959,13 @@
 
                     // this.vx+=0.41*this.vy
 
-                    this.bound();
-                    return this;
+                    return this.bound();
                 },
                 //回弹
                 bound: function() {
                     if (this.x < this.left || this.x > this.right) this.vx *= -1;
                     if (this.y < this.top || this.y > this.bottom) this.vy *= -1;
+                    return this;
                 },
                 clone: function(opt) {
                     // return this.constructor(_.extend({}, this, opt))
@@ -7240,7 +7252,6 @@
 
 
 
-
         //可滑动进度条
         var _slider = _.slider = function() {
             function Slider(draw, opt) {
@@ -7248,12 +7259,11 @@
                 opt = opt || {};
                 var self = this,
                     width = draw.width,
-                    progess = this.progess = opt.progess || 0,
                     color = this.color = opt.color || "#000";
                 this.draw = draw;
                 this.context = draw.context;
                 this.canvas = draw.canvas
-                this.pasue = false;
+                this.pause = opt.pause||false;
                 this.x = opt.x || 30;
                 this.y = opt.y || 10;
                 this.height = opt.height || 20;
@@ -7268,12 +7278,13 @@
                     opt.callback && opt.callback(p)
                     self.render(p);
                 }
+               var  progess = this.progess = opt.progess ||this.min;
                 this.render(progess);
                 this.addEvent();
             }
             return createClass(Slider, {
                 getColor: function(progess) {
-                    return this.colors ? this.colors[(this.colors.length - 1) * progess / this.max << 0] : this.color;
+                    return this.colors ? this.colors[(this.colors.length - 1) * (progess-this.min) / (this.max-this.min) << 0] : this.color;
                 },
                 render: function(progess, color) {
                     var self = this,
@@ -7282,8 +7293,10 @@
                         y = this.y,
                         height = this.height,
                         width = this.width,
-                        max = this.max;
+                        max = this.max,
+                        min=this.min;
                     this.progess = progess;
+
                     color = color || this.getColor(progess);
 
                     ctx.beginPath();
@@ -7292,7 +7305,7 @@
                     ctx.fill();
                     ctx.beginPath();
                     self.draw.setFillStyle(ctx, color);
-                    ctx.rect(x, y, width * progess / max, height)
+                    ctx.rect(x, y, width * (progess-min) / (max-min), height)
                     ctx.fill();
                     ctx.beginPath();
                     self.draw.setFillStyle(ctx, "#fff");
@@ -7320,13 +7333,13 @@
                         callback: function(item, ev) {
                             var pos = _.pos(ev);
                             if ((pos.y < y + height) && pos.y > y) {
-                                self.pasue = true
-                                i = max * (pos.x - x) / width << 0
-                                i = _.between(0, max, i);
+                                self.pause = true
+                                i = min+(max-min) * (pos.x - x) / width << 0
+                                i = _.between(min, max, i);
                                 self.callback && self.callback(i);
                                 isDragging = true;
                             } else {
-                                self.pasue = !self.pasue;
+                                self.pause = !self.pause;
                             }
                         }
                     }, {
@@ -7335,9 +7348,9 @@
                         callback: function(item, ev) {
                             var pos = _.pos(ev);
                             if (isDragging) {
-                                self.pasue = true
-                                i = max * (pos.x - x) / width << 0
-                                i = _.between(0, max, i);
+                                self.pause = true
+                                i = min+ (max-min) * (pos.x - x) / width << 0
+                                i = _.between(min, max, i);
                                 self.callback && self.callback(i);
                             }
                         }
@@ -7354,20 +7367,26 @@
                         max = this.max,
                         i = this.progess,
                         loop = this.loop,
-                        timeInterval = this.timeInterval;
-                    // self.draw.
-                    _.animate(function() {
-                        if (!self.pasue) {
-                            self.callback && self.callback(i++);
-                            if (!loop && i === max + 1) {
-                                self.pasue = true;
-                                self.progess = 0;
+                        timeInterval = this.timeInterval,
+                    callback = this.callback;
+                    if (this.pause) {
+                        callback && callback(i)
+                    } else {
+                        _.animate(function() {
+                            if (!self.pause) {
+                                callback && callback(i++);
+                                if (!loop && i === max + 1) {
+                                    self.pause = true;
+                                    self.progess = 0;
+                                }
+                                i %= (max + 1);
+                            } else {
+                                i = self.progess;
                             }
-                            i %= (max + 1);
-                        } else {
-                            i = self.progess;
-                        }
-                    }, timeInterval);
+                        }, timeInterval);
+                    }
+
+
                 }
             })
         }();
@@ -7518,8 +7537,9 @@
                     }].forEach(function(t) {
                         if (t.v in options) bg[t.k] = options[t.v]
                     });
-                    this.background(bg);
+
                     this.callback = options.callback;
+                    this.background(bg, this.callback);
                     // var queue = _queue();
                     // //延迟
                     // this.delay = function(callback, time) {
@@ -7567,7 +7587,7 @@
                         ratio: "fullscreen"
                     });
                 },
-                background: function(opt) {
+                background: function(opt, callback) {
                     var self = this,
                         canvas = self.canvas,
                         ctx = self.context,
@@ -7575,8 +7595,8 @@
                         size = opt.size,
                         position = opt.position,
                         repeat = opt.repeat,
-                        color = opt.color,
-                        callback = opt.callback;
+                        color = opt.color;
+                    // callback = opt.callback;
                     if (color) {
                         self.setFillStyle(ctx, color);
                         ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -7637,7 +7657,7 @@
                                 break;
                         }
 
-                        callback && callback();
+                        callback && callback.call(self);
                     });
                     return this;
                 },
@@ -8313,7 +8333,7 @@
                     if (opt.global.movie !== "none") {
                         this[opt.global.movie](opt.group || opt.shape);
                         return false;
-                    } 
+                    }
                     //网格
                     if (opt.global.showGrid) {
                         if (opt.global.grid === "ecgGrid") this.ecgGrid(opt.global);
@@ -8330,7 +8350,7 @@
 
                     this.opt = opt;
                     if (this.global(opt)) {
-                        if (opt.motion) return  this.motion(opt);
+                        if (opt.motion) return this.motion(opt);
                         return this.group(opt);
                     }
                 },
@@ -8410,17 +8430,15 @@
                 },
                 //心电图网格
                 ecgGrid: function(opt) {
+                    opt = opt || {};
                     var self = this;
                     var color = _.color();
                     var a = opt.background || opt.color || color.rgb(),
                         b = color.light(a, 0.5),
                         c = color.light(b, 0.5);
-
-                    // ctx.save();
                     [c, b, a].forEach(function(t, i) {
                         self._grid.call(self, t, 3 * Math.pow(5, i))
                     })
-                    // ctx.restore();
                 },
                 //刻度盘
                 dial: function(opt) {
@@ -8472,12 +8490,14 @@
                     ctx.putImageData(imgData, 0, 0);
                 },
                 //粒子
-                getPixels: function() {
+                getPixels: function(num) {
                     var canvas = this.canvas,
                         ctx = this.context,
-                        imgData = ctx.getImageData(0, 0, canvas.width, canvas.height),
-                        cols = 100,
-                        rows = 100,
+                        width = this.width,
+                        height = this.height,
+                        imgData = ctx.getImageData(0, 0, width, height),
+                        cols = num ? Math.sqrt(num * width / height) : 100,
+                        rows = num ? Math.sqrt(num * height / width) : 100,
                         s_width = imgData.width / cols << 0,
                         s_heihgt = imgData.height / rows << 0;
 
@@ -9109,6 +9129,79 @@
                         },
                         colors: colorArr
                     }).run();
+                },
+                //对角线
+                sliderDiagonal: function(opt) {
+                    opt = opt || {};
+                    var self = this,
+                        max = opt.max || 25,
+                        colorArr = _.color.circle(max + 1);
+
+                    var update = function(i) {
+                        self.clear()
+                        var opt = {
+                            shape: "polygon",
+                            num: i,
+                            r: 150,
+                            color: colorArr[i],
+                            showDiagonal: true
+                        }
+                        self.shape(opt)
+                    }
+
+                    _.slider(this, {
+                        min: 3,
+                        max: max,
+                        colors: colorArr,
+                        callback: function(i) {
+                            update(i)
+                        }
+                    }).run()
+
+                },
+                sliderGroup: function(opt) {
+
+                    opt = opt || {};
+                    var self = this,
+                        max = opt.max || 60,
+                        num = opt.num || 3,
+                        colorArr = _.color.circle(max + 1),
+                        ctx = this.context;
+                    // self.setGlobalCompositeOperation(ctx,"lighter");
+
+                    var update = function(i) {
+
+                        self.clear()
+
+                        self.group({
+                            shape: {
+                                shape: "polygon",
+                                num: num,
+                                r: 60,
+                                lineWidth: 2
+                            },
+                            group: {
+                                group: "polygon",
+                                num: i,
+                                r: 60,
+                                colorful: "circle",
+                                rotation: true,
+
+                                // color: colorArr[i],
+                            }
+
+                        })
+                    }
+
+                    _.slider(this, {
+                        min: 3,
+                        max: max,
+                        colors: colorArr,
+                        callback: function(i) {
+                            update(i)
+                        }
+                    }).run()
+
                 }
             })
         }();
