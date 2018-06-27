@@ -1,14 +1,14 @@
 # h5draw
 几何画图（h5）：开向几何世界的神奇校车出发了
 
-|||
+
 |--|--|
 |![image](https://github.com/Walt2016/h5draw/blob/master/pic/group.gif)|![image](https://github.com/Walt2016/h5draw/blob/master/pic/sierpinski.gif)| 
 |![image](https://github.com/Walt2016/h5draw/blob/master/pic/diagonal.gif)|![image](https://github.com/Walt2016/h5draw/blob/master/pic/firework.gif)|
 |![image](https://github.com/Walt2016/h5draw/blob/master/pic/spiral.gif)|![image](https://github.com/Walt2016/h5draw/blob/master/pic/spiralpolygon.gif)|
 
 
-代码示例
+代码示例：
 ```
 <canvas id="myCanvas"></canvas>
 <script src="js/tpler.js"></script>
@@ -42,12 +42,16 @@
 
 ```
 
-DEMO:
+DEMO：
 
 [slider](https://walt2016.github.io/h5draw/slider.html)
 
 [track](https://walt2016.github.io/h5draw/track.html)
 
 [index](https://walt2016.github.io/h5draw/index.html)
+
+
+
+交流互动：
 
 几何画图qq群272831512
