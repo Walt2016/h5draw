@@ -4197,53 +4197,53 @@
             return arr;
         }
 
-        //延迟 函数队列  (带参数)
-        var _queue = _.queue = function() {
-            function Queue(fn) {
-                if (!(this instanceof Queue)) return new Queue(fn);
-                this.dataStore = [];
-                this.speeds = {
-                    slow: 600,
-                    fast: 200,
-                    _default: 400
-                };
-                fn && this.push(fn)
-            }
-            return createClass(Queue, {
-                push: function(fn) {
-                    // var self = this;
-                    // this.dataStore.push(function() {
-                    //     fn && fn()
-                    //     self.next()
-                    // })
-                    this.dataStore.push(fn);
-                },
-                shift: function() {
-                    return this.dataStore.shift();
-                },
-                //执行
-                next: function() {
-                    var fn = this.shift();
-                    fn && fn();
-                    // fn && fn.call(this, this.next);
-                },
-                //延迟
-                delay: function(fn, time) {
-                    var self = this;
-                    time = _.isNumber(time) ? time : time in this.speeds ? this.speeds[time] : this.speeds._default;
-                    this.push(function(next) {
-                        setTimeout(function(i) {
-                            fn && fn(i);
-                            next && next.call(self);
-                        }, time);
-                    })
-                    self.timeout && clearTimeout(self.timeout);
-                    self.timeout = setTimeout(function() {
-                        self.next();
-                    }, 0)
-                }
-            })
-        }();
+        // //延迟 函数队列  (带参数)
+        // var _queue = _.queue = function() {
+        //     function Queue(fn) {
+        //         if (!(this instanceof Queue)) return new Queue(fn);
+        //         this.dataStore = [];
+        //         this.speeds = {
+        //             slow: 600,
+        //             fast: 200,
+        //             _default: 400
+        //         };
+        //         fn && this.push(fn)
+        //     }
+        //     return createClass(Queue, {
+        //         push: function(fn) {
+        //             // var self = this;
+        //             // this.dataStore.push(function() {
+        //             //     fn && fn()
+        //             //     self.next()
+        //             // })
+        //             this.dataStore.push(fn);
+        //         },
+        //         shift: function() {
+        //             return this.dataStore.shift();
+        //         },
+        //         //执行
+        //         next: function() {
+        //             var fn = this.shift();
+        //             fn && fn();
+        //             // fn && fn.call(this, this.next);
+        //         },
+        //         //延迟
+        //         delay: function(fn, time) {
+        //             var self = this;
+        //             time = _.isNumber(time) ? time : time in this.speeds ? this.speeds[time] : this.speeds._default;
+        //             this.push(function(next) {
+        //                 setTimeout(function(i) {
+        //                     fn && fn(i);
+        //                     next && next.call(self);
+        //                 }, time);
+        //             })
+        //             self.timeout && clearTimeout(self.timeout);
+        //             self.timeout = setTimeout(function() {
+        //                 self.next();
+        //             }, 0)
+        //         }
+        //     })
+        // }();
 
         //延迟函数队列
         var _delay = _.delay = function() {
@@ -4253,13 +4253,23 @@
                     fast: 200,
                     _default: 400
                 },
-                timeout, index = 0;
+                index = 0;
+            var nextTimeout, fireTimeout;
 
+            // opt={
+            //     callback:调用函数,
+            //     time:延迟时间,
+            //     args:参数,
+            //     loop:是否循环,
+            // }
             function Delay(fn, time) {
                 // if (!(this instanceof Delay)) return new Delay(fn, time);
                 var self = this instanceof Delay ? this : Object.create(Delay.prototype);
+
+                currentTime = +new Date();
                 fn && self.load.apply(self, arguments);
                 self.stack = stack;
+                self.index = index;
                 return self;
             }
 
@@ -4267,40 +4277,51 @@
                 //填弹
                 load: function(fn, time) {
                     var self = this;
+                    // var fn=opt.fn;
+                    // var time=opt.time;
+                    // var args=opt.args;
+                    // var loop
                     var args = Array.prototype.slice.call(arguments, 2);
                     time = _.isNumber(time) ? time : time in speeds ? speeds[time] : speeds._default;
-                    stack.push({
+                    fn && stack.push({
                         fn: function() {
                             fn && fn.apply(null, args)
-                            self.next()
+                            self.next.call(self)
                             // console.timeEnd("delay");
+                            // console.log(args)
                             // console.time("delay");
                         },
                         time: time,
-                        args: args //参数
+                        args: args, //参数
+                        // loop:loop
                     })
 
-                    this.fire()
-                    return this
+                    // if(+new Date() -currentTime <0)
+                    
+                    self.fire.call(self)
+                    return self
                 },
                 //连续 发射
                 next: function() {
+                    this.index = index
                     var obj = stack[index++];
                     if (obj) {
                         if (this.force) // true 规定时间内没执行完不执行
-                            timeout && clearTimeout(timeout);
-                        timeout = setTimeout(obj.fn, obj.time) //
+                            nextTimeout && clearTimeout(nextTimeout);
+                        nextTimeout = setTimeout(obj.fn, obj.time) //
                     }
                 },
                 //点火   重头开始执行   没执行完不执行  覆盖执行
                 fire: function(i) {
-                    if (stack.length === 0) return;
+                    if (stack.length === 0) return this;
                     index = _.isUndefined(i) ? 0 : _.between(0, stack.length, i);
-                    timeout && clearTimeout(timeout);
-                    timeout = setTimeout(function() {
+                    nextTimeout && clearTimeout(nextTimeout);
+                    fireTimeout && clearTimeout(fireTimeout);
+                    fireTimeout = setTimeout(function() {
                         var obj = stack[index++];
                         obj.fn && obj.fn.apply(null, obj.args);
-                    }, stack[index].time)
+                    }, stack[index].time);
+                    return this;
                     // console.time("delay");
                 }
             })
@@ -7017,257 +7038,535 @@
         var _track = _.track = function() {
             function Track(draw, opt) {
                 if (!(this instanceof Track)) return new Track(draw, opt);
+                opt = opt || {};
                 this.draw = draw;
-                this.point = draw.point.bind(draw);
-                this.width = draw.width;
-                this.height = draw.height;
-                this.center = {
-                    x: this.width / 2,
-                    y: this.height / 2
-                }
-                var shape = opt.shape || "circle";
-                this[shape] && this[shape](opt);
+
+                //策略
+                this.strategy = opt.strategy || [opt.callback];
+                this.strategyIndex = opt.strategyIndex || 0;
+                this.strategyAutoChange = _.isUndefined(opt.strategyAutoChange) ? true : opt.strategyAutoChange;
+                this.times = opt.times || 360;
+                this.animate = opt.animate || opt.delay;
+                this.delay = this.animate ? opt.delay || 10 : 0;
+                this.colors = opt.colors;
+                this.loop = _.isUndefined(opt.loop) ? true : opt.loop;
+                this.strategyClear = _.isUndefined(opt.strategyClear) ? true : opt.strategyClear;
             }
+
             return createClass(Track, {
-                //多边形路径动画 
-                polygon: function(opt) {
-                    var self = this,
-                        vertex = _.vertex(opt),
-                        vs = vertex.vs,
-                        len = vs.length,
-                        time = opt.delay || 50,
-                        animate = opt.animate || opt.delay,
-                        color = opt.color || 'black';
-
-                    function update(o) {
-                        self.point({
-                            x: o.x,
-                            y: o.y,
-                            r: 1,
-                            color: color
-                        })
-                    }
-                    vs.forEach(function(t, i) {
-                        var t1 = vs[i + 1 == len ? 0 : i + 1];
-                        var d = t.dist(t1);
-                        var ps = [t].concat(t.split(t1, d / 10 << 0 || 1))
-                        ps.forEach(function(o) {
-                            animate ? _.delay(update, time, o) : update(o);
-                        })
-                    });
-                },
-                //圆路径动画 
-                circle: function(opt) {
-                    var self = this,
-                        color = opt.color || 'black',
-                        animate = opt.animate || opt.delay,
-                        a = opt.a || 0,
-                        r = opt.r || 100,
-                        o = this.center;
-                    var p = _.pointPolar({
-                        r: r,
-                        a: a,
-                        o: o
-                    });
-                    var delay = animate ? opt.delay || 10 : 0;
-                    var times = 360;
-
-                    function update() {
-                        p = p.rotate(1);
-                        self.point({
-                            x: p.x,
-                            y: p.y,
-                            r: 1,
-                            color: color
-                        })
-                    }
-                    _.loop(update, times, delay);
-                },
-                //螺旋
-                spiral: function(opt) {
-                    var self = this,
-                        r = opt.r || 10,
-                        color = opt.color || 'black',
-                        animate = opt.animate || opt.delay,
-                        interval = opt.interval || 0.1,
-                        a = opt.a || 0,
-                        o = this.center;
-                    var p = _.pointPolar({
-                        r: r,
-                        a: a,
-                        o: o
-                    });
-
-                    var delay = animate ? opt.delay || 10 : 0;
-                    var times = (this.height / 2 - r) / interval;
-
-
-                    function update() {
-                        p = p.rotate(1);
-                        p = p.clone({
-                            r: p.r + interval
-                        })
-                        self.point({
-                            x: p.x,
-                            y: p.y,
-                            r: 1,
-                            color: color
-                        })
-                    }
-                    _.loop(update, times, delay);
-                },
-                //var opt = {
-                //     shape:"spiro",
-                //     r: 100,
-                //     x: draw.width / 2,
-                //     y: draw.height / 2,
-                //     r2:10,
-                //     rRatio:7,
-                //     aRatio:-1,
-                //     delay:10
-                // }
-                //繁画曲线  二级
-                spiro: function(opt) {
-                    var self = this,
-                        r = opt.r || opt.r1 || 50,
-                        r2 = opt.r2 || 50,
-                        rRatio = opt.rRatio || 1,
-                        aRatio = opt.aRatio || 1,
-                        animate = opt.animate || opt.delay,
-                        color = opt.color || 'black',
-                        turns = opt.turns || 1,
-                        k = opt.k || (1 + r / r2),
-                        a = opt.a || 0,
-                        o = this.center;
-
-                    var p = _.pointPolar({
-                        r: r,
-                        a: a,
-                        o: o
-                    })
-
-                    var delay = animate ? opt.delay || 10 : 0;
-                    var times = 360 * turns; //(this.height / 2 - r) / interval;
-
-                    function update() {
-                        p = p.rotate(1);
-                        var a1 = k * p.a % 360;
-                        var p1 = _.pointPolar({
-                            r: r2 * rRatio,
-                            a: a1 * aRatio,
-                            o: {
-                                x: p.x,
-                                y: p.y
+                run: function() {
+                    var self = this
+                    if (this.strategyAutoChange) {
+                        var len = this.strategy.length;
+                        this.strategy.forEach(function(t, index) {
+                            var clear = function() {
+                                if (index + 1 === len) {
+                                    if (self.loop) {
+                                        self.draw.clear()
+                                        _.delay()
+                                    }
+                                } else {
+                                    self.strategyClear && self.draw.clear()
+                                }
                             }
-                        })
-                        self.point({
-                            x: p1.x,
-                            y: p1.y,
-                            r: 1,
-                            color: color
-                        })
-                    }
-
-                    _.loop(update, times, delay)
-                },
-
-                //正弦
-                sine: function(opt) {
-                    var self = this,
-                        animate = opt.animate || opt.delay,
-                        color = opt.color || 'black',
-                        turns = opt.turns || 1,
-                        r = opt.r || opt.r1 || 50,
-                        r2 = opt.r2 || 50,
-                        k = opt.k || (1 + r / r2),
-                        a = opt.a || 0,
-                        o = this.center;
-                    var p = _.pointPolar({
-                        r: r,
-                        a: a,
-                        o: o
-                    })
-
-                    var delay = animate ? opt.delay || 10 : 0;
-                    var times = 360 * turns; //(this.height / 2 - r) / interval;
-
-
-                    function update() {
-                        p = p.rotate(1);
-                        var a1 = k * p.a % 360;
-                        var p1 = _.pointPolar({
-                            r: r2 * (1 + _.sin(a1)),
-                            a: p.a,
-                            o: {
-                                x: p.x,
-                                y: p.y
+                            var update = function(i) {
+                                var p = t.call(self.draw, i)
+                                self.draw.point({
+                                    x: p.x,
+                                    y: p.y,
+                                    r: 1,
+                                    color: self.colors[i]
+                                })
+                                if (i + 1 === self.times) {
+                                    clear()
+                                }
                             }
+                            _.loop(update, self.times, self.delay);
                         })
-                        self.point({
-                            x: p1.x,
-                            y: p1.y,
-                            r: 1,
-                            color: color
-                        })
+                    } else {
+                        var update = function(i) {
+                            var p = self.strategy[self.strategyIndex].call(self.draw, i)
+                            self.draw.point({
+                                x: p.x,
+                                y: p.y,
+                                r: 1,
+                                color: self.colors[i]
+                            })
+                            if (i + 1 === self.times) {
+                                if (self.loop) {
+                                    console.timeEnd("loop")
+                                    console.time("loop")
+                                    _.delay(self.draw.clear(), 4000)
+                                }
+                            }
+                        }
+                        console.time("loop")
+                        _.loop(update, self.times, self.delay);
                     }
-                    _.loop(update, times, delay);
-                },
-                //笛卡尔心形线
-                cardioid: function(opt) {
-                    var self = this,
-                        r = opt.r || 50,
-                        animate = opt.animate || opt.delay,
-                        o = this.center,
-                        p = _.pointPolar({
-                            o: o
-                        });
-
-                    var delay = animate ? opt.delay || 10 : 0;
-                    var times = 360; //(this.height / 2 - r) / interval;
-
-                    function update() {
-                        p = p.rotate(1);
-                        p = p.clone({
-                            r: r * (1 + _.sin(p.a)), //50*(_.sin(i)*Math.sqrt(_.cos(i))/ (_.sin(i)+7/5)- 2*_.sin(i)+2), 
-                            // a: -i //-180*_.cos(i)
-                        })
-                        self.point({
-                            x: p.x,
-                            y: p.y,
-                            r: 1
-                        })
-                    }
-                    _.loop(update, times, delay);
-                },
-                //双纽线 ρ^2=2(a^2)*cos2θ
-                lemniscate: function(opt) {
-                    var self = this,
-                        r = opt.r || 50,
-                        animate = opt.animate || opt.delay,
-                        o = this.center,
-                        p = _.pointPolar({
-                            o: o
-                        });
-                    var a = 100;
-
-                    var delay = animate ? opt.delay || 10 : 0;
-                    var times = 360;
-
-                    function update() {
-                        p = p.rotate(1);
-                        p = p.clone({
-                            r: Math.sqrt(2 * Math.pow(a, 2) * _.cos(p.a * 2))
-                        })
-                        self.point({
-                            x: p.x,
-                            y: p.y,
-                            r: 1
-                        })
-                    }
-                    _.loop(update, times, delay);
                 }
             })
+
         }();
+
+        //轨迹策略
+        var _tarckStrategy = _.tarckStrategy = function() {
+            var trackColors = [];
+            var trackTimes = 10
+            var TrackStrategy = function(times, colors, strategyName) {
+                if (!(this instanceof TrackStrategy)) return new TrackStrategy(times, colors, strategyName)
+                trackTimes = times || 10
+                trackColors = colors;
+                var ss = [],
+                    strategyIndex = 0,
+                    i = 0;
+                for (var key in this.strategyObj) {
+                    if (key === strategyName) strategyIndex = i;
+                    ss[ss.length] = this.strategyObj[key];
+                    i++;
+                }
+                this.strategyIndex = strategyIndex;
+                this.strategy = ss
+            }
+
+            return createClass(TrackStrategy, {
+                    strategyObj: {
+                        //椭圆   椭圆方程ρ=ep (1-ecosθ)
+                        ellipse1: function(i) {
+                            var draw = this,
+                                o = draw.o,
+                                r = 100,
+                                a = i * 360 / trackTimes;
+                            var p = _.pointPolar({
+                                r: r,
+                                a: a,
+                                o: o
+                            })
+                            return _.pointPolar({
+                                r: r * _.sin(a),
+                                a: 0,
+                                o: {
+                                    x: p.x,
+                                    y: p.y
+                                }
+                            })
+                        },
+                        ellipse2: function(i) {
+                            var draw = this,
+                                o = draw.o,
+                                r = 100,
+                                a = i * 360 / trackTimes;
+                            var p = _.pointPolar({
+                                r: r,
+                                a: a,
+                                o: o
+                            })
+                            return _.pointPolar({
+                                r: r * _.sin(a),
+                                a: 180,
+                                o: {
+                                    x: p.x,
+                                    y: p.y
+                                }
+                            })
+                        },
+
+                        //繁花曲线 二级
+                        spiro: function(i) {
+                            var draw = this,
+                                o = draw.o,
+                                r = 100,
+                                a = i * 360 / trackTimes,
+                                r2 = 50,
+                                k = 1 + r / r2;
+                            var p = _.pointPolar({
+                                r: r,
+                                a: a,
+                                o: o
+                            });
+                            var rRatio = 1,
+                                aRatio = -1,
+                                a1 = k * a % 360;
+                            return _.pointPolar({
+                                r: r2 * rRatio,
+                                a: a1 * aRatio,
+                                o: {
+                                    x: p.x,
+                                    y: p.y
+                                }
+                            })
+                        },
+
+                        
+                        // sine: function(i) {
+                        //     var draw = this,
+                        //         o = draw.o,
+                        //         r = 50,
+                        //         a = i * 360 / trackTimes,
+                        //         r2 = 50,
+                        //         k = 1 + r / r2;
+                        //     var p = _.pointPolar({
+                        //         r: r,
+                        //         a: a,
+                        //         o: o
+                        //     })
+                        //     var a1 = k * a % 360;
+                        //     return _.pointPolar({
+                        //         r: r2 * (1 + _.sin(a1)),
+                        //         a: a,
+                        //         o: {
+                        //             x: p.x,
+                        //             y: p.y
+                        //         }
+                        //     })
+                        // },
+                        cose: function(i) {
+                            var draw = this,
+                                o = draw.o,
+                                r = 50,
+                                a = i * 360 / trackTimes,
+                                r2 = 50,
+                                k = 1 + r / r2;
+                            var p = _.pointPolar({
+                                r: r,
+                                a: a,
+                                o: o
+                            })
+                            var a1 = k * a % 360;
+                            return _.pointPolar({
+                                r: r2 * (1 + _.cos(a1)),
+                                a: a,
+                                o: {
+                                    x: p.x,
+                                    y: p.y
+                                }
+                            })
+                        },
+                        //双纽线 ρ^2=2(a^2)*cos2θ
+                        lemniscate: function(i) {
+                            var draw = this,
+                                a = i * 360 / trackTimes,
+                                r = 100,
+                                r = Math.sqrt(2 * Math.pow(r, 2) * _.cos(a * 2)),
+                                o = draw.o;
+                            return _.pointPolar({
+                                r: r,
+                                a: a,
+                                o: o
+                            });
+                        },
+                        circle: function(i) {
+                            var draw = this,
+                                r = 100,
+                                a = i * 360 / trackTimes,
+                                o = draw.o;
+                            return _.pointPolar({
+                                r: r,
+                                a: a,
+                                o: o
+                            });
+                        },
+                        //笛卡尔心形线
+                        cardioid: function(i) {
+                            var draw = this,
+                                a = i * 360 / trackTimes,
+                                r = 100 * (1 + _.sin(a)),
+                                o = draw.o;
+                            return _.pointPolar({
+                                r: r,
+                                a: a,
+                                o: o
+                            });
+                        },
+                        //螺旋
+                        spiral: function(i) {
+                            var draw = this,
+                                o = draw.o,
+                                r = 30,
+                                a = 0,
+                                interval = 0.1;
+
+                            var turns = (draw.width / 2 - r) / interval / trackTimes;
+                            return _.pointPolar({
+                                r: r + interval * i * turns,
+                                a: a + i * turns,
+                                o: o
+                            });
+                        },
+
+                    }
+                }
+
+            )
+
+        }();
+        // var _track = _.track = function() {
+        //     function Track(draw, opt) {
+        //         if (!(this instanceof Track)) return new Track(draw, opt);
+        //         opt = opt || {};
+        //         this.draw = draw;
+        //         this.point = draw.point.bind(draw);
+        //         this.width = draw.width;
+        //         this.height = draw.height;
+        //         this.center = {
+        //             x: this.width / 2,
+        //             y: this.height / 2
+        //         }
+        //         var shape = opt.shape || "circle";
+        //         this[shape] && this[shape](opt);
+
+
+        //         //策略
+        //         // this.strategy = opt.strategy || [opt.callback];
+        //         // this.strategyIndex = opt.strategyIndex || 0;
+        //         // this.strategyAutoChange = _.isUndefined(opt.strategyAutoChange) ? true : opt.strategyAutoChange;
+
+        //         // var update=this.strategy[this.strategyIndex]
+        //         // var times = 360;
+        //         // var animate = opt.animate || opt.delay;
+        //         // var delay = animate ? opt.delay || 10 : 0;
+
+        //         // _.loop(update, times, delay);
+        //     }
+        //     return createClass(Track, {
+        //         //多边形路径动画 
+        //         polygon: function(opt) {
+        //             var self = this,
+        //                 vertex = _.vertex(opt),
+        //                 vs = vertex.vs,
+        //                 len = vs.length,
+        //                 time = opt.delay || 50,
+        //                 animate = opt.animate || opt.delay,
+        //                 color = opt.color || 'black';
+
+        //             function update(o) {
+        //                 self.point({
+        //                     x: o.x,
+        //                     y: o.y,
+        //                     r: 1,
+        //                     color: color
+        //                 })
+        //             }
+        //             vs.forEach(function(t, i) {
+        //                 var t1 = vs[i + 1 == len ? 0 : i + 1];
+        //                 var d = t.dist(t1);
+        //                 var ps = [t].concat(t.split(t1, d / 10 << 0 || 1))
+        //                 ps.forEach(function(o) {
+        //                     animate ? _.delay(update, time, o) : update(o);
+        //                 })
+        //             });
+        //         },
+        //         //圆路径动画 
+        //         circle: function(opt) {
+        //             var self = this,
+        //                 color = opt.color || 'black',
+        //                 animate = opt.animate || opt.delay,
+        //                 a = opt.a || 0,
+        //                 r = opt.r || 100,
+        //                 o = this.center;
+        //             var p = _.pointPolar({
+        //                 r: r,
+        //                 a: a,
+        //                 o: o
+        //             });
+        //             var delay = animate ? opt.delay || 10 : 0;
+        //             var times = 360;
+
+        //             function update() {
+        //                 p = p.rotate(1);
+        //                 self.point({
+        //                     x: p.x,
+        //                     y: p.y,
+        //                     r: 1,
+        //                     color: color
+        //                 })
+        //             }
+        //             _.loop(update, times, delay);
+        //         },
+        //         //螺旋
+        //         spiral: function(opt) {
+        //             var self = this,
+        //                 r = opt.r || 10,
+        //                 color = opt.color || 'black',
+        //                 animate = opt.animate || opt.delay,
+        //                 interval = opt.interval || 0.1,
+        //                 a = opt.a || 0,
+        //                 o = this.center;
+        //             var p = _.pointPolar({
+        //                 r: r,
+        //                 a: a,
+        //                 o: o
+        //             });
+
+        //             var delay = animate ? opt.delay || 10 : 0;
+        //             var times = (this.height / 2 - r) / interval;
+
+
+        //             function update() {
+        //                 p = p.rotate(1);
+        //                 p = p.clone({
+        //                     r: p.r + interval
+        //                 })
+        //                 self.point({
+        //                     x: p.x,
+        //                     y: p.y,
+        //                     r: 1,
+        //                     color: color
+        //                 })
+        //             }
+        //             _.loop(update, times, delay);
+        //         },
+        //         //var opt = {
+        //         //     shape:"spiro",
+        //         //     r: 100,
+        //         //     x: draw.width / 2,
+        //         //     y: draw.height / 2,
+        //         //     r2:10,
+        //         //     rRatio:7,
+        //         //     aRatio:-1,
+        //         //     delay:10
+        //         // }
+        //         //繁画曲线  二级
+        //         spiro: function(opt) {
+        //             var self = this,
+        //                 r = opt.r || opt.r1 || 50,
+        //                 r2 = opt.r2 || 50,
+        //                 rRatio = opt.rRatio || 1,
+        //                 aRatio = opt.aRatio || 1,
+        //                 animate = opt.animate || opt.delay,
+        //                 color = opt.color || 'black',
+        //                 turns = opt.turns || 1,
+        //                 k = opt.k || (1 + r / r2),
+        //                 a = opt.a || 0,
+        //                 o = this.center;
+
+        //             var p = _.pointPolar({
+        //                 r: r,
+        //                 a: a,
+        //                 o: o
+        //             })
+
+        //             var delay = animate ? opt.delay || 10 : 0;
+        //             var times = 360 * turns; //(this.height / 2 - r) / interval;
+
+        //             function update() {
+        //                 p = p.rotate(1);
+        //                 var a1 = k * p.a % 360;
+        //                 var p1 = _.pointPolar({
+        //                     r: r2 * rRatio,
+        //                     a: a1 * aRatio,
+        //                     o: {
+        //                         x: p.x,
+        //                         y: p.y
+        //                     }
+        //                 })
+        //                 self.point({
+        //                     x: p1.x,
+        //                     y: p1.y,
+        //                     r: 1,
+        //                     color: color
+        //                 })
+        //             }
+
+        //             _.loop(update, times, delay)
+        //         },
+
+        //         //正弦
+        //         sine: function(opt) {
+        //             var self = this,
+        //                 animate = opt.animate || opt.delay,
+        //                 color = opt.color || 'black',
+        //                 turns = opt.turns || 1,
+        //                 r = opt.r || opt.r1 || 50,
+        //                 r2 = opt.r2 || 50,
+        //                 k = opt.k || (1 + r / r2),
+        //                 a = opt.a || 0,
+        //                 o = this.center;
+        //             var p = _.pointPolar({
+        //                 r: r,
+        //                 a: a,
+        //                 o: o
+        //             })
+
+        //             var delay = animate ? opt.delay || 10 : 0;
+        //             var times = 360 * turns; //(this.height / 2 - r) / interval;
+
+
+        //             function update() {
+        //                 p = p.rotate(1);
+        //                 var a1 = k * p.a % 360;
+        //                 var p1 = _.pointPolar({
+        //                     r: r2 * (1 + _.sin(a1)),
+        //                     a: p.a,
+        //                     o: {
+        //                         x: p.x,
+        //                         y: p.y
+        //                     }
+        //                 })
+        //                 self.point({
+        //                     x: p1.x,
+        //                     y: p1.y,
+        //                     r: 1,
+        //                     color: color
+        //                 })
+        //             }
+        //             _.loop(update, times, delay);
+        //         },
+        //         //笛卡尔心形线
+        //         cardioid: function(opt) {
+        //             var self = this,
+        //                 r = opt.r || 50,
+        //                 animate = opt.animate || opt.delay,
+        //                 o = this.center,
+        //                 p = _.pointPolar({
+        //                     o: o
+        //                 });
+
+        //             var delay = animate ? opt.delay || 10 : 0;
+        //             var times = 360; //(this.height / 2 - r) / interval;
+
+        //             function update() {
+        //                 p = p.rotate(1);
+        //                 p = p.clone({
+        //                     r: r * (1 + _.sin(p.a)), //50*(_.sin(i)*Math.sqrt(_.cos(i))/ (_.sin(i)+7/5)- 2*_.sin(i)+2), 
+        //                     // a: -i //-180*_.cos(i)
+        //                 })
+        //                 self.point({
+        //                     x: p.x,
+        //                     y: p.y,
+        //                     r: 1
+        //                 })
+        //             }
+        //             _.loop(update, times, delay);
+        //         },
+        //         //双纽线 ρ^2=2(a^2)*cos2θ
+        //         lemniscate: function(opt) {
+        //             var self = this,
+        //                 r = opt.r || 50,
+        //                 animate = opt.animate || opt.delay,
+        //                 o = this.center,
+        //                 p = _.pointPolar({
+        //                     o: o
+        //                 });
+        //             var a = 100;
+
+        //             var delay = animate ? opt.delay || 10 : 0;
+        //             var times = 360;
+
+        //             function update() {
+        //                 p = p.rotate(1);
+        //                 p = p.clone({
+        //                     r: Math.sqrt(2 * Math.pow(a, 2) * _.cos(p.a * 2))
+        //                 })
+        //                 self.point({
+        //                     x: p.x,
+        //                     y: p.y,
+        //                     r: 1
+        //                 })
+        //             }
+        //             _.loop(update, times, delay);
+        //         }
+        //     })
+        // }();
 
 
 
@@ -7408,11 +7707,6 @@
                                         self.strategyIndex = self.strategyIndex + 1 === self.strategy.length ? 0 : self.strategyIndex + 1
                                     if (!loop) self.pause = true;
                                 }
-                                // if (!loop && i === max + 1) {
-                                //     self.pause = true;
-                                //     self.progess = 0;
-                                // }
-                                // i %= (max + 1);
                             } else {
                                 i = self.progess;
                             }
@@ -7444,7 +7738,7 @@
             }
             return createClass(SliderStrategy, {
                 strategyObj: {
-                    
+
                     sierpinskiGroup: function(i) {
                         var draw = this;
                         draw.clear();
@@ -7616,10 +7910,6 @@
                         })
                         ctx.stroke()
                     },
-
-
-
-
                 }
             })
         }();
@@ -8781,10 +9071,7 @@
                         timeout && clearTimeout(timeout)
                     }, time + 10000);
                 },
-                //轨道
-                track: function(opt) {
-                    _.track(this, opt);
-                },
+
                 //星空  点和线
                 starrySky: function(opt) {
                     var self = this,
@@ -9225,6 +9512,29 @@
                     _.animate(update);
                 },
 
+                //轨道
+                track: function(opt) {
+
+                    opt = opt || {};
+                    var times = opt.times || 360;
+                    var colors = _.color.circle(times + 1);
+                    var strategyName = opt.strategyName || opt.name || ""; //"sine"; // "sine"; //"lemniscate"
+                    var ts = _tarckStrategy(times, colors, strategyName)
+
+                    var trackConfig = _.extend({
+                        times: times,
+                        delay: 10,
+                        colors: colors,
+                        strategy: ts.strategy,
+                    }, opt)
+                    if (strategyName) {
+                        trackConfig.strategyAutoChange = false
+                        trackConfig.strategyIndex = ts.strategyIndex
+                    }
+
+                    _track(draw, trackConfig).run()
+                },
+
                 //进度条 播放策略
                 slider: function(opt) {
                     var max = opt.max || 50;
@@ -9248,195 +9558,195 @@
                 //    interval:5,
                 //    step:2
                 // });
-                spiral: function(opt) {
-                    opt = opt || {};
-                    var self = this,
-                        ctx = self.context,
-                        width = self.width,
-                        height = self.height,
-                        colorArr = _.color.circle(361),
-                        interval = opt.interval || 1,
-                        step = opt.step || 1;
+                // spiral: function(opt) {
+                //     opt = opt || {};
+                //     var self = this,
+                //         ctx = self.context,
+                //         width = self.width,
+                //         height = self.height,
+                //         colorArr = _.color.circle(361),
+                //         interval = opt.interval || 1,
+                //         step = opt.step || 1;
 
-                    var _spiral = function(interval, offsetAngle) {
-                        var p = _.pointPolar({
-                            o: self.o
-                        })
-                        var ps = [p];
-                        var i = 0;
-                        do {
-                            var v = p.toV().rotate(offsetAngle)
-                            if (i % step === 0) {
-                                var abs = v.abs()
-                                v = v.abs(abs + interval)
-                            }
-                            p = v.toP(p)
-                            ps[ps.length] = p;
-                            i++;
-                        } while (p.x > 0 && p.x < width && p.y > 0 && p.y < height)
+                //     var _spiral = function(interval, offsetAngle) {
+                //         var p = _.pointPolar({
+                //             o: self.o
+                //         })
+                //         var ps = [p];
+                //         var i = 0;
+                //         do {
+                //             var v = p.toV().rotate(offsetAngle)
+                //             if (i % step === 0) {
+                //                 var abs = v.abs()
+                //                 v = v.abs(abs + interval)
+                //             }
+                //             p = v.toP(p)
+                //             ps[ps.length] = p;
+                //             i++;
+                //         } while (p.x > 0 && p.x < width && p.y > 0 && p.y < height)
 
-                        ctx.beginPath();
-                        ps.forEach(function(t, i) {
-                            self.line(ctx, t, i == 0)
-                        })
-                        ctx.lineWidth = 1;
-                        ctx.strokeStyle = colorArr[offsetAngle];
-                        ctx.stroke();
-                    }
+                //         ctx.beginPath();
+                //         ps.forEach(function(t, i) {
+                //             self.line(ctx, t, i == 0)
+                //         })
+                //         ctx.lineWidth = 1;
+                //         ctx.strokeStyle = colorArr[offsetAngle];
+                //         ctx.stroke();
+                //     }
 
 
-                    var update = function(i) {
-                        self.clear()
-                        _spiral(interval, i);
-                    }
+                //     var update = function(i) {
+                //         self.clear()
+                //         _spiral(interval, i);
+                //     }
 
-                    _.slider(this, {
-                        max: 360,
-                        colors: colorArr,
-                        callback: update
-                    }).run();
-                },
+                //     _.slider(this, {
+                //         max: 360,
+                //         colors: colorArr,
+                //         callback: update
+                //     }).run();
+                // },
                 //螺旋多边形
-                spiralPolygon: function(opt) {
-                    opt = opt || {};
-                    var self = this,
-                        width = this.width,
-                        height = this.height,
-                        r = opt.r || 100,
-                        num = opt.num || 3,
-                        inR = r * _.cos(180 / num),
-                        shape = opt.shape || "cornercurve",
-                        v = _.vector({
-                            x: width / 2,
-                            y: height / 2
-                        }),
-                        n = Math.log(v.abs() / inR) / Math.log(1.05) << 0,
-                        max = 360,
-                        colorArr = _.color.circle(max + 1); //, 0.05
+                // spiralPolygon: function(opt) {
+                //     opt = opt || {};
+                //     var self = this,
+                //         width = this.width,
+                //         height = this.height,
+                //         r = opt.r || 100,
+                //         num = opt.num || 3,
+                //         inR = r * _.cos(180 / num),
+                //         shape = opt.shape || "cornercurve",
+                //         v = _.vector({
+                //             x: width / 2,
+                //             y: height / 2
+                //         }),
+                //         n = Math.log(v.abs() / inR) / Math.log(1.05) << 0,
+                //         max = 360,
+                //         colorArr = _.color.circle(max + 1); //, 0.05
 
-                    function update(p) {
-                        self.clear()
-                        _.loop(function(i) {
-                            self.shape({
-                                shape: shape, //  polygon bomb cornercurve
-                                num: num,
-                                r: r * Math.pow(1.05, i),
-                                a: i * 5 + p, //180 * _.sin(p),
-                                color: colorArr[p],
-                            })
-                        }, n)
-                    }
-                    _.slider(this, {
-                        max: max,
-                        colors: colorArr,
-                        loop: false,
-                        callback: update
-                    }).run()
-                },
-                bomb: function() {
-                    var self = this,
-                        colorArr = _.color.circle(101);
+                //     function update(p) {
+                //         self.clear()
+                //         _.loop(function(i) {
+                //             self.shape({
+                //                 shape: shape, //  polygon bomb cornercurve
+                //                 num: num,
+                //                 r: r * Math.pow(1.05, i),
+                //                 a: i * 5 + p, //180 * _.sin(p),
+                //                 color: colorArr[p],
+                //             })
+                //         }, n)
+                //     }
+                //     _.slider(this, {
+                //         max: max,
+                //         colors: colorArr,
+                //         loop: false,
+                //         callback: update
+                //     }).run()
+                // },
+                // bomb: function() {
+                //     var self = this,
+                //         colorArr = _.color.circle(101);
 
-                    function update(i) {
-                        self.clear()
-                        var opt = {
-                            shape: "ploygon",
-                            num: i || 3,
-                            r: 40,
-                            x: self.width / 2,
-                            y: self.height / 2
-                        }
+                //     function update(i) {
+                //         self.clear()
+                //         var opt = {
+                //             shape: "ploygon",
+                //             num: i || 3,
+                //             r: 40,
+                //             x: self.width / 2,
+                //             y: self.height / 2
+                //         }
 
-                        var vertex = _.vertex(opt),
-                            vs = vertex.vs,
-                            len = vs.length,
-                            ctx = self.context,
-                            po = vertex.po;
-                        ctx.beginPath();
-                        vs.forEach(function(t, i) {
-                            var t1 = vs[i + 1 === len ? 0 : i + 1];
-                            ctx.moveTo(t.x, t.y)
-                            ctx.quadraticCurveTo(
-                                po.x, po.y,
-                                t1.x, t1.y
-                            );
-                        })
-                        self.setStrokeStyle(ctx, colorArr[i]);
-                        ctx.stroke()
-                    }
+                //         var vertex = _.vertex(opt),
+                //             vs = vertex.vs,
+                //             len = vs.length,
+                //             ctx = self.context,
+                //             po = vertex.po;
+                //         ctx.beginPath();
+                //         vs.forEach(function(t, i) {
+                //             var t1 = vs[i + 1 === len ? 0 : i + 1];
+                //             ctx.moveTo(t.x, t.y)
+                //             ctx.quadraticCurveTo(
+                //                 po.x, po.y,
+                //                 t1.x, t1.y
+                //             );
+                //         })
+                //         self.setStrokeStyle(ctx, colorArr[i]);
+                //         ctx.stroke()
+                //     }
 
-                    _.slider(this, {
-                        min: 3,
-                        max: 100,
-                        callback: update,
-                        colors: colorArr
-                    }).run();
-                },
+                //     _.slider(this, {
+                //         min: 3,
+                //         max: 100,
+                //         callback: update,
+                //         colors: colorArr
+                //     }).run();
+                // },
                 //对角线
-                sliderDiagonal: function(opt) {
-                    opt = opt || {};
-                    var self = this,
-                        max = opt.max || 25,
-                        colorArr = _.color.circle(max + 1);
+                // sliderDiagonal: function(opt) {
+                //     opt = opt || {};
+                //     var self = this,
+                //         max = opt.max || 25,
+                //         colorArr = _.color.circle(max + 1);
 
-                    var update = function(i) {
-                        self.clear()
-                        var opt = {
-                            shape: "polygon",
-                            num: i,
-                            r: 150,
-                            color: colorArr[i],
-                            showDiagonal: true
-                        }
-                        self.shape(opt)
-                    }
+                //     var update = function(i) {
+                //         self.clear()
+                //         var opt = {
+                //             shape: "polygon",
+                //             num: i,
+                //             r: 150,
+                //             color: colorArr[i],
+                //             showDiagonal: true
+                //         }
+                //         self.shape(opt)
+                //     }
 
-                    _.slider(this, {
-                        min: 3,
-                        max: max,
-                        colors: colorArr,
-                        callback: update
-                    }).run()
+                //     _.slider(this, {
+                //         min: 3,
+                //         max: max,
+                //         colors: colorArr,
+                //         callback: update
+                //     }).run()
 
-                },
+                // },
                 //图形组合
-                sliderGroup: function(opt) {
-                    opt = opt || {};
-                    var self = this,
-                        max = opt.max || 60,
-                        num = opt.num || 3,
-                        colorArr = _.color.circle(max + 1),
-                        ctx = this.context;
-                    // self.setGlobalCompositeOperation(ctx,"lighter");
+                // sliderGroup: function(opt) {
+                //     opt = opt || {};
+                //     var self = this,
+                //         max = opt.max || 60,
+                //         num = opt.num || 3,
+                //         colorArr = _.color.circle(max + 1),
+                //         ctx = this.context;
+                //     // self.setGlobalCompositeOperation(ctx,"lighter");
 
-                    var update = function(i) {
+                //     var update = function(i) {
 
-                        self.clear()
+                //         self.clear()
 
-                        self.group({
-                            shape: {
-                                shape: "polygon",
-                                num: num,
-                                r: 60,
-                                lineWidth: 2
-                            },
-                            group: {
-                                group: "polygon",
-                                num: i,
-                                r: 60,
-                                colorful: "circle",
-                                rotation: true,
-                            }
-                        })
-                    }
+                //         self.group({
+                //             shape: {
+                //                 shape: "polygon",
+                //                 num: num,
+                //                 r: 60,
+                //                 lineWidth: 2
+                //             },
+                //             group: {
+                //                 group: "polygon",
+                //                 num: i,
+                //                 r: 60,
+                //                 colorful: "circle",
+                //                 rotation: true,
+                //             }
+                //         })
+                //     }
 
-                    _.slider(this, {
-                        min: 3,
-                        max: max,
-                        colors: colorArr,
-                        callback: update
-                    }).run()
-                },
+                //     _.slider(this, {
+                //         min: 3,
+                //         max: max,
+                //         colors: colorArr,
+                //         callback: update
+                //     }).run()
+                // },
                 //圆内均匀分布的随机点
                 randomPointInCircle: function(opt) {
 
