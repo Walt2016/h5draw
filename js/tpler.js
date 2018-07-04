@@ -1,6 +1,6 @@
 //一个js开发框架
 //template.event.canvas
-//v0.8.20180625
+//v0.8.20180702
 ;
 (function(root, factory) {
     if (typeof define === "function" && define.amd) {
@@ -2323,6 +2323,12 @@
                     ];
                 }
             };
+            var _max = function(arr) {
+                return Math.max.apply(Math, arr)
+            }
+            var _min = function(arr) {
+                return Math.min.apply(Math, arr)
+            }
 
             var Color = function(color, alpha) {
                 if (!(this instanceof Color)) return new Color(color, alpha);
@@ -2378,7 +2384,39 @@
                         return "hsla(" + [Math.random() * 360 << 0] + ",50%,50%,0.5)";
                     },
                     hsl: function() { //微信小程序不支持hsl
-                        return "hsl(" + [Math.random() * 360 << 0] + ",50%,50%)";
+                        // return "hsl(" + [Math.random() * 360 << 0] + ",50%,50%)";
+                        var r, g, b, cc = this.color.map(function(t, i) {
+                                t /= 255
+                                if (i === 0)
+                                    r = t;
+                                else if (i === 1)
+                                    g = t;
+                                else(i === 2)
+                                b = t;
+                                return t
+                            }),
+                            max = _max(cc),
+                            min = _min(cc),
+                            l = (max + min) / 2,
+                            s, h;
+                        if (max === min) {
+                            s = 0;
+                            h = 0;
+                        }
+                        if (l < 0.5)
+                            s = (max - min) / (max + min)
+                        else
+                            s = (max - min) / (2.0 - max - min)
+                        if (r === max)
+                            h = (g - b) / (max - min)
+                        if (g === max)
+                            h = 2.0 + (b - r) / (max - min)
+                        if (b === max)
+                            h = 4.0 + (r - g) / (max - min)
+                        h = (h * 60 + 360) % 360
+                        s = s * 100 + '%'
+                        l = l * 100 + '%'
+                        return 'hsl(' + [h, s, l] + ')'
                     },
                     //深色  随机深色(rgb两位小于 80)，指定颜色加深
                     dark: function(color, level) {
@@ -2530,24 +2568,24 @@
                     //互补色
                     complementary: function(color) {
                         var arr = rgbaArr(color),
-                            max = Math.max.apply(Math, arr), //_.max
-                            min = Math.min.apply(Math, arr),
+                            max = _max(arr),
+                            min = _min(arr),
                             sum = max + min;
-                        arr = arr.map(function(t) {
+                        return rgbaWrapper(arr.map(function(t) {
                             return sum - t
-                        })
-                        return rgbaWrapper(arr);
+                        }));
                     },
                     //色相环
                     circle: function(len, alpha) {
                         var a = 0,
-                            step = 360 / len;
-                        var arr = [];
+                            step = 360 / len,
+                            arr = [],
+                            r, g, b;
                         for (var i = 0; i < len; i++) {
                             a += step
-                            var r = _.cos(a) * 127 + 128 << 0,
-                                g = _.cos(a + 120) * 127 + 128 << 0,
-                                b = _.cos(a + 240) * 127 + 128 << 0;
+                            r = _.cos(a) * 127 + 128 << 0;
+                            g = _.cos(a + 120) * 127 + 128 << 0;
+                            b = _.cos(a + 240) * 127 + 128 << 0;
                             arr[arr.length] = rgbaWrapper(_.isUndefined(alpha) ? [r, g, b] : [r, g, b, alpha]);
                         }
                         return arr;
@@ -4266,7 +4304,7 @@
                 // if (!(this instanceof Delay)) return new Delay(fn, time);
                 var self = this instanceof Delay ? this : Object.create(Delay.prototype);
 
-                currentTime = +new Date();
+                // currentTime = +new Date();
                 fn && self.load.apply(self, arguments);
                 self.stack = stack;
                 self.index = index;
@@ -4297,7 +4335,7 @@
                     })
 
                     // if(+new Date() -currentTime <0)
-                    
+
                     self.fire.call(self)
                     return self
                 },
@@ -6181,6 +6219,47 @@
                     })
                     this.draw.setStrokeStyle(ctx, color);
                     ctx.stroke()
+                },
+                //橘子 num=12
+                orange: function(opt) {
+                    var vertex = this.vertex,
+                        vs = vertex.vs,
+                        po = vertex.po,
+                        len = vs.length,
+                        ctx = this.context,
+                        color = opt.color;
+                    var fillColor = _.color(color);
+                    var p = _pointPolar({
+                        r: r * 1.5,
+                        a: 0,
+                        o: po
+                    })
+                    ctx.beginPath();
+                    ctx.moveTo(p.x, p.y)
+                    ctx.arc(po.x, po.y, opt.r * 1.5, 0, 2 * Math.PI, false);
+
+                    ctx.stroke();
+                    this.draw.setFillStyle(ctx, fillColor.alpha(0.5));
+                    ctx.fill();
+
+                    ctx.beginPath();
+                    vs.forEach(function(t, i) {
+                        var t1 = vs[i + 1 == len ? 0 : i + 1];
+                        var v = _.vector({
+                            x: t.x - t1.x,
+                            y: t.y - t1.y
+                        })
+                        var m = t.mid(t1),
+                            rad = v.rad(),
+                            r = v.abs() / 2;
+                        ctx.arc(m.x, m.y, r, rad, rad + Math.PI, false);
+                        ctx.lineTo(po.x, po.y)
+                    })
+                    this.draw.setStrokeStyle(ctx, color);
+                    ctx.stroke();
+                    this.draw.setFillStyle(ctx, fillColor.alpha(0.8));
+                    ctx.fill();
+
                 }
             });
 
@@ -6678,8 +6757,6 @@
         //rotate move zoom  gravitate  jiggle  float circle ellips
         //组合运动 rotate_zoom
         var _motion = _.motion = function() {
-
-
             function Motion(draw, opt) {
                 if (!(this instanceof Motion)) return new Motion(draw, opt);
                 var self = this;
@@ -6855,7 +6932,6 @@
                             opt.y = opt.top - opt.r;
                         }
                     }
-
                 },
                 //碰撞
                 collide: function(opt1, opt2) {
@@ -7130,46 +7206,301 @@
 
             return createClass(TrackStrategy, {
                     strategyObj: {
-                        //椭圆   椭圆方程ρ=ep (1-ecosθ)
-                        ellipse1: function(i) {
+                        //     x=a*(2*cos(t)-cos(2*t))
+                        // y=a*(2*sin(t)-sin(2*t))
+                        // heart: function(i) {
+                        //     var draw = this,
+                        //         o = draw.o,
+                        //         r = 100,
+                        //         a = i * 360 / trackTimes;
+                        //     return {
+                        //         x: r * (2 * _.cos(a) - _.cos(2 * a)) + o.x,
+                        //         y: r * (2 * _.sin(a) - _.sin(2 * a)) + o.y,
+                        //     }
+
+                        // },
+                        //三角形 直线参数方程x=x'+tcosa y=y'+tsina ,x'
+                        polygon: function(i) {
                             var draw = this,
                                 o = draw.o,
                                 r = 100,
                                 a = i * 360 / trackTimes;
-                            var p = _.pointPolar({
-                                r: r,
-                                a: a,
-                                o: o
-                            })
-                            return _.pointPolar({
-                                r: r * _.sin(a),
-                                a: 0,
-                                o: {
-                                    x: p.x,
-                                    y: p.y
-                                }
-                            })
+                            var num = 3,
+                                ia = 360 / num,
+                                vertex = _.vertex({
+                                    r: r,
+                                    a: 0,
+                                    num: num,
+                                    x: o.x,
+                                    y: o.y
+                                }),
+                                vs = vertex.vs,
+                                len = vs.length,
+                                n = i / ia << 0,
+                                m = i % ia,
+                                t = vs[n],
+                                t1 = vs[n + 1 === len ? 0 : n + 1],
+                                v = t.toV(t1),
+                                k = v.abs() * m / ia,
+                                rad = v.rad();
+                            return {
+                                x: k * Math.cos(rad) + t.x,
+                                y: k * Math.sin(rad) + t.y
+                            }
                         },
-                        ellipse2: function(i) {
+                        polygon4: function(i) {
                             var draw = this,
                                 o = draw.o,
                                 r = 100,
                                 a = i * 360 / trackTimes;
-                            var p = _.pointPolar({
-                                r: r,
-                                a: a,
-                                o: o
-                            })
-                            return _.pointPolar({
-                                r: r * _.sin(a),
-                                a: 180,
-                                o: {
-                                    x: p.x,
-                                    y: p.y
-                                }
-                            })
+                            var num = 4,
+                                ia = 360 / num,
+                                vertex = _.vertex({
+                                    r: r,
+                                    a: 0,
+                                    num: num,
+                                    x: o.x,
+                                    y: o.y
+                                }),
+                                vs = vertex.vs,
+                                len = vs.length,
+                                n = i / ia << 0,
+                                m = i % ia,
+                                t = vs[n],
+                                t1 = vs[n + 1 === len ? 0 : n + 1],
+                                v = t.toV(t1),
+                                k = v.abs() * m / ia,
+                                rad = v.rad();
+                            return {
+                                x: k * Math.cos(rad) + t.x,
+                                y: k * Math.sin(rad) + t.y
+                            }
+                        },
+                        polygon5: function(i) {
+                            var draw = this,
+                                o = draw.o,
+                                r = 100,
+                                a = i * 360 / trackTimes;
+                            var num = 5,
+                                ia = 360 / num,
+                                vertex = _.vertex({
+                                    r: r,
+                                    a: 0,
+                                    num: num,
+                                    x: o.x,
+                                    y: o.y
+                                }),
+                                vs = vertex.vs,
+                                len = vs.length,
+                                n = i / ia << 0,
+                                m = i % ia,
+                                t = vs[n],
+                                t1 = vs[n + 1 === len ? 0 : n + 1],
+                                v = t.toV(t1),
+                                k = v.abs() * m / ia,
+                                rad = v.rad();
+                            return {
+                                x: k * Math.cos(rad) + t.x,
+                                y: k * Math.sin(rad) + t.y
+                            }
                         },
 
+                        //玫瑰线 x=a* sin(nθ)* cos(θ), y=a*sin(nθ)* sin(θ)
+                        rose3: function(i) {
+                            var draw = this,
+                                o = draw.o,
+                                r = 100,
+                                a = i * 360 / trackTimes;
+
+                            var n = 3;
+                            return {
+                                x: r * _.sin(n * a) * _.cos(a) + o.x,
+                                y: r * _.sin(n * a) * _.sin(a) + o.y
+                            }
+
+                        },
+                        rose4: function(i) {
+                            var draw = this,
+                                o = draw.o,
+                                r = 100,
+                                a = i * 360 / trackTimes;
+
+                            var n = 4;
+                            return {
+                                x: r * _.sin(n * a) * _.cos(a) + o.x,
+                                y: r * _.sin(n * a) * _.sin(a) + o.y
+                            }
+
+                        },
+                        rose5: function(i) {
+                            var draw = this,
+                                o = draw.o,
+                                r = 100,
+                                a = i * 360 / trackTimes;
+
+                            var n = 5;
+                            return {
+                                x: r * _.sin(n * a) * _.cos(a) + o.x,
+                                y: r * _.sin(n * a) * _.sin(a) + o.y
+                            }
+
+                        },
+                        astroid7: function(i) {
+
+                            var draw = this,
+                                o = draw.o,
+                                r = 100,
+                                a = i * 360 / trackTimes;
+
+                            var n = 7
+                            return {
+                                x: r * Math.pow(_.cos(a), n) + o.x,
+                                y: r * Math.pow(_.sin(a), n) + o.y
+                            }
+                        },
+                        //星形线（Astroid） x=a*(cost)3,y=a*(sint)3 （t为参数）
+                        astroid5: function(i) {
+
+                            var draw = this,
+                                o = draw.o,
+                                r = 100,
+                                a = i * 360 / trackTimes;
+
+                            var n = 5
+                            return {
+                                x: r * Math.pow(_.cos(a), n) + o.x,
+                                y: r * Math.pow(_.sin(a), n) + o.y
+                            }
+                        },
+                        //星形线（Astroid） x=a*(cost)3,y=a*(sint)3 （t为参数）
+                        astroid: function(i) {
+                            var draw = this,
+                                o = draw.o,
+                                r = 100,
+                                a = i * 360 / trackTimes;
+
+                            return {
+                                x: r * Math.pow(_.cos(a), 3) + o.x,
+                                y: r * Math.pow(_.sin(a), 3) + o.y
+                            }
+                        },
+                        //Hypocycloid内摆线
+                        hypocycloid: function(i) {
+                            var draw = this,
+                                o = draw.o,
+                                r = 20,
+                                a = i * 360 / trackTimes;
+                            a *= 3;
+                            var k = 7.2;
+                            return {
+                                x: r * (k - 1) * _.cos(a) + r * _.cos((k - 1) * a) + o.x,
+                                y: r * (k - 1) * _.sin(a) - r * _.sin((k - 1) * a) + o.y,
+                            }
+                        },
+                        hypocycloid2: function(i) {
+                            var draw = this,
+                                o = draw.o,
+                                r = 50,
+                                a = i * 360 / trackTimes;
+                            a *= 10;
+                            var k = 2.1;
+                            return {
+                                x: r * (k - 1) * _.cos(a) + r * _.cos((k - 1) * a) + o.x,
+                                y: r * (k - 1) * _.sin(a) - r * _.sin((k - 1) * a) + o.y,
+                            }
+                        },
+                        // 圆的渐开线x=r(cosφ+φsinφ） y=r(sinφ-φcosφ）（φ∈[0,2π）） r为基圆的半径 φ为参数
+                        evolent: function(i) {
+                            var draw = this,
+                                o = draw.o,
+                                r = 4,
+                                a = i * 360 / trackTimes;
+
+                            a *= 10;
+                            return {
+                                x: r * (_.cos(a) + a * Math.PI / 180 * _.sin(a)) + o.x,
+                                y: r * (_.sin(a) - a * Math.PI / 180 * _.cos(a)) + o.y
+                            }
+
+                        },
+
+
+                        // 平摆线参数方程 x=r（θ-sinθ） y=r（1-cosθ）r为圆的半径，θ是圆的半径所经过的角度（滚动角），当θ由0变到2π时，动点就画出了摆线的一支，称为一拱。
+                        // cycloid: function(i) {
+                        //     var draw = this,
+                        //         o = draw.o,
+                        //         r = 100,
+                        //         a = i * 360 / trackTimes;
+                        //     return {
+                        //         x: r * (a * Math.PI / 180 - _.sin(a)),
+                        //         y: r * (1 - _.cos(a))
+                        //     }
+
+                        // },
+                        //直线 直线的参数方程 x=x'+tcosa y=y'+tsina,x',y'和a表示直线经过（x',y'）
+                        //且倾斜角为a,t为参数
+                        // line:function(i){
+                        //     var draw = this,
+                        //         o = draw.o,
+                        //         r = 100,
+                        //         a = i * 360 / trackTimes;
+
+                        //     return {
+                        //         x: r*_.cos(a)+o.x,
+                        //         y:r*_.sin(a)+o.y
+                        //     }
+
+                        // },
+
+
+                        //双曲线 p²=1/(cos²θ/a²-sin²θ/b²)  y²/a²-x²/b² = 1焦点在y轴
+                        //双曲线的参数方程 x=a secθ （正割） y=b tanθ a为实半轴长 b为虚半轴长 θ为参数
+                        hyperbola: function(i) {
+                            var draw = this,
+                                o = draw.o,
+                                r = 100,
+                                a = i * 360 / trackTimes;
+
+                            return {
+                                x: r / _.cos(a) + o.x,
+                                y: r * _.tan(a) + o.y
+                            }
+
+                            // var n = 5,
+                            //     m = 10;
+                            // var r = 1 / (Math.pow(_.cos(a), 2) / Math.pow(n, 2) - Math.pow(_.sin(a), 2) / Math.pow(m, 2))
+                            // return _.pointPolar({
+                            //     r: r,
+                            //     a: a,
+                            //     o: o
+                            // })
+
+                        },
+
+                        //椭圆的参数方程 x=a cosθ　 y=b sinθ（θ∈[0，2π）） a为长半轴长 b为短半轴长 θ为参数
+                        ellipse: function(i) {
+                            var draw = this,
+                                o = draw.o,
+                                r = 100,
+                                a = i * 360 / trackTimes;
+                            return {
+                                x: r * _.cos(a) + o.x,
+                                y: 2 * r * _.sin(a) + o.y
+                            }
+                            // var p = _.pointPolar({
+                            //     r: r,
+                            //     a: a,
+                            //     o: o
+                            // })
+                            // return _.pointPolar({
+                            //     r: r * _.sin(a),
+                            //     a: 0,
+                            //     o: {
+                            //         x: p.x,
+                            //         y: p.y
+                            //     }
+                            // })
+                        },
                         //繁花曲线 二级
                         spiro: function(i) {
                             var draw = this,
@@ -7230,18 +7561,19 @@
                                 o: o
                             });
                         },
+                        //圆的参数方程 x=a+r cosθ y=b+r sinθ（θ∈ [0，2π) ） (a,b) 为圆心坐标，r 为圆半径，θ 为参数，(x,y) 为经过点的坐标
                         circle: function(i) {
                             var draw = this,
                                 r = 100,
                                 a = i * 360 / trackTimes,
                                 o = draw.o;
-                            return _.pointPolar({
-                                r: r,
-                                a: a,
-                                o: o
-                            });
+                            return {
+                                x: r * _.cos(a) + o.x,
+                                y: r * _.sin(a) + o.y
+                            }
                         },
-                        //笛卡尔心形线
+
+                        //笛卡尔心形线 
                         cardioid: function(i) {
                             var draw = this,
                                 a = i * 360 / trackTimes,
@@ -7275,7 +7607,7 @@
             )
 
         }();
-        
+
 
         //可滑动进度条
         var _slider = _.slider = function() {
@@ -7617,6 +7949,252 @@
                         })
                         ctx.stroke()
                     },
+                }
+            })
+        }();
+
+
+        //粒子喷射器  不断产生  不断消亡
+        var _emitter = _.emitter = function() {
+            var Particle = function(opt) {
+                opt = opt || {};
+                this.x = opt.x || 0;
+                this.y = opt.y || 0;
+                // this.pos = {
+                //     x: opt.x || 0,
+                //     y: opt.y || 0
+                // };
+                this.speed = opt.speed || 5;
+                this.life = opt.life || 1;
+                this.size = opt.size || 2;
+                this.lived = 0;
+                this.vel = {
+                    x: _.cos(opt.a) * this.speed,
+                    y: _.sin(opt.a) * this.speed
+                }
+                this._color = _.color(this.color);
+                this.friction = 0.9;
+                this.spring = 0.01 + Math.random() * 0.04;
+            };
+            createClass(Particle, {
+                move: function(dt) {
+                    this.lived += dt;
+                    if (this.lived >= this.life) this.dead = true;
+                    this.x += this.vel.x * dt / 1000;
+                    this.y += this.vel.y * dt / 1000;
+                    this.color = this._color.alpha(+(1 - this.lived / this.life).toFixed(2));
+                    this.follow()
+                    return this;
+                },
+                //移动目标
+                target: function(t) {
+                    this.translating = true;
+                    this.tx = t.x || 0;
+                    this.ty = t.y || 0;
+                    return this;
+                },
+                //跟随移动  位移过渡
+                follow: function() {
+                    if (this.translating) {
+                        var sx = (this.tx - this.x) * this.spring;
+                        var sy = (this.ty - this.y) * this.spring;
+
+                        sx *= this.friction;
+                        sy *= this.friction;
+                        this.x += sx;
+                        this.y += sy;
+                    }
+                    // 到达
+                    if (Math.abs(this.tx - this.x) < 5 && Math.abs(this.ty - this.y) < 5) {
+                        this.translating = false;
+                    }
+                    return this;
+                },
+            })
+
+            var emitterId;
+            //策略
+            var emitterStrategy = {
+                colorful: function(dt) {
+                    for (var i = 0; i <= this.particles.length; i++) {
+                        var p = this.particles[i]
+                        if (p) {
+                            p.move(dt);
+                            this.ctx.fillStyle = p.color;
+                            this.ctx.beginPath();
+                            this.ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                            this.ctx.fill();
+                        }
+                    }
+                },
+                polygon: function(dt) {
+                    this.ctx.strokeStyle = this.opt.color;
+                    this.ctx.beginPath();
+                    for (var i = 0; i <= this.particles.length; i++) {
+                        var p = this.particles[i]
+                        if (p) {
+                            p.move(dt);
+                            this.ctx[i === 0 ? "moveTo" : "lineTo"](p.x, p.y);
+                        }
+                    }
+                    this.ctx.closePath()
+                    this.ctx.stroke();
+                },
+                ray: function(dt) {
+                    this.ctx.strokeStyle = this.opt.color;
+                    this.ctx.beginPath();
+                    for (var i = 0; i <= this.particles.length; i++) {
+                        var p = this.particles[i]
+                        if (p) {
+                            p.move(dt);
+                            this.ctx.moveTo(this.x, this.y);
+                            this.ctx.lineTo(p.x, p.y)
+                        }
+                    }
+                    this.ctx.stroke();
+                },
+                default: function(dt) {
+                    this.ctx.fillStyle = this.opt.color;
+                    this.ctx.beginPath();
+                    for (var i = 0; i <= this.particles.length; i++) {
+                        var p = this.particles[i]
+                        if (p) {
+                            p.move(dt);
+                            this.ctx.moveTo(p.x, p.y);
+                            this.ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                        }
+                    }
+                    this.ctx.fill();
+                }
+            }
+
+            var Emitter = function(draw, opt) {
+                if (!(this instanceof Emitter)) return new Emitter(draw, opt);
+                opt = _.extend({
+                    rate: 10,
+                    life: [3000, 5000],
+                    a: [0, 360],
+                    speed: [25, 40],
+                    size: [3, 5],
+                    color: _.color().rgb()
+                }, opt)
+
+
+                this.x = opt.x = _.isUndefined(opt.x) ? draw.o.x : opt.x;
+                this.y = opt.y = _.isUndefined(opt.y) ? draw.o.y : opt.y;
+                this.opt = opt;
+                this.delay = 1000 / opt.rate; //延迟发射
+                this.lastUpdate = 0;
+                this.lastEmission = 0;
+                this.particles = [];
+                this.shadow = opt.shadow
+                this.colorful = opt.colorful; //彩色
+
+                this.draw = draw;
+                this.ctx = draw.context;
+                this.strategy = opt.strategy && opt.strategy in emitterStrategy ? emitterStrategy[opt.strategy] : emitterStrategy.default //opt.strategy //colorful shadow line
+                if (opt.strategy) {
+                    if (opt.strategy in emitterStrategy) {
+                        this.strategy = [emitterStrategy[opt.strategy]]
+                    } else {
+                        this.strategy = [emitterStrategy.default]
+                    }
+
+                } else {
+                    this.strategy = [];
+                    for (var key in emitterStrategy) {
+                        this.strategy[this.strategy.length] = emitterStrategy[key]
+                    }
+                }
+                this.strategyIndex = 0
+
+                var self = this
+                toucher([{
+                    el: draw.canvas,
+                    type: "touchend",
+                    callback: function(item, ev) {
+                        var pos = _.pos(ev);
+                        self.x = self.opt.x = pos.x;
+                        self.y = self.opt.y = pos.y;
+                        self.strategyIndex = self.strategyIndex + 1 === self.strategy.length ? 0 : self.strategyIndex + 1;
+
+                        for (var i = 0; i <= self.particles.length; i++) {
+                            var p = self.particles[i]
+                            p && p.target(pos)
+                        }
+                    }
+                }, {
+                    el: draw.canvas,
+                    type: "touchmove",
+                    callback: function(item, ev) {
+                        var pos = _.pos(ev);
+                        self.x = self.opt.x = pos.x;
+                        self.y = self.opt.y = pos.y;
+                        for (var i = 0; i <= self.particles.length; i++) {
+                            var p = self.particles[i]
+                            p && p.target(pos)
+                        }
+                    }
+                }])
+            };
+
+            return createClass(Emitter, {
+                render: function(dt) {
+                    if (this.shadow) {
+                        this.ctx.fillStyle = "rgba(0,0,0,0.05)"
+                        this.ctx.fillRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
+                    } else {
+                        this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
+                    }
+                    this.strategy[this.strategyIndex].call(this, dt);
+                },
+                initSettings: function() {
+                    var obj = {}
+                    for (var key in this.opt) {
+                        if (_.isArray(this.opt[key]))
+                            obj[key] = _.between.apply(null, this.opt[key])
+                        else
+                            obj[key] = this.opt[key]
+                    }
+                    return obj;
+                },
+                createParticals: function(dt) {
+                    if (this.lastEmission > this.delay) {
+                        var i = this.lastEmission / this.delay << 0;
+                        this.lastEmission -= i * this.delay;
+                        while (i--) {
+                            this.particles[this.particles.length] = new Particle(this.initSettings())
+                        }
+                    }
+                },
+                delParticals: function() {
+                    for (var i = this.particles.length - 1; i >= 0; i--) {
+                        var p = this.particles[i];
+                        p && p.dead && this.particles.splice(i, 1);
+                    }
+                },
+                update: function() {
+                    if (!this.lastUpdate) {
+                        this.lastUpdate = Date.now();
+                        return;
+                    }
+                    var time = Date.now();
+                    var dt = time - this.lastUpdate;
+                    this.lastEmission += dt;
+                    this.lastUpdate = time;
+                    this.createParticals(dt)
+                    this.delParticals();
+                    // this.draw.clear();
+
+
+                    this.render(dt)
+                },
+                start: function() {
+                    emitterId && clearInterval(emitterId);
+                    emitterId = setInterval(this.update.bind(this), 17);
+                },
+                stop: function() {
+                    emitterId && clearInterval(emitterId);
                 }
             })
         }();
@@ -8021,6 +8599,7 @@
                         opt.showMirror && this.mirror(vs, opt);
                         //标注夹角
                         opt.showAngle && this.includedAngle(vs, opt);
+
                     }
                     return this;
                 },
@@ -8181,9 +8760,12 @@
 
 
                         //实线
-                        vs.forEach(function(t, i) {
-                            self.line(ctx, t, i === 0);
-                        })
+                        if (opt && !opt.hideEdge) {
+                            vs.forEach(function(t, i) {
+                                self.line(ctx, t, i === 0);
+                            })
+                        }
+
                     }
                     //曲线
                     if (opt && opt.curve) {
@@ -8204,14 +8786,14 @@
                         })
                     }
                     //半圆弧
-                    if (opt && opt.semiarc) {
+                    if (opt && opt.semicricle) {
                         vs.forEach(function(t, i) {
                             var t1 = vs[i + 1 === len ? 0 : i + 1],
-                                to = t.mid(t1),
-                                v1 = to.toV(t),
-                                v2 = to.toV(t1);
-                            ctx.moveTo(t.x, t.y);
-                            ctx.arc(to.x, to.y, v1.abs(), v1.rad(), v2.rad(), false);
+                                m = t.mid(t1),
+                                v1 = m.toV(t),
+                                rad = v1.rad(),
+                                r = v1.abs();
+                            ctx.arc(m.x, m.y, r, rad, rad + Math.PI, false);
                         })
                     }
 
@@ -8341,7 +8923,6 @@
                     return this.linkGroup(vsGroup, _.clone(opt, {
                         showVertices: false
                     }));
-                    // return this.draw.link(vs, opt);
                 },
                 //间隔填色
                 zebra: function(vs, opt) {
@@ -8396,18 +8977,9 @@
                     // }
                     // self.callback && self.callback(result);
                     if (opt && opt.animate) { //动画
-                        _.extend(opt, {
-                            animate: false
-                        })
+                        opt.animate = false
                         var animationInterval = opt.animationInterval || 0;
                         vsGroup.forEach(function(t, i) {
-                            // setTimeout(function() {
-                            //     self.link(t, opt);
-                            // }, animationInterval * i);
-                            // _.delay(function() {
-                            //     self.link(t, opt);
-                            // }, animationInterval)
-
                             _.delay(self.link, animationInterval, t, opt)
                         })
                     } else {
@@ -8629,7 +9201,7 @@
                     }
                 },
 
-                _grid: function(color, interval) {
+                _grid: function(interval, color) {
                     var ctx = this.context;
                     var w = this.width,
                         h = this.height;
@@ -8651,7 +9223,7 @@
                 grid: function(opt) {
                     opt = opt || {};
                     var color = opt.background || opt.color || _.color().rgb();
-                    this._grid(color, 10)
+                    this._grid(10, color)
                 },
                 //心电图网格
                 ecgGrid: function(opt) {
@@ -8662,7 +9234,7 @@
                         b = color.light(a, 0.5),
                         c = color.light(b, 0.5);
                     [c, b, a].forEach(function(t, i) {
-                        self._grid.call(self, t, 3 * Math.pow(5, i))
+                        self._grid.call(self, 3 * Math.pow(5, i), t)
                     })
                 },
                 //刻度盘

@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+    <title>emitter</title>
+    <link rel="shortcut icon" type="image/x-icon" href="data:image/gif;base64,YQ==">
+    <style>
+    body {
+        margin: 0;
+        padding: 0
+    }
+    </style>
+</head>
+
+<body>
+    <canvas id="myCanvas"></canvas>
+</body>
+<script src=js/tpler.js></script>
+<script type="text/javascript">
+var draw = _.draw({
+    canvasid: "myCanvas",
+    fullscreen: true
+})
+_.emitter(draw, {
+    shadow: true
+}).start()
+</script>
+
+</html>
