@@ -8223,6 +8223,7 @@
                     ctx.arc((opt.x2 + opt.x) / 2, (opt.y2 + opt.y) / 2, opt.r / 2, 0, Math.PI * 2, true);
                     ctx.fill()
                 },
+                //卷叶
                 semiarc: function(ctx, opt, level, index) {
                     ctx.lineWidth = 1
                     ctx.strokeStyle = colors[level];
@@ -8241,6 +8242,7 @@
                 this.x = opt.x = _.isUndefined(opt.x) ? draw.o.x : opt.x;
                 this.y = opt.y = _.isUndefined(opt.y) ? draw.o.y : opt.y;
                 this.a = opt.a;
+                this.regular = opt.regular;
                 this.ctx = draw.context;
 
 
@@ -8280,7 +8282,13 @@
                         var pos = _.pos(ev);
                         self.x = pos.x;
                         self.y = pos.y;
-                        self.strategyIndex = self.strategyIndex + 1 === self.strategy.length ? 0 : self.strategyIndex + 1;
+                        // self.strategyIndex = self.strategyIndex + 1 === self.strategy.length ? 0 : self.strategyIndex + 1;
+                        if (self.strategyIndex + 1 === self.strategy.length) {
+                            self.regular = !self.regular
+                            self.strategyIndex = 0
+                        } else {
+                            self.strategyIndex += 1
+                        }
                         self.init()
                     }
                 });
@@ -8298,7 +8306,8 @@
                             y: this.y,
                             a: a,
                             r: this.r,
-                            branchWidth: this.branchWidth
+                            branchWidth: this.branchWidth,
+                            regular: this.regular
                         }, 0)
                     }
 
@@ -8306,14 +8315,20 @@
                 callstrategy: function(opt, level, i) {
                     if (level++ > this.depth) return;
                     var strategy = this.strategy[this.strategyIndex];
-                    this._strategyBefore(opt);
+                    this._strategyBefore(opt, i);
                     strategy && strategy.call(this, this.ctx, opt, level, i);
                     var opt = this._strategyAfter.call(this, opt);
                     this._iteration.call(this, arguments.callee, opt, level)
                 },
-                _strategyBefore: function(opt) {
-                    opt.a += (random() - 0.5) * Math.PI / 2;
-                    opt.r *= (.7 + random() * .3);
+                _strategyBefore: function(opt, i) {
+                    if (opt.regular) {
+                        opt.a += (i === 0 ? -1 : 1) * Math.PI / 4; //二叉
+                        opt.r *= .8;
+                    } else {
+                        opt.a += (random() - 0.5) * Math.PI / 2;
+                        opt.r *= (.7 + random() * .3);
+                    }
+
                     opt.x2 = opt.x + opt.r * Math.cos(opt.a);
                     opt.y2 = opt.y + opt.r * Math.sin(opt.a);
                 },
