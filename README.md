@@ -48,6 +48,10 @@ DEMO：
 
 [track](https://walt2016.github.io/h5draw/track.html)
 
+[emitter](https://walt2016.github.io/h5draw/emitter.html)
+
+[fractal](https://walt2016.github.io/h5draw/fractal.html)
+
 [index](https://walt2016.github.io/h5draw/index.html)
 
 
