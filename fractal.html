@@ -1,63 +1,32 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
     <title>fractal</title>
-    <link rel="stylesheet" href="css/draw.min.css">
+    <link rel="shortcut icon" type="image/x-icon" href="data:image/gif;base64,YQ==">
+    <style>
+    body {
+        margin: 0;
+        padding: 0
+    }
+    </style>
 </head>
 
 <body>
     <canvas id="myCanvas"></canvas>
-    <script src="js/tpler.js?v=4"></script>
+    <script src=js/tpler.js></script>
     <script>
     var draw = _.draw({
-        canvasid:"myCanvas",
-        fullscreen:true
-
-    })
-
-    var opt = {
-        shape: "sierpinski",
+        canvasid: "myCanvas",
+        fullscreen: true
+    });
+    _.fractal(draw, {
+        // strategy: "semiarc", //fernstree
         num: 3,
-        r: 60,
-        a: 0,
-        fractal: true,
-        fractalLevel: 2,
-        lineWidth:1
-    };
-
-   
-    var shapeArr=["polygon", "ray", "pentagram","sierpinski","ellipse","vertices"];
-    var max=10;//shapeArr.length;
-    var min=3;
-    var colorArr=_.color.circle(max-min+1);
-    var update=function(i){
-        draw.clear();
-         draw.shape(_.extend(opt, {num:i,color:colorArr[i-min]})); //{ shape: shapeArr[i] }
-         // draw.group({
-         //    shape:opt,
-         //    group:{
-         //        group:"polygon",
-         //        num:i,
-         //        r:60,
-         //        rotation:true,
-         //        colorful:"circle"
-         //    }
-         // })
-    }
-
-    _.slider(draw,{
-        min:min,
-        max:max,
-        colors:colorArr,
-        pause:true,
-        callback:function(i){
-            update(i);
-        }
-    }).run()
-    
+        a: -90
+    })
     </script>
 </body>
 

@@ -7960,10 +7960,6 @@
                 opt = opt || {};
                 this.x = opt.x || 0;
                 this.y = opt.y || 0;
-                // this.pos = {
-                //     x: opt.x || 0,
-                //     y: opt.y || 0
-                // };
                 this.speed = opt.speed || 5;
                 this.life = opt.life || 1;
                 this.size = opt.size || 2;
@@ -8184,9 +8180,6 @@
                     this.lastUpdate = time;
                     this.createParticals(dt)
                     this.delParticals();
-                    // this.draw.clear();
-
-
                     this.render(dt)
                 },
                 start: function() {
@@ -8195,6 +8188,154 @@
                 },
                 stop: function() {
                     emitterId && clearInterval(emitterId);
+                }
+            })
+        }();
+
+        //分形
+        var _fractal = _.fractal = function() {
+            var random = Math.random;
+            var colors = [];
+            var fillColors = [];
+            var fractalStrategy = {
+                ferns: function(ctx, opt, level) {
+                    ctx.lineCap = 'round';
+                    ctx.lineWidth = 1
+                    ctx.strokeStyle = colors[level];
+                    ctx.beginPath()
+                    ctx.moveTo(opt.x, opt.y)
+                    ctx.lineTo(opt.x2, opt.y2)
+                    ctx.stroke()
+                },
+                tree: function(ctx, opt, level) {
+                    ctx.lineCap = 'round';
+                    ctx.lineWidth = opt.branchWidth;
+                    ctx.strokeStyle = colors[level];
+                    ctx.beginPath()
+                    ctx.moveTo(opt.x, opt.y)
+                    ctx.lineTo(opt.x2, opt.y2)
+                    ctx.stroke()
+                },
+                circle: function(ctx, opt, level) {
+                    ctx.fillStyle = fillColors[level];
+                    ctx.beginPath()
+                    // ctx.arc(opt.x, opt.y, opt.r, 0, Math.PI * 2, true);
+                    ctx.arc((opt.x2 + opt.x) / 2, (opt.y2 + opt.y) / 2, opt.r / 2, 0, Math.PI * 2, true);
+                    ctx.fill()
+                },
+                semiarc: function(ctx, opt, level, index) {
+                    ctx.lineWidth = 1
+                    ctx.strokeStyle = colors[level];
+                    ctx.beginPath()
+                    var rad = Math.atan2(opt.y2 - opt.y, opt.x2 - opt.x)
+                    ctx.arc((opt.x2 + opt.x) / 2, (opt.y2 + opt.y) / 2, opt.r / 2, rad, rad + Math.PI, index === 0);
+                    ctx.stroke()
+                }
+            }
+            var Fractal = function(draw, opt) {
+                if (!(this instanceof Fractal)) return new Fractal(draw, opt);
+                opt = opt || {};
+                this.depth = opt.depth || 10
+
+                this.r = opt.r || 40
+                this.x = opt.x = _.isUndefined(opt.x) ? draw.o.x : opt.x;
+                this.y = opt.y = _.isUndefined(opt.y) ? draw.o.y : opt.y;
+                this.a = opt.a;
+                this.ctx = draw.context;
+
+
+                this.width = draw.width;
+                this.height = draw.height;
+
+                colors = _.color.circle(this.depth + 1)
+                fillColors = _.color.circle(this.depth + 1, 0.5)
+
+                this.animate = _.isUndefined(opt.animate) ? true : opt.animate;
+                this.step = 0;
+                this.branchWidth = opt.branchWidth || 12;
+                this.branchNum = opt.branchNum || opt.num || 20;
+
+                this.strategy = opt.strategy && opt.strategy in fractalStrategy ? fractalStrategy[opt.strategy] : fractalStrategy.ferns //
+                if (opt.strategy) {
+                    if (opt.strategy in fractalStrategy) {
+                        this.strategy = [fractalStrategy[opt.strategy]]
+                    } else {
+                        this.strategy = [fractalStrategy.ferns]
+                    }
+
+                } else {
+                    this.strategy = [];
+                    for (var key in fractalStrategy) {
+                        this.strategy[this.strategy.length] = fractalStrategy[key]
+                    }
+                }
+                this.strategyIndex = 0
+
+                this.init()
+                var self = this;
+                toucher({
+                    el: draw.canvas,
+                    type: "touchend",
+                    callback: function(item, ev) {
+                        var pos = _.pos(ev);
+                        self.x = pos.x;
+                        self.y = pos.y;
+                        self.strategyIndex = self.strategyIndex + 1 === self.strategy.length ? 0 : self.strategyIndex + 1;
+                        self.init()
+                    }
+                });
+            }
+
+            return createClass(Fractal, {
+                init: function() {
+                    this.ctx.globalCompositeOperation = 'lighter';
+                    this.ctx.clearRect(0, 0, this.width, this.height)
+                    for (var i = 0; i < this.branchNum; i++) {
+                        // var a = _.isUndefined(this.a) ? random() * Math.PI * 2 : this.a * Math.PI / 180;
+                        var a = i * Math.PI * 2 / this.branchNum - Math.PI / 2
+                        this.callstrategy({
+                            x: this.x,
+                            y: this.y,
+                            a: a,
+                            r: this.r,
+                            branchWidth: this.branchWidth
+                        }, 0)
+                    }
+
+                },
+                callstrategy: function(opt, level, i) {
+                    if (level++ > this.depth) return;
+                    var strategy = this.strategy[this.strategyIndex];
+                    this._strategyBefore(opt);
+                    strategy && strategy.call(this, this.ctx, opt, level, i);
+                    var opt = this._strategyAfter.call(this, opt);
+                    this._iteration.call(this, arguments.callee, opt, level)
+                },
+                _strategyBefore: function(opt) {
+                    opt.a += (random() - 0.5) * Math.PI / 2;
+                    opt.r *= (.7 + random() * .3);
+                    opt.x2 = opt.x + opt.r * Math.cos(opt.a);
+                    opt.y2 = opt.y + opt.r * Math.sin(opt.a);
+                },
+                _strategyAfter: function(opt) {
+                    opt.branchWidth *= 0.7;
+                    opt.x = opt.x2;
+                    opt.y = opt.y2;
+                    return _.extend({}, opt)
+                },
+                _iteration: function(fn, opt, level) {
+                    var self = this,
+                        _iteration = function() {
+                            for (var i = 0; i < 2; i++) //一分二
+                                fn.call(self, opt, level, i)
+                        };
+                    if (this.animate) {
+                        setTimeout(function() {
+                            _iteration.call(self)
+                        }, 100)
+                    } else {
+                        _iteration.call(self)
+                    }
                 }
             })
         }();
@@ -8280,7 +8421,6 @@
                         }
                         var endHandler = function(item, ev) {
                             isDragging = false;
-
                         }
 
                         //事件
