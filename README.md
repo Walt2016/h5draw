@@ -8,7 +8,7 @@
 |![image](https://github.com/Walt2016/h5draw/blob/master/pic/spiral.gif)|![image](https://github.com/Walt2016/h5draw/blob/master/pic/spiralpolygon.gif)|
 
 
-###代码示例：
+# 代码示例：
 ```
 <canvas id="myCanvas"></canvas>
 <script src="js/tpler.js"></script>
@@ -42,7 +42,7 @@
 
 ```
 
-###DEMO：
+# DEMO：
 
 [图形组合](https://walt2016.github.io/h5draw/slider.html)
 
@@ -56,6 +56,6 @@
 
 
 
-交流互动：
+# 交流互动：
 
 几何画图qq群272831512
