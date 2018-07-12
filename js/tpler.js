@@ -1,6 +1,6 @@
 //一个js开发框架
 //template.event.canvas
-//v0.8.20180702
+//v0.8.20180712
 ;
 (function(root, factory) {
     if (typeof define === "function" && define.amd) {
@@ -8192,7 +8192,7 @@
             })
         }();
 
-        //分形
+        //分形 植物
         var _fractal = _.fractal = function() {
             var random = Math.random;
             var colors = [];
@@ -8254,8 +8254,10 @@
 
                 this.animate = _.isUndefined(opt.animate) ? true : opt.animate;
                 this.step = 0;
-                this.branchWidth = opt.branchWidth || 12;
+                this.branchWidth = opt.branchWidth || 12; //thickness
                 this.branchNum = opt.branchNum || opt.num || 20;
+                this.descending = _.isUndefined(opt.descending) ? true : opt.descending; //默认递减
+                this.offsetA = _.isUndefined(opt.offsetA) ? Math.PI / 4 : opt.offsetA * Math.PI / 180; //偏移角度
 
                 this.strategy = opt.strategy && opt.strategy in fractalStrategy ? fractalStrategy[opt.strategy] : fractalStrategy.ferns //
                 if (opt.strategy) {
@@ -8300,14 +8302,17 @@
                     this.ctx.clearRect(0, 0, this.width, this.height)
                     for (var i = 0; i < this.branchNum; i++) {
                         // var a = _.isUndefined(this.a) ? random() * Math.PI * 2 : this.a * Math.PI / 180;
-                        var a = i * Math.PI * 2 / this.branchNum - Math.PI / 2
+                        // var a = i * Math.PI * 2 / this.branchNum - Math.PI / 2
+                        var a = _.isUndefined(this.a) ? random() * Math.PI * 2 : (this.a * Math.PI / 180) + (Math.PI * 2 * i / this.branchNum);
                         this.callstrategy({
                             x: this.x,
                             y: this.y,
                             a: a,
                             r: this.r,
                             branchWidth: this.branchWidth,
-                            regular: this.regular
+                            regular: this.regular,
+                            descending: this.descending,
+                            offsetA: this.offsetA
                         }, 0)
                     }
 
@@ -8322,18 +8327,21 @@
                 },
                 _strategyBefore: function(opt, i) {
                     if (opt.regular) {
-                        opt.a += (i === 0 ? -1 : 1) * Math.PI / 4; //二叉
-                        opt.r *= .8;
+                        opt.a += (i === 0 ? -1 : 1) * opt.offsetA; //二叉
+                        if (opt.descending)
+                            opt.r *= .8;
                     } else {
-                        opt.a += (random() - 0.5) * Math.PI / 2;
-                        opt.r *= (.7 + random() * .3);
+                        opt.a += (random() * 2 - 1) * opt.offsetA;
+                        if (opt.descending)
+                            opt.r *= (.7 + random() * .3);
                     }
 
                     opt.x2 = opt.x + opt.r * Math.cos(opt.a);
                     opt.y2 = opt.y + opt.r * Math.sin(opt.a);
                 },
                 _strategyAfter: function(opt) {
-                    opt.branchWidth *= 0.7;
+                    if (opt.descending)
+                        opt.branchWidth *= 0.7;
                     opt.x = opt.x2;
                     opt.y = opt.y2;
                     return _.extend({}, opt)
@@ -8882,6 +8890,7 @@
                 },
                 //连线
                 link: function(vs, opt) {
+                    opt = opt || {};
                     var self = this,
                         ctx = this.context,
                         len = vs.length;
@@ -8889,9 +8898,9 @@
                     // ctx.translate(this.x, this.y); //将坐标移到this.x 和 this.y
                     // ctx.rotate(this.rotation); //设置旋转角度
                     this.beginPath(opt);
-                    var dashLength = opt && opt.dashed ? opt.dashLength : 5;
+                    var dashLength = opt.dashed ? opt.dashLength : 5;
 
-                    if (opt && opt.dashed && !ctx.setLineDash) {
+                    if (opt.dashed && !ctx.setLineDash) {
                         //虚线 兼容
                         vs.forEach(function(t, i) {
                             var t2 = vs[i + 1 === len ? 0 : i + 1];
@@ -8905,7 +8914,7 @@
                         })
 
                     } else {
-                        if (opt && ctx.setLineDash) {
+                        if (ctx.setLineDash) {
                             if (opt.dashed) {
                                 ctx.setLineDash([dashLength]);
                             } else if (opt.dashed === false) {
@@ -8915,7 +8924,7 @@
 
 
                         //实线
-                        if (opt && !opt.hideEdge) {
+                        if (!opt.hideEdge) {
                             vs.forEach(function(t, i) {
                                 self.line(ctx, t, i === 0);
                             })
@@ -8923,7 +8932,7 @@
 
                     }
                     //曲线
-                    if (opt && opt.curve) {
+                    if (opt.curve) {
                         var po = _pointPolar({
                             o: this.o
                         });
@@ -8941,7 +8950,7 @@
                         })
                     }
                     //半圆弧
-                    if (opt && opt.semicricle) {
+                    if (opt.semicricle) {
                         vs.forEach(function(t, i) {
                             var t1 = vs[i + 1 === len ? 0 : i + 1],
                                 m = t.mid(t1),
