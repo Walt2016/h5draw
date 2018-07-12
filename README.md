@@ -44,15 +44,15 @@
 
 DEMO：
 
-[slider](https://walt2016.github.io/h5draw/slider.html)
+[图形组合](https://walt2016.github.io/h5draw/slider.html)
 
-[track](https://walt2016.github.io/h5draw/track.html)
+[图形路径](https://walt2016.github.io/h5draw/track.html)
 
-[emitter](https://walt2016.github.io/h5draw/emitter.html)
+[一种发射粒子](https://walt2016.github.io/h5draw/emitter.html)
 
-[fractal](https://walt2016.github.io/h5draw/fractal.html)
+[一种植物分形](https://walt2016.github.io/h5draw/fractal.html)
 
-[index](https://walt2016.github.io/h5draw/index.html)
+[图形自定义](https://walt2016.github.io/h5draw/index.html)
 
 
 
