@@ -2,8 +2,7 @@
 几何画图（h5）：开向几何世界的神奇校车出发了
 
 ![image](https://github.com/Walt2016/h5draw/blob/master/pic/fractal.gif)![image](https://github.com/Walt2016/h5draw/blob/master/pic/slider.gif)
-![image](https://github.com/Walt2016/h5draw/blob/master/pic/diagonal.gif)![image](https://github.com/Walt2016/h5draw/blob/master/pic/track.gif)
-![image](https://github.com/Walt2016/h5draw/blob/master/pic/spiral.gif)![image](https://github.com/Walt2016/h5draw/blob/master/pic/emitter.gif)
+![image](https://github.com/Walt2016/h5draw/blob/master/pic/track.gif)![image](https://github.com/Walt2016/h5draw/blob/master/pic/emitter.gif)
 ![image](https://github.com/Walt2016/h5draw/blob/master/pic/custom.gif)![image](https://github.com/Walt2016/h5draw/blob/master/pic/custom2.gif)
 
 
