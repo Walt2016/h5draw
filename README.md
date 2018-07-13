@@ -18,6 +18,8 @@
 
 [图形自定义](https://walt2016.github.io/h5draw/index.html)
 
+[简单图形编辑器](https://walt2016.github.io/h5draw/editer.html)
+
 # 代码示例：
 ```
 <canvas id="myCanvas"></canvas>
