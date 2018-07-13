@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+    <title>editer</title>
+    <link rel="shortcut icon" type="image/x-icon" href="data:image/gif;base64,YQ==">
+    <link rel="stylesheet" href="css/editer.min.css">
+</head>
+
+<body>
+    <canvas id="myCanvas"></canvas>
+    <div class="panel">
+        <div class="row">
+            <div class="col">图形</div>
+            <div class="shape col" template>
+                <div class="item" name="{=name}">{=text}</div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">颜色</div>
+            <div class="color col" template>
+                <div class="item" name="{=$this}" style="background-color:{=$this}">{=$index}</div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">填色</div>
+            <div class="fill col" template>
+                <div class="item" name="{=name}">{=text}</div>
+            </div>
+        </div>
+    </div>
+    <script src=js/tpler.js></script>
+    <script src=js/editer.js></script>
+</body>
+
+</html>
