@@ -4986,13 +4986,13 @@
                 this.top = opt.top || 0;
                 this.bottom = opt.bottom || opt.height;
 
-                this.speed()
+                this.initSpeed()
             }
             return createClass(Point, {
                 // spring: 0.01, //弹力
                 friction: 0.9, //摩擦力
                 //初始速度
-                speed: function() {
+                initSpeed: function() {
                     this.vx = (Math.random() * 2 - 1) * this.speed;
                     this.vy = (Math.random() * 2 - 1) * this.speed;
                     this.vz = (Math.random() * 2 - 1) * this.speed;
@@ -8722,10 +8722,10 @@
                         if (opt.randomColor) opt.color = _.color().rgb();
                         this.setLineJoin(ctx, opt.lineJoin);
                         this.setLineWidth(ctx, opt.lineWidth);
-                        this.setStrokeStyle(ctx, opt.lineColor || opt.color);
+                        (opt.lineColor || opt.color) &&this.setStrokeStyle(ctx, opt.lineColor || opt.color);
                         opt.shadowBlur && this.setShadowBlur(ctx, opt.shadowBlur);
                         opt.shadowColor && this.setShadowColor(ctx, opt.shadowColor);
-                        this.setFillStyle(ctx, opt.color);
+                        opt.color&& this.setFillStyle(ctx, opt.color);
                     }
                     return this;
                 },
@@ -8895,6 +8895,8 @@
                         ctx = this.context,
                         len = vs.length;
 
+                    this.save().set(opt)
+
                     // ctx.translate(this.x, this.y); //将坐标移到this.x 和 this.y
                     // ctx.rotate(this.rotation); //设置旋转角度
                     this.beginPath(opt);
@@ -8964,6 +8966,7 @@
 
                     self.closePath(opt);
                     self.render(opt, vs);
+                    this.restore()
 
                     return this;
                 },
@@ -9311,7 +9314,10 @@
 
                     this.opt = opt;
                     if (this.global(opt)) {
-                        if (opt.motion) return this.motion(opt);
+                        if (opt.motion){
+                            return this.motion(opt);
+                        }
+                        _.animate().stop();
                         return this.group(opt);
                     }
                 },
@@ -9573,7 +9579,7 @@
                         })
                         ls.forEach(function(t) {
                             self.setLineWidth(ctx, t.alptha * 2.5);
-                            self.setStrokeStyle(ctx, color.mix(t.a.color, t.b.color))
+                            self.setStrokeStyle(ctx, _.color.mix(t.a.color, t.b.color))
                             // 'rgba(200,200,200,' + alptha + ')';
                             self.link([t.a, t.b]);
                         })
@@ -9587,7 +9593,7 @@
                                 x: pos.x,
                                 y: pos.y,
                                 r: _randomR(),
-                                color: color.rgb(),
+                                color: _.color().rgb(),
                             })
                             ps.length >= maxNum && ps.shift();
                         }
@@ -9605,7 +9611,7 @@
 
                     _.animate(function() {
                         update();
-                        render();
+                        // render();
                     });
                 },
                 //烟花
