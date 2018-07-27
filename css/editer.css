@@ -1,6 +1,8 @@
  body {
      margin: 0;
-     padding: 0
+     padding: 0;
+     -webkit-user-select: none;
+     -webkit-touch-callout: none;
  }
 
  .panel {
@@ -13,8 +15,8 @@
      background-color: #fff;
      cursor: pointer;
      border: 1px solid #eee;
-     
  }
+
  .row {
      display: flex;
  }

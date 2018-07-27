@@ -2,17 +2,17 @@ body{display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-
 .container{display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-box-orient:vertical;-webkit-box-direction:normal;-webkit-flex-direction:column;-ms-flex-direction:column;flex-direction:column;max-width:680px;margin:0 auto;height:100vh;min-width:320px}
 .wraper{padding-right:14px;padding-left:14px}
 .top{-webkit-box-flex:1;-webkit-flex:1;-ms-flex:1;flex:1;background:#d0d0d0;font-size:16px;line-height:30px;height:30px;padding-left:10px;padding-right:10px;font-weight:700;margin-bottom:20px;display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-box-pack:justify;-webkit-justify-content:space-between;-ms-flex-pack:justify;justify-content:space-between;-webkit-box-align:center;-webkit-align-items:center;-ms-flex-align:center;align-items:center;max-height:30px}
-.top .icon{width:20px;height:20px;border-radius:50%;background-color:#fff;font-size:12px;line-height:20px;text-align:center}
+.top .icon{width:20px;height:20px;-webkit-border-radius:50%;border-radius:50%;background-color:#fff;font-size:12px;line-height:20px;text-align:center}
 .main{-webkit-box-flex:1;-webkit-flex:1;-ms-flex:1;flex:1;display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-box-orient:vertical;-webkit-box-direction:normal;-webkit-flex-direction:column;-ms-flex-direction:column;flex-direction:column;padding:10px;font-size:14px}
 .help{padding:10px}
-.editer{border:1px solid #ccc;height:100px;border-radius:4px;padding:4px;overflow-y:auto}
+.editer{border:1px solid #ccc;height:100px;-webkit-border-radius:4px;border-radius:4px;padding:4px;overflow-y:auto}
 .addon{display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex}
 .addon-flied{-webkit-box-flex:1;-webkit-flex:1;-ms-flex:1;flex:1}
 .hide{display:none}
 .mt10{margin-top:10px}
-select{-webkit-appearance:none;background:#ebebeb;padding-left:4px;border-radius:4px 0 0 4px!important;border:1px solid #ccc;height:32px}
-.btn{border:1px solid #ccc;color:#000;font-size:14px;line-height:30px;height:30px;text-align:center;background:#ebebeb;border-radius:4px}
-.addon .btn{border-radius:0 4px 4px 0!important;width:80px;border-left:none}
+select{-webkit-appearance:none;background:#ebebeb;padding-left:4px;-webkit-border-radius:4px 0 0 4px!important;border-radius:4px 0 0 4px!important;border:1px solid #ccc;height:32px}
+.btn{border:1px solid #ccc;color:#000;font-size:14px;line-height:30px;height:30px;text-align:center;background:#ebebeb;-webkit-border-radius:4px;border-radius:4px}
+.addon .btn{-webkit-border-radius:0 4px 4px 0!important;border-radius:0 4px 4px 0!important;width:80px;border-left:none}
 .test{background-color:#bf3f3f}
 .events{display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-box-orient:vertical;-webkit-box-direction:normal;-webkit-flex-direction:column;-ms-flex-direction:column;flex-direction:column}
 .events li{line-height:30px;font-size:15px;list-style:none;padding:0;margin:0;min-width:60px;border:1px solid #ccc;padding-left:14px}
@@ -58,19 +58,19 @@ to{opacity:1;-webkit-transform:none;transform:none}
 #loginFail .line_right,#password .line_right,#playback_head_error .line_right,#playback_password .line_right{display:inline-block;margin-left:12px;height:16px;width:53px;background-image:url(../image/password_title_right.png);-webkit-background-size:cover;background-size:cover;background-position:center center;background-repeat:no-repeat;vertical-align:middle;-webkit-user-select:none}
 #password .ipt_group,#playback_password .ipt_group{text-align:center;margin-top:-23px}
 #password .ipt,#playback_password .ipt{display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-box-orient:horizontal;-webkit-box-direction:normal;-webkit-flex-direction:row;-ms-flex-direction:row;flex-direction:row;margin:0 auto;margin-top:32px;-webkit-box-pack:center;-webkit-justify-content:center;-ms-flex-pack:center;justify-content:center}
-#password .ipt div,#playback_password .ipt div{height:34px;width:52px;border:1px solid rgba(247,106,43,.7);background-color:rgba(255,255,255,.08);border-radius:2px;margin-left:10px;font-size:24px;line-height:34px;text-align:center;height:8.93vw;width:13.66vw;max-width:93px;max-height:61px;display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-box-pack:center;-webkit-justify-content:center;-ms-flex-pack:center;justify-content:center;-webkit-box-align:center;-webkit-align-items:center;-ms-flex-align:center;align-items:center}
+#password .ipt div,#playback_password .ipt div{height:34px;width:52px;border:1px solid rgba(247,106,43,.7);background-color:rgba(255,255,255,.08);-webkit-border-radius:2px;border-radius:2px;margin-left:10px;font-size:24px;line-height:34px;text-align:center;height:8.93vw;width:13.66vw;max-width:93px;max-height:61px;display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-box-pack:center;-webkit-justify-content:center;-ms-flex-pack:center;justify-content:center;-webkit-box-align:center;-webkit-align-items:center;-ms-flex-align:center;align-items:center}
 #password .ipt div.tinyline,#playback_password .ipt div.tinyline{border-width:.5px}
 #password .ipt div:first-child,#playback_password .ipt div:first-child{margin-left:0}
 #password .ipt div.active,#playback_password .ipt div.active{background-color:rgba(0,0,0,.08)}
 #loginFail .screen_tip,#password .screen_tip,#playback_head_error .screen_tip,#playback_password .screen_tip{position:absolute;margin:0 auto;bottom:0;display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;text-align:center;-webkit-box-pack:center;-webkit-justify-content:center;-ms-flex-pack:center;justify-content:center;-webkit-box-align:center;-webkit-align-items:center;-ms-flex-align:center;align-items:center;height:auto;top:auto;right:0;left:0;min-height:auto;min-width:auto;line-height:38px;height:38px;background-color:rgba(0,0,0,.08);color:rgba(255,255,255,.8);font-size:14px;padding-left:14px;padding-right:14px}
-#loginFail .screen_tip .text,#password .screen_tip .text,#playback_head_error .screen_tip .text,#playback_password .screen_tip .text{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:rgba(255,255,255,.55);font-size:13px}
+#loginFail .screen_tip .text,#password .screen_tip .text,#playback_head_error .screen_tip .text,#playback_password .screen_tip .text{overflow:hidden;-o-text-overflow:ellipsis;text-overflow:ellipsis;white-space:nowrap;color:rgba(255,255,255,.55);font-size:13px}
 #loginFail .screen_tip .url,#password .screen_tip .url,#playback_head_error .screen_tip .url,#playback_password .screen_tip .url{color:#f76a2b;font-size:13px;margin-left:10px;white-space:nowrap;-webkit-flex-shrink:0;-ms-flex-negative:0;flex-shrink:0}
 #password .btn,#playback_password .btn{font-size:28px;font-weight:400;-webkit-user-select:none}
 #loginFail_tip.hide,#password_tip.hide,#playback_head_error_tip.hide,#playback_password_tip.hide{display:none}
 .row{display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-box-pack:justify;-webkit-justify-content:space-between;-ms-flex-pack:justify;justify-content:space-between}
 .row .col{font-size:0;width:100%;-webkit-box-flex:1;-webkit-flex:1;-ms-flex:1;flex:1}
 .row .col-xs-4{font-size:0}
-.btn{border-radius:0;background:inherit;font-size:16px;text-align:center;margin-right:14px;cursor:pointer;width:100%;height:58px;line-height:58px;border-left:1px solid #c8c8c8;border-top:1px solid #c8c8c8;color:#3a3f51;font-weight:700;-webkit-flex-shrink:0;-ms-flex-negative:0;flex-shrink:0;-webkit-user-select:none}
+.btn{-webkit-border-radius:0;border-radius:0;background:inherit;font-size:16px;text-align:center;margin-right:14px;cursor:pointer;width:100%;border-left:1px solid #c8c8c8;border-top:1px solid #c8c8c8;color:#3a3f51;font-weight:700;-webkit-flex-shrink:0;-ms-flex-negative:0;flex-shrink:0;-webkit-user-select:none}
 .btn.hover{color:#333;text-decoration:none}
 #keyboard{border-bottom:1px solid #c8c8c8;border-right:1px solid #c8c8c8;position:absolute;bottom:0;left:0;right:0;z-index:888;display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-box-orient:vertical;-webkit-box-direction:normal;-webkit-flex-direction:column;-ms-flex-direction:column;flex-direction:column;background-color:#fff;max-width:680px;margin:0 auto}
 #keyboard.btn{min-width:100px}
