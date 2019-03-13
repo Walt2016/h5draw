@@ -97,7 +97,8 @@
                 isEdge = !!~ua.indexOf('edge/'),
                 isChrome = /chrome\/\d+/.test(ua) && !isEdge,
                 weixin = /MicroMessenger/i.test(ua),
-                isWxMiniProgram = /miniprogram/i.test(window.__wxjs_environment);
+                isWxMiniProgram = /miniprogram/i.test(window.__wxjs_environment),
+                isMobile =/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ;
 
             var env = (function() {
                 var os = {},
@@ -141,7 +142,8 @@
                 isEdge: isEdge,
                 isChrome: isChrome,
                 weixin: weixin,
-                isWxMiniProgram: isWxMiniProgram
+                isWxMiniProgram: isWxMiniProgram,
+                isMobile:isMobile
             });
             screen = {
                 x: document.documentElement.clientWidth,
@@ -8279,7 +8281,7 @@
                 var self = this;
                 toucher({
                     el: draw.canvas,
-                    type: "touchend",
+                    type: _.envt.isMobile?"touchend":"click",
                     callback: function(item, ev) {
                         var pos = _.pos(ev);
                         self.x = pos.x;
